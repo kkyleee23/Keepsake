@@ -12,8 +12,10 @@ import '../../data/models/keepsake_section.dart';
 import '../../data/providers.dart';
 import '../creation/keepsake_factory.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
+import '../sections/open_when_editor_screen.dart';
 import '../sections/section_display.dart';
 import '../sections/section_editor_screen.dart';
+import '../sections/timeline_editor_screen.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
 
@@ -39,8 +41,11 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   static const _addable = [
     SectionType.letter,
     SectionType.memory,
+    SectionType.openWhen,
     SectionType.reasons,
+    SectionType.timeline,
     SectionType.question,
+    SectionType.countdown,
     SectionType.customMessage,
   ];
 
@@ -82,7 +87,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
 
   Future<void> _openSection(KeepsakeSection section) async {
     final content = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(builder: (_) => SectionEditorScreen(section: section)),
+      MaterialPageRoute(builder: (_) => _editorFor(section)),
     );
     if (content == null) return;
     final draft = _draft!;
@@ -260,16 +265,33 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     );
   }
 
+  Widget _editorFor(KeepsakeSection section) {
+    switch (section.type) {
+      case SectionType.openWhen:
+        return OpenWhenEditorScreen(section: section);
+      case SectionType.timeline:
+        return TimelineEditorScreen(section: section);
+      default:
+        return SectionEditorScreen(section: section);
+    }
+  }
+
   static IconData _iconFor(SectionType type) {
     switch (type) {
       case SectionType.letter:
         return Icons.mail_outline;
       case SectionType.memory:
         return Icons.auto_stories_outlined;
+      case SectionType.openWhen:
+        return Icons.lock_outline;
       case SectionType.reasons:
         return Icons.format_list_numbered;
+      case SectionType.timeline:
+        return Icons.timeline_outlined;
       case SectionType.question:
         return Icons.help_outline;
+      case SectionType.countdown:
+        return Icons.timer_outlined;
       case SectionType.customMessage:
         return Icons.chat_bubble_outline;
       default:

@@ -12,8 +12,13 @@ abstract final class SectionDisplay {
         final t = (s.content['title'] as String?)?.trim();
         return (t == null || t.isEmpty) ? s.type.label : t;
       case SectionType.reasons:
+      case SectionType.openWhen:
+      case SectionType.timeline:
         final t = (s.content['title'] as String?)?.trim();
-        return (t == null || t.isEmpty) ? 'Reasons' : t;
+        return (t == null || t.isEmpty) ? s.type.label : t;
+      case SectionType.countdown:
+        final t = (s.content['label'] as String?)?.trim();
+        return (t == null || t.isEmpty) ? s.type.label : t;
       default:
         return s.type.label;
     }
@@ -31,6 +36,15 @@ abstract final class SectionDisplay {
       case SectionType.reasons:
         final items = (s.content['items'] as List?)?.length ?? 0;
         return items == 0 ? '' : '$items ${items == 1 ? 'reason' : 'reasons'}';
+      case SectionType.openWhen:
+        final n = (s.content['items'] as List?)?.length ?? 0;
+        return n == 0 ? '' : '$n ${n == 1 ? 'note' : 'notes'}';
+      case SectionType.timeline:
+        final n = (s.content['entries'] as List?)?.length ?? 0;
+        return n == 0 ? '' : '$n ${n == 1 ? 'moment' : 'moments'}';
+      case SectionType.countdown:
+        final d = DateTime.tryParse((s.content['date'] as String?) ?? '');
+        return d == null ? '' : 'Counting down';
       default:
         return '';
     }

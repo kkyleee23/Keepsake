@@ -47,6 +47,12 @@ abstract final class KeepsakeFactory {
         return {'prompt': ''};
       case SectionType.customMessage:
         return {'body': ''};
+      case SectionType.openWhen:
+        return {'title': '', 'items': <Map<String, dynamic>>[]};
+      case SectionType.timeline:
+        return {'title': '', 'entries': <Map<String, dynamic>>[]};
+      case SectionType.countdown:
+        return {'label': '', 'date': null};
       default:
         return const {};
     }

@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keepsake/data/models/enums.dart';
 import 'package:keepsake/data/models/keepsake.dart';
+import 'package:keepsake/data/models/keepsake_section.dart';
 import 'package:keepsake/data/repositories/local_keepsake_repository.dart';
 import 'package:keepsake/features/creation/keepsake_factory.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,6 +37,48 @@ void main() {
       expect(restored.coverNote, 'For you.');
       expect(restored.sections.single.type, SectionType.letter);
       expect(restored.sections.single.content['body'], 'Happy birthday.');
+    });
+
+    test('rich section types survive JSON encode/decode', () {
+      final openWhen =
+          KeepsakeFactory.newSection(SectionType.openWhen, 0).copyWith(
+        content: {
+          'title': 'Open when',
+          'items': [
+            {'label': 'you miss me', 'body': 'I miss you too.'},
+          ],
+        },
+      );
+      final timeline =
+          KeepsakeFactory.newSection(SectionType.timeline, 1).copyWith(
+        content: {
+          'title': 'Us',
+          'entries': [
+            {'date': '2025-01-01T00:00:00.000', 'title': 'Day one', 'body': ''},
+          ],
+        },
+      );
+      final countdown =
+          KeepsakeFactory.newSection(SectionType.countdown, 2).copyWith(
+        content: {'label': 'Anniversary', 'date': '2026-12-31T09:00:00.000'},
+      );
+
+      final k = KeepsakeFactory.newDraft(occasion: Occasion.love)
+          .copyWith(sections: [openWhen, timeline, countdown]);
+
+      final restored =
+          Keepsake.fromJson(jsonDecode(jsonEncode(k.toJson())) as Map<String, dynamic>);
+
+      expect(restored.sections.length, 3);
+      expect(
+        (restored.sections[0].content['items'] as List).first['label'],
+        'you miss me',
+      );
+      expect(
+        (restored.sections[1].content['entries'] as List).first['title'],
+        'Day one',
+      );
+      expect(restored.sections[2].content['label'], 'Anniversary');
     });
   });
 

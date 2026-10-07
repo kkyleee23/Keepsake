@@ -10,6 +10,9 @@ import '../../shared/widgets/primary_button.dart';
 
 /// Edits one section's content. Pops with the updated content [Map] on save, or
 /// null on cancel. The editor screen applies the result to the draft.
+///
+/// Handles the single-field and simple-list types. Open When and Timeline have
+/// their own editors because they manage richer item lists.
 class SectionEditorScreen extends StatefulWidget {
   const SectionEditorScreen({super.key, required this.section});
 
@@ -24,7 +27,8 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
   late final TextEditingController _body;
   late final TextEditingController _prompt;
   final List<TextEditingController> _reasons = [];
-  String? _dateLabel;
+  String? _dateLabel; // memory: a human date string
+  DateTime? _targetDate; // countdown: the actual moment
 
   SectionType get _type => widget.section.type;
 
@@ -32,10 +36,13 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
   void initState() {
     super.initState();
     final c = widget.section.content;
-    _title = TextEditingController(text: c['title'] as String? ?? '');
+    _title = TextEditingController(
+      text: (c['title'] ?? c['label']) as String? ?? '',
+    );
     _body = TextEditingController(text: c['body'] as String? ?? '');
     _prompt = TextEditingController(text: c['prompt'] as String? ?? '');
     _dateLabel = c['date'] as String?;
+    _targetDate = DateTime.tryParse((c['date'] as String?) ?? '');
     final items = (c['items'] as List?)?.map((e) => e.toString()).toList() ??
         const <String>[];
     for (final item in items) {
@@ -70,6 +77,26 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
     }
   }
 
+  Future<void> _pickTargetDateTime() async {
+    final now = DateTime.now();
+    final date = await showDatePicker(
+      context: context,
+      initialDate: _targetDate ?? now,
+      firstDate: now.subtract(const Duration(days: 1)),
+      lastDate: DateTime(now.year + 50),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_targetDate ?? now),
+    );
+    if (time == null) return;
+    setState(() {
+      _targetDate =
+          DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    });
+  }
+
   void _save() {
     final content = <String, dynamic>{};
     switch (_type) {
@@ -90,6 +117,9 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
             .map((r) => r.text.trim())
             .where((t) => t.isNotEmpty)
             .toList();
+      case SectionType.countdown:
+        content['label'] = _title.text.trim();
+        content['date'] = _targetDate?.toIso8601String();
       default:
         break;
     }
@@ -134,7 +164,12 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
           _line(_title, hint: 'The day everything started'),
           const SizedBox(height: AppSpacing.lg),
           _label('Date (Optional)'),
-          _DateRow(label: _dateLabel, onPick: _pickDate),
+          _PickerRow(
+            label: _dateLabel,
+            placeholder: 'Pick a date',
+            icon: Icons.event_outlined,
+            onPick: _pickDate,
+          ),
           const SizedBox(height: AppSpacing.lg),
           _label('What happened'),
           _multiline(_body, hint: 'Tell the story.'),
@@ -163,6 +198,21 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
                 setState(() => _reasons.add(TextEditingController())),
             icon: const Icon(Icons.add, size: 20),
             label: const Text('Add a reason'),
+          ),
+        ];
+      case SectionType.countdown:
+        return [
+          _label('What is it counting down to?'),
+          _line(_title, hint: 'Our anniversary'),
+          const SizedBox(height: AppSpacing.lg),
+          _label('Date & time'),
+          _PickerRow(
+            label: _targetDate == null
+                ? null
+                : DateFormat.yMMMMd().add_jm().format(_targetDate!),
+            placeholder: 'Pick a date & time',
+            icon: Icons.timer_outlined,
+            onPick: _pickTargetDateTime,
           ),
         ];
       default:
@@ -225,20 +275,28 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
       );
 }
 
-class _DateRow extends StatelessWidget {
-  const _DateRow({required this.label, required this.onPick});
+/// A labelled button that opens a picker and shows the chosen value.
+class _PickerRow extends StatelessWidget {
+  const _PickerRow({
+    required this.label,
+    required this.placeholder,
+    required this.icon,
+    required this.onPick,
+  });
 
   final String? label;
+  final String placeholder;
+  final IconData icon;
   final VoidCallback onPick;
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
       onPressed: onPick,
-      icon: const Icon(Icons.event_outlined, size: 20),
+      icon: Icon(icon, size: 20),
       label: Align(
         alignment: Alignment.centerLeft,
-        child: Text(label == null || label!.isEmpty ? 'Pick a date' : label!),
+        child: Text(label == null || label!.isEmpty ? placeholder : label!),
       ),
     );
   }
