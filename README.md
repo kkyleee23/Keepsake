@@ -51,19 +51,26 @@ The project is currently focused on establishing the first usable version of the
 
 In place:
 
-* Flutter project (Android / iOS / Web).
-* Design-system theme: warm paper + ink, a single terracotta accent, Playfair
-  Display for headlines and Inter for body, on an 8dp spacing grid.
-* App shell with four tabs: Home, Create, Keepsakes, Profile.
-* Core data model: `Keepsake` → ordered `KeepsakeSection`s, with delivery and
-  privacy settings. Built so new section types can be added without a rewrite.
-* Create flow: occasion → recipient → editor (add / edit / reorder / delete
-  sections, autosaved) → preview. Sections: letter, memory, reasons, question,
-  custom message.
-* Publishing on Supabase: publish a draft, get a link + QR, and open it as the
+* Flutter project (Android / iOS / Web) with its own brand kit: mascot,
+  wordmark, app icon, and a launch splash.
+* Design-system theme (the "Sage" direction): warm stone background, a single
+  deep evergreen accent, Montserrat headings and Inter body, on an 8dp grid.
+  Centered in a phone-width column on tablets and desktop.
+* Onboarding on first launch, then email + password accounts (sign up, sign in,
+  forgot password, edit profile, delete my data). Recipients never sign in.
+* Four tabs: Home, Create, Keepsakes, Profile.
+* Core data model: `Keepsake` holds ordered `KeepsakeSection`s plus delivery and
+  privacy settings. New section types slot in without a rewrite.
+* Create flow: occasion, recipient, editor (add / edit / reorder / delete
+  sections, autosaved), preview. Section types: letter, memory, Open When,
+  reasons, timeline, question, countdown, custom message.
+* Publishing on Supabase: publish a draft, get a link and QR, open it as the
   recipient. Scheduled access, expiry, and PIN are enforced on the server.
+* Library: Created / Received / Drafts / Archived, with search and per-card
+  actions (open, copy link, archive, delete).
 
-Next: media (photos, voice), responses, and the full library tabs.
+Next (needs a testing session or a backend step): media (photos, voice),
+recipient responses, notifications, and dark mode.
 
 ## Running it
 
