@@ -60,7 +60,7 @@ create or replace function public.publish_keepsake(
   p_unlisted boolean,
   p_pin text
 ) returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare uid uuid := auth.uid();
 begin
   if uid is null then
@@ -105,7 +105,7 @@ $$;
 -- recipient can see a calm countdown), but never the content.
 create or replace function public.keepsake_cover(p_token text)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare r public.keepsakes;
 begin
   select * into r from public.keepsakes where share_token = p_token;
@@ -132,7 +132,7 @@ $$;
 -- Open the content. Enforces schedule, expiry, and PIN before returning payload.
 create or replace function public.keepsake_open(p_token text, p_pin text)
 returns jsonb
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare r public.keepsakes;
 begin
   select * into r from public.keepsakes where share_token = p_token;
