@@ -10,9 +10,18 @@
 ///               --dart-define=SUPABASE_ANON_KEY=eyJ... \
 ///               --dart-define=KEEPSAKE_LINK_BASE=https://your.app
 abstract final class AppConfig {
-  static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  static const String supabaseAnonKey =
-      String.fromEnvironment('SUPABASE_ANON_KEY');
+  // Defaults are this project's PUBLIC client values (Supabase publishable key +
+  // URL), so the app is configured no matter how it's launched. A --dart-define
+  // of the same name overrides them per environment. The secret key is never
+  // here.
+  static const String supabaseUrl = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: 'https://vrmvvtsosvljnwspausm.supabase.co',
+  );
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+    defaultValue: 'sb_publishable_MSPIPEsBY7Ka3WEDAsMB_Q_8vkJ0oSo',
+  );
 
   /// Base used to build a shareable link: `<base>/receive/<token>`.
   static const String shareLinkBase = String.fromEnvironment(
