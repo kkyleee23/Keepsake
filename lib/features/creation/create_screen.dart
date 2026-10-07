@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
@@ -25,13 +26,7 @@ class _CreateScreenState extends State<CreateScreen> {
   void _continue() {
     final occasion = _selected;
     if (occasion == null) return;
-    // Next stage wires this to recipient + editor. Kept honest for now.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Starting a ${occasion.label} keepsake — '
-            'recipient & editor are up next.'),
-      ),
-    );
+    context.push('/new/recipient', extra: occasion);
   }
 
   @override

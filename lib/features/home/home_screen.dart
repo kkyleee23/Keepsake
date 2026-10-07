@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/models/keepsake.dart';
+import '../keepsakes/application/keepsakes_controller.dart';
+import '../keepsakes/widgets/keepsake_card.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/section_header.dart';
 
 /// Home prioritizes meaningful actions over statistics (product brief).
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  void _open(BuildContext context, Keepsake k) {
+    context.push(k.isDraft ? '/editor/${k.id}' : '/preview/${k.id}');
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final drafts = ref.watch(draftsProvider);
+    final created =
+        ref.watch(recentKeepsakesProvider).where((k) => !k.isDraft).toList();
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -25,7 +37,6 @@ class HomeScreen extends StatelessWidget {
         children: [
           Text('Keepsake', style: AppTypography.caption),
           const SizedBox(height: AppSpacing.sm),
-          // The one focal headline per screen (serif display).
           Text('Make something\nworth keeping.', style: AppTypography.display),
           const SizedBox(height: AppSpacing.sm),
           Text(
@@ -41,17 +52,29 @@ class HomeScreen extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxl),
 
-          const SectionHeader(title: 'Continue where you left off'),
-          const _QuietPlaceholder(
-            message: 'Nothing in progress. When you start something, '
-                'it waits for you here.',
+          SectionHeader(
+            title: 'Continue where you left off',
+            actionLabel: drafts.length > 2 ? 'See all' : null,
+            onAction: drafts.length > 2 ? () => context.go('/keepsakes') : null,
           ),
+          if (drafts.isEmpty)
+            const _QuietPlaceholder(
+              message: 'Nothing in progress. When you start something, '
+                  'it waits for you here.',
+            )
+          else
+            for (final k in drafts.take(3))
+              KeepsakeCard(keepsake: k, onTap: () => _open(context, k)),
           const SizedBox(height: AppSpacing.xl),
 
           const SectionHeader(title: 'Recently created'),
-          const _QuietPlaceholder(
-            message: 'Keepsakes you make will show up here.',
-          ),
+          if (created.isEmpty)
+            const _QuietPlaceholder(
+              message: 'Keepsakes you finish and share will show up here.',
+            )
+          else
+            for (final k in created.take(3))
+              KeepsakeCard(keepsake: k, onTap: () => _open(context, k)),
         ],
       ),
     );

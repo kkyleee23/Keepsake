@@ -92,6 +92,7 @@ class Keepsake {
     required this.occasion,
     this.recipientName = '',
     this.recipientContact,
+    this.senderName = '',
     this.coverNote,
     this.status = KeepsakeStatus.draft,
     this.sections = const [],
@@ -109,6 +110,9 @@ class Keepsake {
   final Occasion occasion;
   final String recipientName;
   final String? recipientContact;
+
+  /// Who it's from, shown on the cover ("Made for you by ..."). Optional.
+  final String senderName;
 
   /// Short line shown on the cover, e.g. "A little something for your birthday."
   final String? coverNote;
@@ -138,6 +142,7 @@ class Keepsake {
     Occasion? occasion,
     String? recipientName,
     String? recipientContact,
+    String? senderName,
     String? coverNote,
     KeepsakeStatus? status,
     List<KeepsakeSection>? sections,
@@ -154,6 +159,7 @@ class Keepsake {
       occasion: occasion ?? this.occasion,
       recipientName: recipientName ?? this.recipientName,
       recipientContact: recipientContact ?? this.recipientContact,
+      senderName: senderName ?? this.senderName,
       coverNote: coverNote ?? this.coverNote,
       status: status ?? this.status,
       sections: sections ?? this.sections,
@@ -173,6 +179,7 @@ class Keepsake {
         'occasion': occasion.id,
         'recipientName': recipientName,
         'recipientContact': recipientContact,
+        'senderName': senderName,
         'coverNote': coverNote,
         'status': status.id,
         'sections': sections.map((s) => s.toJson()).toList(),
@@ -192,6 +199,7 @@ class Keepsake {
       occasion: Occasion.fromId(json['occasion'] as String? ?? 'custom'),
       recipientName: json['recipientName'] as String? ?? '',
       recipientContact: json['recipientContact'] as String?,
+      senderName: json['senderName'] as String? ?? '',
       coverNote: json['coverNote'] as String?,
       status: KeepsakeStatus.fromId(json['status'] as String? ?? 'draft'),
       sections: (json['sections'] as List? ?? const [])

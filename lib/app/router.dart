@@ -1,8 +1,12 @@
 import 'package:go_router/go_router.dart';
 
+import '../data/models/enums.dart';
 import '../features/creation/create_screen.dart';
+import '../features/creation/recipient_screen.dart';
+import '../features/editor/editor_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/keepsakes/keepsakes_screen.dart';
+import '../features/preview/preview_screen.dart';
 import '../features/profile/profile_screen.dart';
 import 'home_shell.dart';
 
@@ -52,5 +56,26 @@ final GoRouter appRouter = GoRouter(
         ),
       ],
     ),
+
+    // Focused creator flows, shown above the tab shell (no bottom nav).
+    GoRoute(
+      path: '/new/recipient',
+      builder: (context, state) => RecipientScreen(
+        occasion: state.extra as Occasion? ?? Occasion.custom,
+      ),
+    ),
+    GoRoute(
+      path: '/editor/:id',
+      builder: (context, state) =>
+          EditorScreen(keepsakeId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/preview/:id',
+      builder: (context, state) =>
+          PreviewScreen(keepsakeId: state.pathParameters['id']!),
+    ),
+
+    // Recipient route group (/receive/:token) is added with publishing in the
+    // next stage, deliberately outside the creator shell.
   ],
 );
