@@ -75,14 +75,16 @@ flutter run            # pick a device, or:
 flutter run -d chrome  # quick preview in the browser
 ```
 
-Publishing needs Supabase credentials passed at build time (never committed):
+With sharing — the Supabase URL and **publishable** key live in
+`dart_defines.json` (the publishable key is a public client key, safe to commit;
+the secret key is never stored here):
 
 ```bash
-flutter run -d chrome \
-  --dart-define=SUPABASE_URL=https://YOUR-PROJECT.supabase.co \
-  --dart-define=SUPABASE_ANON_KEY=YOUR-ANON-KEY \
-  --dart-define=KEEPSAKE_LINK_BASE=http://localhost:PORT
+flutter run -d chrome --dart-define-from-file=dart_defines.json
 ```
+
+In VS Code, just pick the **"Keepsake (Supabase)"** run configuration. To point
+at a different project, edit `dart_defines.json`.
 
 ## Sharing / backend setup (Supabase)
 
