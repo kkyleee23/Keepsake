@@ -102,10 +102,11 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     await _persist(draft.copyWith(sections: next, updatedAt: DateTime.now()));
   }
 
-  // newIndex is already adjusted for the removed item by onReorderItem.
   Future<void> _reorder(int oldIndex, int newIndex) async {
     final draft = _draft!;
     final list = [...draft.orderedSections];
+    // ReorderableListView.onReorder reports the pre-removal index.
+    if (newIndex > oldIndex) newIndex -= 1;
     final moved = list.removeAt(oldIndex);
     list.insert(newIndex, moved);
     await _persist(
@@ -225,7 +226,8 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 buildDefaultDragHandles: false,
                 itemCount: sections.length,
-                onReorderItem: _reorder,
+                // ignore: deprecated_member_use
+                onReorder: _reorder,
                 itemBuilder: (context, index) {
                   final s = sections[index];
                   return _SectionCard(

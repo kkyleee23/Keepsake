@@ -188,7 +188,8 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
             const SizedBox(height: AppSpacing.sm),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
-              activeThumbColor: AppColors.accent,
+              // ignore: deprecated_member_use
+              activeColor: AppColors.accent,
               title: Text('Require a PIN', style: AppTypography.bodyLarge),
               subtitle: Text('They enter it to open.',
                   style: AppTypography.caption),
@@ -209,7 +210,8 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
               ),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
-              activeThumbColor: AppColors.accent,
+              // ignore: deprecated_member_use
+              activeColor: AppColors.accent,
               title: Text('Set an expiry', style: AppTypography.bodyLarge),
               subtitle: Text('The link stops working after this.',
                   style: AppTypography.caption),
