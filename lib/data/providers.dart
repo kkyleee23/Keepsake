@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'remote/keepsake_backend.dart';
 import 'repositories/keepsake_repository.dart';
 import 'repositories/local_keepsake_repository.dart';
 
@@ -16,3 +17,8 @@ final sharedPreferencesProvider = Provider<SharedPreferences>(
 final keepsakeRepositoryProvider = Provider<KeepsakeRepository>(
   (ref) => LocalKeepsakeRepository(ref.watch(sharedPreferencesProvider)),
 );
+
+/// Backend for the parts that must leave the device (publish + recipient open).
+final keepsakeBackendProvider =
+    Provider<KeepsakeBackend>((ref) => KeepsakeBackend());
+

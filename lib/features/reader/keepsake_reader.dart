@@ -4,7 +4,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
-import '../sections/section_view.dart';
+import 'keepsake_content_view.dart';
 import '../../shared/widgets/primary_button.dart';
 
 /// The recipient experience: a restrained sealed cover that opens into the
@@ -27,7 +27,10 @@ class _KeepsakeReaderState extends State<KeepsakeReader> {
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 280),
       child: _opened
-          ? _Content(keepsake: widget.keepsake)
+          ? KeyedSubtree(
+              key: const ValueKey('content'),
+              child: KeepsakeContentView(keepsake: widget.keepsake),
+            )
           : _Cover(
               keepsake: widget.keepsake,
               onOpen: () => setState(() => _opened = true),
@@ -83,41 +86,3 @@ class _Cover extends StatelessWidget {
   }
 }
 
-class _Content extends StatelessWidget {
-  const _Content({required this.keepsake});
-
-  final Keepsake keepsake;
-
-  @override
-  Widget build(BuildContext context) {
-    final sections = keepsake.orderedSections;
-    return ListView.separated(
-      key: const ValueKey('content'),
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.gutter,
-        AppSpacing.xl,
-        AppSpacing.gutter,
-        AppSpacing.xxxl,
-      ),
-      itemCount: sections.length + 1,
-      separatorBuilder: (_, index) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
-        child: index == 0
-            ? const SizedBox.shrink()
-            : const Divider(color: AppColors.hairline),
-      ),
-      itemBuilder: (context, index) {
-        if (index == 0) {
-          // A quiet opening line before the content.
-          return Text(
-            keepsake.recipientName.isEmpty
-                ? keepsake.title
-                : 'For ${keepsake.recipientName}',
-            style: AppTypography.displaySmall,
-          );
-        }
-        return SectionView(section: sections[index - 1]);
-      },
-    );
-  }
-}

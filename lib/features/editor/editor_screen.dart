@@ -244,6 +244,14 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                 icon: const Icon(Icons.add, size: 20),
                 label: const Text('Add something'),
               ),
+            if (draft.hasContent) ...[
+              const SizedBox(height: AppSpacing.xl),
+              PrimaryButton(
+                label: draft.isPublished ? 'Update & re-share' : 'Publish',
+                icon: Icons.ios_share,
+                onPressed: () => context.push('/delivery/${draft.id}'),
+              ),
+            ],
           ],
         ),
       ),

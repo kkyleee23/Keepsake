@@ -102,6 +102,7 @@ class Keepsake {
     required this.updatedAt,
     this.publishedAt,
     this.expiresAt,
+    this.shareToken,
   });
 
   final String id;
@@ -127,7 +128,11 @@ class Keepsake {
   final DateTime? publishedAt;
   final DateTime? expiresAt;
 
+  /// Unguessable token used in the share link once published. Null while draft.
+  final String? shareToken;
+
   bool get isDraft => status == KeepsakeStatus.draft;
+  bool get isPublished => shareToken != null && status != KeepsakeStatus.draft;
   bool get hasContent => sections.isNotEmpty;
 
   /// Sections in display order.
@@ -151,6 +156,7 @@ class Keepsake {
     DateTime? updatedAt,
     DateTime? publishedAt,
     DateTime? expiresAt,
+    String? shareToken,
   }) {
     return Keepsake(
       id: id,
@@ -169,6 +175,7 @@ class Keepsake {
       updatedAt: updatedAt ?? this.updatedAt,
       publishedAt: publishedAt ?? this.publishedAt,
       expiresAt: expiresAt ?? this.expiresAt,
+      shareToken: shareToken ?? this.shareToken,
     );
   }
 
@@ -189,6 +196,7 @@ class Keepsake {
         'updatedAt': updatedAt.toIso8601String(),
         'publishedAt': publishedAt?.toIso8601String(),
         'expiresAt': expiresAt?.toIso8601String(),
+        'shareToken': shareToken,
       };
 
   factory Keepsake.fromJson(Map<String, dynamic> json) {
@@ -218,6 +226,7 @@ class Keepsake {
       expiresAt: json['expiresAt'] == null
           ? null
           : DateTime.parse(json['expiresAt'] as String),
+      shareToken: json['shareToken'] as String?,
     );
   }
 }

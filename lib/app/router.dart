@@ -8,6 +8,9 @@ import '../features/home/home_screen.dart';
 import '../features/keepsakes/keepsakes_screen.dart';
 import '../features/preview/preview_screen.dart';
 import '../features/profile/profile_screen.dart';
+import '../features/publishing/delivery_screen.dart';
+import '../features/publishing/published_screen.dart';
+import '../features/receive/receive_screen.dart';
 import 'home_shell.dart';
 
 /// Centralized routing.
@@ -74,8 +77,22 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           PreviewScreen(keepsakeId: state.pathParameters['id']!),
     ),
+    GoRoute(
+      path: '/delivery/:id',
+      builder: (context, state) =>
+          DeliveryScreen(keepsakeId: state.pathParameters['id']!),
+    ),
+    GoRoute(
+      path: '/published/:id',
+      builder: (context, state) =>
+          PublishedScreen(keepsakeId: state.pathParameters['id']!),
+    ),
 
-    // Recipient route group (/receive/:token) is added with publishing in the
-    // next stage, deliberately outside the creator shell.
+    // Recipient route group — deliberately outside the creator shell, no account.
+    GoRoute(
+      path: '/receive/:token',
+      builder: (context, state) =>
+          ReceiveScreen(token: state.pathParameters['token']!),
+    ),
   ],
 );
