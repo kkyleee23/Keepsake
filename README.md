@@ -27,7 +27,7 @@ Keepsakes can eventually include:
 
 The first version will focus on the basics and grow from there.
 
-## Core Idea
+## Idea:
 
 A Keepsake is something you create for another person.
 
