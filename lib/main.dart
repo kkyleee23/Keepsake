@@ -15,11 +15,15 @@ Future<void> main() async {
   // with publishing disabled.
   if (AppConfig.isSupabaseConfigured) {
     try {
+      final key = AppConfig.supabaseAnonKey;
+      // Supabase's newer "publishable" keys start with sb_; the classic anon
+      // key is a JWT. Pass whichever was supplied to the right parameter.
+      final isPublishable = key.startsWith('sb_');
       await Supabase.initialize(
         url: AppConfig.supabaseUrl,
-        // Classic Supabase projects use the anon JWT key here.
+        publishableKey: isPublishable ? key : null,
         // ignore: deprecated_member_use
-        anonKey: AppConfig.supabaseAnonKey,
+        anonKey: isPublishable ? null : key,
       );
     } catch (_) {
       // Leave publishing disabled rather than blocking startup.
