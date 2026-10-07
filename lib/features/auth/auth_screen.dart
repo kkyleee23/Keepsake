@@ -97,6 +97,53 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
     }
   }
 
+  Future<void> _forgotPassword() async {
+    var target = _email.text.trim();
+    if (target.isEmpty) {
+      final controller = TextEditingController();
+      target = await showDialog<String>(
+            context: context,
+            builder: (ctx) => AlertDialog(
+              backgroundColor: AppColors.surface,
+              title: Text('Reset your password', style: AppTypography.heading),
+              content: TextField(
+                controller: controller,
+                autofocus: true,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(hintText: 'you@example.com'),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx, controller.text.trim()),
+                  child: const Text('Send link'),
+                ),
+              ],
+            ),
+          ) ??
+          '';
+    }
+    if (target.isEmpty || !mounted) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+      _info = null;
+    });
+    final err = await ref.read(authServiceProvider).sendPasswordReset(target);
+    if (!mounted) return;
+    setState(() {
+      _busy = false;
+      if (err != null) {
+        _error = err;
+      } else {
+        _info = 'Password reset link sent. Check your email.';
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -148,6 +195,14 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
               obscure: _obscure,
               onToggleObscure: () => setState(() => _obscure = !_obscure),
             ),
+            if (!_signUp)
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: _busy ? null : _forgotPassword,
+                  child: const Text('Forgot password?'),
+                ),
+              ),
 
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.md),

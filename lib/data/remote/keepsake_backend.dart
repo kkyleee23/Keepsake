@@ -111,6 +111,13 @@ class KeepsakeBackend {
     await _client.from('keepsakes').delete().eq('share_token', token);
   }
 
+  /// Deletes every published keepsake owned by the signed-in creator.
+  Future<void> deleteAllMine() async {
+    final uid = _client.auth.currentUser?.id;
+    if (!isAvailable || uid == null) return;
+    await _client.from('keepsakes').delete().eq('creator_id', uid);
+  }
+
   Future<CoverResult> fetchCover(String token) async {
     if (!isAvailable) return const CoverResult(status: 'error');
     try {

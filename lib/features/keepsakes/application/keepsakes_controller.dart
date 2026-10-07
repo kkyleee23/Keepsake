@@ -49,6 +49,17 @@ class KeepsakesController extends AsyncNotifier<List<Keepsake>> {
       receivedAt: existing?.receivedAt ?? DateTime.now(),
     ));
   }
+
+  /// Removes everything this person has: their published keepsakes on the
+  /// server, and every keepsake stored on this device.
+  Future<void> wipeEverything() async {
+    await ref.read(keepsakeBackendProvider).deleteAllMine();
+    final repo = ref.read(keepsakeRepositoryProvider);
+    for (final k in await repo.getAll()) {
+      await repo.delete(k.id);
+    }
+    state = AsyncData(await repo.getAll());
+  }
 }
 
 final keepsakesControllerProvider =

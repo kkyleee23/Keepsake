@@ -12,6 +12,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
 import '../../data/providers.dart';
+import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
 
@@ -83,6 +84,8 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
             AppSpacing.xxl,
           ),
           children: [
+            const Center(child: Mascot(size: 120)),
+            const SizedBox(height: AppSpacing.md),
             Text('Ready to give', style: AppTypography.display),
             const SizedBox(height: AppSpacing.xs),
             Text(

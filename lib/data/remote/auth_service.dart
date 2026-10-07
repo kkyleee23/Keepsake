@@ -82,6 +82,36 @@ class AuthService {
   Future<void> signOut() async {
     await supabaseClientOrNull?.auth.signOut();
   }
+
+  /// Sends a password-reset email. Returns an error message, or null on success.
+  Future<String?> sendPasswordReset(String email) async {
+    final client = supabaseClientOrNull;
+    if (client == null) return 'Sign-in is not set up yet.';
+    try {
+      await client.auth.resetPasswordForEmail(email.trim());
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Something went wrong.';
+    }
+  }
+
+  /// Updates the signed-in user's display name.
+  Future<String?> updateDisplayName(String name) async {
+    final client = supabaseClientOrNull;
+    if (client == null) return 'Sign-in is not set up yet.';
+    try {
+      await client.auth.updateUser(
+        UserAttributes(data: {'display_name': name.trim()}),
+      );
+      return null;
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (_) {
+      return 'Something went wrong.';
+    }
+  }
 }
 
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
