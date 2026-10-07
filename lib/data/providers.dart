@@ -22,3 +22,19 @@ final keepsakeRepositoryProvider = Provider<KeepsakeRepository>(
 final keepsakeBackendProvider =
     Provider<KeepsakeBackend>((ref) => KeepsakeBackend());
 
+/// Whether the viewer has finished onboarding. Persisted so it only shows once.
+class OnboardingController extends Notifier<bool> {
+  static const _key = 'onboarding.seen.v1';
+
+  @override
+  bool build() => ref.read(sharedPreferencesProvider).getBool(_key) ?? false;
+
+  Future<void> complete() async {
+    await ref.read(sharedPreferencesProvider).setBool(_key, true);
+    state = true;
+  }
+}
+
+final onboardingSeenProvider =
+    NotifierProvider<OnboardingController, bool>(OnboardingController.new);
+

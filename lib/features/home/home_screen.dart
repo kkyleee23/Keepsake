@@ -9,6 +9,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import '../keepsakes/widgets/keepsake_card.dart';
+import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/section_header.dart';
 
@@ -35,13 +36,16 @@ class HomeScreen extends ConsumerWidget {
           AppSpacing.xxl,
         ),
         children: [
-          Text('KEEPSAKE', style: AppTypography.eyebrow),
-          const SizedBox(height: AppSpacing.sm),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Wordmark(height: 24),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           Text('Make something\nworth keeping.', style: AppTypography.display),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'A letter, a memory, a small gift for someone — '
-            'made by you, kept by them.',
+            'A letter, a memory, a small gift for someone. '
+            'Made by you, kept by them.',
             style: AppTypography.bodyLarge.copyWith(color: AppColors.inkSoft),
           ),
           const SizedBox(height: AppSpacing.lg),

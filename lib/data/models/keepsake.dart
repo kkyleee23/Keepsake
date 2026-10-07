@@ -37,7 +37,7 @@ class DeliverySettings {
 /// Who can reach a Keepsake and how it is protected.
 ///
 /// Note: these flags describe intent. Real enforcement (e.g. scheduled access,
-/// PIN checks) must live on the backend — never trust client-side hiding alone.
+/// PIN checks) must live on the backend - never trust client-side hiding alone.
 class PrivacySettings {
   const PrivacySettings({
     this.unlisted = true,

@@ -36,15 +36,30 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.1
+
+# Generate launcher icons from the brand mark:
+#   dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/brand/icon_1024.png"
+  adaptive_icon_background: "#798669"
+  adaptive_icon_foreground: "assets/brand/icon_foreground.png"
+  web:
+    generate: true
+    image_path: "assets/brand/icon_1024.png"
 
 flutter:
   uses-material-design: true
 
   assets:
     - images/
+    - assets/brand/
 
   fonts:
-    # Headings — Montserrat, used for structural titles and the big headline.
+    # Headings: Montserrat, used for structural titles and the big headline.
     - family: Montserrat
       fonts:
         - asset: fonts/montserrat/montserrat_regular.ttf
@@ -55,7 +70,7 @@ flutter:
           weight: 700
         - asset: fonts/montserrat/montserrat_extrabold.ttf
           weight: 800
-    # Body / UI — Inter for everything else.
+    # Body / UI: Inter for everything else.
     - family: Inter
       fonts:
         - asset: fonts/inter/inter_regular.ttf

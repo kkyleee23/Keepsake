@@ -51,14 +51,6 @@ class KeepsakeBackend {
 
   SupabaseClient get _client => Supabase.instance.client;
 
-  /// Anonymous sign-in gives the creator a stable auth.uid() for RLS without
-  /// making them create an account.
-  Future<void> _ensureSignedIn() async {
-    if (_client.auth.currentUser == null) {
-      await _client.auth.signInAnonymously();
-    }
-  }
-
   static String _newToken() {
     final rng = Random.secure();
     final bytes = List<int>.generate(16, (_) => rng.nextInt(256));
@@ -66,12 +58,16 @@ class KeepsakeBackend {
   }
 
   /// Publishes [keepsake]. Returns the share token. [pin] (if any) is sent once
-  /// and hashed on the server — it is never stored on the device.
+  /// and hashed on the server - it is never stored on the device.
   Future<String> publish(Keepsake keepsake, {String? pin}) async {
     if (!isAvailable) {
       throw StateError('Sharing is not set up yet.');
     }
-    await _ensureSignedIn();
+    // Creators are signed in before reaching here; the server also rejects an
+    // unauthenticated publish.
+    if (_client.auth.currentUser == null) {
+      throw StateError('Please sign in to publish.');
+    }
 
     final token = keepsake.shareToken ?? _newToken();
 
@@ -110,8 +106,7 @@ class KeepsakeBackend {
 
   /// Removes a published keepsake (RLS limits this to the creator's own rows).
   Future<void> revoke(String token) async {
-    if (!isAvailable) return;
-    await _ensureSignedIn();
+    if (!isAvailable || _client.auth.currentUser == null) return;
     await _client.from('keepsakes').delete().eq('share_token', token);
   }
 

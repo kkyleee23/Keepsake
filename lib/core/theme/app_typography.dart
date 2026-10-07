@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Typography for Keepsake — "Sage" direction.
+/// Typography for Keepsake - "Sage" direction.
 ///
 /// Two families used with discipline:
-///  - Montserrat ([headingFamily]) — structural headings and the big title.
-///  - Inter ([sans]) — running text, labels, captions.
+///  - Montserrat ([headingFamily]) - structural headings and the big title.
+///  - Inter ([sans]) - running text, labels, captions.
 ///
 /// Hierarchy comes from size + weight. Headings get tight tracking for a
 /// modern, confident feel; body stays at a comfortable 1.5 line-height.

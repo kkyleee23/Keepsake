@@ -34,7 +34,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   Keepsake? _draft;
   bool _loading = true;
 
-  /// Section types that have a working editor today — so the Add sheet never
+  /// Section types that have a working editor today - so the Add sheet never
   /// offers a dead end.
   static const _addable = [
     SectionType.letter,

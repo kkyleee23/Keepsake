@@ -1,24 +1,23 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:keepsake/app/app.dart';
-import 'package:keepsake/data/providers.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:keepsake/core/theme/app_theme.dart';
+import 'package:keepsake/features/creation/create_screen.dart';
 
 void main() {
-  testWidgets('Home renders the focal headline and create action',
-      (tester) async {
-    SharedPreferences.setMockInitialValues({});
-    final prefs = await SharedPreferences.getInstance();
-
+  testWidgets('Create screen offers occasions to start from', (tester) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        child: const KeepsakeApp(),
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: const CreateScreen(),
+        ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Make something\nworth keeping.'), findsOneWidget);
-    expect(find.text('Create a Keepsake'), findsOneWidget);
+    expect(find.text('What is this for?'), findsOneWidget);
+    expect(find.text('Birthday'), findsOneWidget);
+    expect(find.text('Continue'), findsOneWidget);
   });
 }

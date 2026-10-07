@@ -5,7 +5,7 @@ import '../../core/theme/app_typography.dart';
 import 'primary_button.dart';
 
 /// A designed empty state: a quiet reason plus a clear next action
-/// (design system 1.18) — never a blank screen.
+/// (design system 1.18) - never a blank screen.
 class EmptyState extends StatelessWidget {
   const EmptyState({
     super.key,
@@ -14,6 +14,7 @@ class EmptyState extends StatelessWidget {
     this.actionLabel,
     this.onAction,
     this.icon,
+    this.illustration,
   });
 
   final String title;
@@ -21,6 +22,9 @@ class EmptyState extends StatelessWidget {
   final String? actionLabel;
   final VoidCallback? onAction;
   final IconData? icon;
+
+  /// Optional artwork shown instead of [icon] (e.g. the mascot).
+  final Widget? illustration;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,10 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (icon != null) ...[
+            if (illustration != null) ...[
+              illustration!,
+              const SizedBox(height: AppSpacing.lg),
+            ] else if (icon != null) ...[
               Icon(icon, size: 40, color: AppTypography.caption.color),
               const SizedBox(height: AppSpacing.md),
             ],

@@ -102,7 +102,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       final pin = _usePin ? _pin.text.trim() : null;
       final token = await backend.publish(updated, pin: pin);
 
-      // Persist locally as published — without the PIN (server holds the hash).
+      // Persist locally as published - without the PIN (server holds the hash).
       final local = updated.copyWith(
         status: KeepsakeStatus.published,
         shareToken: token,

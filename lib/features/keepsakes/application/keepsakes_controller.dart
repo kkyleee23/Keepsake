@@ -28,7 +28,7 @@ final keepsakesControllerProvider =
   KeepsakesController.new,
 );
 
-/// Drafts only — powers "Continue where you left off".
+/// Drafts only - powers "Continue where you left off".
 final draftsProvider = Provider<List<Keepsake>>((ref) {
   final all = ref.watch(keepsakesControllerProvider).valueOrNull ?? const [];
   return all.where((k) => k.status == KeepsakeStatus.draft).toList();

@@ -9,7 +9,7 @@ import '../../data/models/keepsake_section.dart';
 /// Read-only rendering of a single section.
 ///
 /// Used by both Preview and (later) the recipient experience, so the creator
-/// always sees exactly what will be received — no second implementation.
+/// always sees exactly what will be received - no second implementation.
 class SectionView extends StatelessWidget {
   const SectionView({super.key, required this.section});
 

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/remote/auth_service.dart';
 
-/// A quiet profile: identity, then a short settings list. No vanity metrics.
-class ProfileScreen extends StatelessWidget {
+/// A quiet profile: identity, a recipient entry point, then a short list.
+class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   /// Accepts either a raw token or a full share link and opens it.
@@ -42,8 +44,39 @@ class ProfileScreen extends StatelessWidget {
     if (token.isNotEmpty) context.push('/receive/$token');
   }
 
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final yes = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Sign out?', style: AppTypography.heading),
+        content: Text(
+          'Your published keepsakes stay safe. Drafts on this device remain here.',
+          style: AppTypography.body,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (yes == true) {
+      await ref.read(authServiceProvider).signOut();
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.read(authServiceProvider);
+    final name = auth.displayName ?? 'Your account';
+    final email = auth.email ?? '';
+
     return SafeArea(
       child: ListView(
         padding: const EdgeInsets.fromLTRB(
@@ -55,7 +88,7 @@ class ProfileScreen extends StatelessWidget {
         children: [
           Text('Profile', style: AppTypography.displaySmall),
           const SizedBox(height: AppSpacing.lg),
-          const _IdentityCard(),
+          _IdentityCard(name: name, email: email),
           const SizedBox(height: AppSpacing.md),
           _ActionCard(
             icon: Icons.qr_code_scanner,
@@ -72,6 +105,13 @@ class ProfileScreen extends StatelessWidget {
               _SettingsItem(Icons.info_outline, 'About Keepsake'),
             ],
           ),
+          const SizedBox(height: AppSpacing.lg),
+          if (email.isNotEmpty)
+            TextButton.icon(
+              onPressed: () => _confirmSignOut(context, ref),
+              icon: const Icon(Icons.logout, size: 20),
+              label: const Text('Sign out'),
+            ),
         ],
       ),
     );
@@ -79,7 +119,10 @@ class ProfileScreen extends StatelessWidget {
 }
 
 class _IdentityCard extends StatelessWidget {
-  const _IdentityCard();
+  const _IdentityCard({required this.name, required this.email});
+
+  final String name;
+  final String email;
 
   @override
   Widget build(BuildContext context) {
@@ -98,16 +141,20 @@ class _IdentityCard extends StatelessWidget {
             child: Icon(Icons.person_outline, color: AppColors.inkSoft),
           ),
           const SizedBox(width: AppSpacing.md),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Not signed in', style: AppTypography.label),
-              const SizedBox(height: 2),
-              Text(
-                'Sign in to keep your keepsakes safe.',
-                style: AppTypography.caption,
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(name, style: AppTypography.label),
+                const SizedBox(height: 2),
+                Text(
+                  email.isEmpty ? 'Signed in' : email,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption,
+                ),
+              ],
+            ),
           ),
         ],
       ),

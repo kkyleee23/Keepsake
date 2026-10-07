@@ -7,6 +7,7 @@ import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
 import 'application/keepsakes_controller.dart';
 import 'widgets/keepsake_card.dart';
+import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 
 /// The library: a permanent place to revisit what was made and received.
@@ -39,7 +40,7 @@ class KeepsakesScreen extends ConsumerWidget {
           Expanded(
             child: items.isEmpty
                 ? EmptyState(
-                    icon: Icons.bookmark_border,
+                    illustration: const Mascot(size: 150),
                     title: 'No keepsakes yet',
                     message: "Make something they'll want to keep.",
                     actionLabel: 'Create a Keepsake',
