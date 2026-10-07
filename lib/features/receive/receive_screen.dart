@@ -11,7 +11,9 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
 import '../../data/providers.dart';
+import '../../data/remote/auth_service.dart';
 import '../../data/remote/keepsake_backend.dart';
+import '../keepsakes/application/keepsakes_controller.dart';
 import '../reader/keepsake_content_view.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
@@ -82,6 +84,7 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           _content = result.keepsake;
           _phase = _Phase.content;
         });
+        _saveToLibrary(result.keepsake);
       case 'pin_required':
         setState(() => _phase = _Phase.pin);
       case 'wrong_pin':
@@ -100,6 +103,18 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           _errorStatus = result.status;
         });
     }
+  }
+
+  /// If a signed-in creator opens someone else's keepsake, keep a copy in their
+  /// library under "Received".
+  void _saveToLibrary(Keepsake? k) {
+    if (k == null) return;
+    final auth = ref.read(authServiceProvider);
+    if (!auth.isSignedIn) return;
+    if (k.creatorId != null && k.creatorId == auth.currentUser?.id) return;
+    ref
+        .read(keepsakesControllerProvider.notifier)
+        .saveReceived(k.copyWith(shareToken: widget.token));
   }
 
   void _onOpenPressed() {

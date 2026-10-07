@@ -24,8 +24,10 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final drafts = ref.watch(draftsProvider);
-    final created =
-        ref.watch(recentKeepsakesProvider).where((k) => !k.isDraft).toList();
+    final created = ref
+        .watch(recentKeepsakesProvider)
+        .where((k) => !k.isDraft && !k.isReceived)
+        .toList();
 
     return SafeArea(
       child: ListView(

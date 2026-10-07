@@ -103,6 +103,7 @@ class Keepsake {
     this.publishedAt,
     this.expiresAt,
     this.shareToken,
+    this.receivedAt,
   });
 
   final String id;
@@ -131,7 +132,12 @@ class Keepsake {
   /// Unguessable token used in the share link once published. Null while draft.
   final String? shareToken;
 
+  /// When this keepsake was opened as a recipient. Null for ones you created.
+  final DateTime? receivedAt;
+
   bool get isDraft => status == KeepsakeStatus.draft;
+  bool get isReceived => receivedAt != null;
+  bool get isArchived => status == KeepsakeStatus.archived;
   bool get isPublished => shareToken != null && status != KeepsakeStatus.draft;
   bool get hasContent => sections.isNotEmpty;
 
@@ -157,6 +163,7 @@ class Keepsake {
     DateTime? publishedAt,
     DateTime? expiresAt,
     String? shareToken,
+    DateTime? receivedAt,
   }) {
     return Keepsake(
       id: id,
@@ -176,6 +183,7 @@ class Keepsake {
       publishedAt: publishedAt ?? this.publishedAt,
       expiresAt: expiresAt ?? this.expiresAt,
       shareToken: shareToken ?? this.shareToken,
+      receivedAt: receivedAt ?? this.receivedAt,
     );
   }
 
@@ -197,6 +205,7 @@ class Keepsake {
         'publishedAt': publishedAt?.toIso8601String(),
         'expiresAt': expiresAt?.toIso8601String(),
         'shareToken': shareToken,
+        'receivedAt': receivedAt?.toIso8601String(),
       };
 
   factory Keepsake.fromJson(Map<String, dynamic> json) {
@@ -227,6 +236,9 @@ class Keepsake {
           ? null
           : DateTime.parse(json['expiresAt'] as String),
       shareToken: json['shareToken'] as String?,
+      receivedAt: json['receivedAt'] == null
+          ? null
+          : DateTime.parse(json['receivedAt'] as String),
     );
   }
 }

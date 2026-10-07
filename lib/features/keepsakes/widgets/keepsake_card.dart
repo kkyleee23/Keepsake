@@ -11,10 +11,16 @@ import '../../../data/models/keepsake.dart';
 /// A library/home card for one Keepsake. Communicates the essentials only -
 /// title, who it's for, occasion, and state - without overloading (brief).
 class KeepsakeCard extends StatelessWidget {
-  const KeepsakeCard({super.key, required this.keepsake, required this.onTap});
+  const KeepsakeCard({
+    super.key,
+    required this.keepsake,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   final Keepsake keepsake;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +36,7 @@ class KeepsakeCard extends StatelessWidget {
         borderRadius: AppRadius.card,
         child: InkWell(
           onTap: onTap,
+          onLongPress: onLongPress,
           borderRadius: AppRadius.card,
           child: Container(
             decoration: BoxDecoration(

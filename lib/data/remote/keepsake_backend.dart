@@ -74,6 +74,7 @@ class KeepsakeBackend {
     // Strip any PIN from the uploaded payload; it lives only as a server hash.
     final payload = keepsake
         .copyWith(
+          creatorId: _client.auth.currentUser?.id,
           status: KeepsakeStatus.published,
           shareToken: token,
           publishedAt: keepsake.publishedAt ?? DateTime.now(),
