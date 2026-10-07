@@ -1,0 +1,56 @@
+import 'package:go_router/go_router.dart';
+
+import '../features/creation/create_screen.dart';
+import '../features/home/home_screen.dart';
+import '../features/keepsakes/keepsakes_screen.dart';
+import '../features/profile/profile_screen.dart';
+import 'home_shell.dart';
+
+/// Centralized routing.
+///
+/// Creator routes live under the [HomeShell] (bottom nav). Recipient routes
+/// (`/receive/:token`) will be added as a separate, shell-free route group so
+/// the recipient never sees the creator chrome.
+final GoRouter appRouter = GoRouter(
+  initialLocation: '/home',
+  routes: [
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          HomeShell(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) => const HomeScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/create',
+              builder: (context, state) => const CreateScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/keepsakes',
+              builder: (context, state) => const KeepsakesScreen(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/profile',
+              builder: (context, state) => const ProfileScreen(),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+);

@@ -46,3 +46,38 @@ Keep
 ```
 
 The project is currently focused on establishing the first usable version of the Keepsake experience.
+
+## Development status
+
+Foundation in place:
+
+* Flutter project scaffolded (Android / iOS / Web).
+* Design-system theme: warm paper + ink, a single terracotta accent, Playfair
+  Display for headlines and Inter for body, on an 8dp spacing grid.
+* App shell with four tabs: Home, Create, Keepsakes, Profile.
+* Core data model: `Keepsake` → ordered `KeepsakeSection`s, with delivery and
+  privacy settings. Built so new section types can be added without a rewrite.
+
+Next: the recipient flow, the section editor, and preview.
+
+## Running it
+
+```bash
+flutter pub get
+flutter run            # pick a device, or:
+flutter run -d chrome  # quick preview in the browser
+```
+
+## Project layout
+
+```
+lib/
+  app/        app shell, router
+  core/       theme tokens (colors, type, spacing, radius)
+  data/       models
+  features/   home, creation, keepsakes, profile
+  shared/     reusable widgets
+```
+
+Fonts live in `fonts/`; color and UI references in `colors/`, `images/`, and
+`login screens/`.
