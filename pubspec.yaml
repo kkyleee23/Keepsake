@@ -44,16 +44,18 @@ flutter:
     - images/
 
   fonts:
-    # Display / editorial serif — used only for the one big title per screen.
-    - family: Playfair Display
+    # Headings — Montserrat, used for structural titles and the big headline.
+    - family: Montserrat
       fonts:
-        - asset: fonts/playfair-display/playfair_display_regular.ttf
+        - asset: fonts/montserrat/montserrat_regular.ttf
           weight: 400
-        - asset: fonts/playfair-display/playfair_display_semibold.ttf
+        - asset: fonts/montserrat/montserrat_semibold.ttf
           weight: 600
-        - asset: fonts/playfair-display/playfair_display_bold.ttf
+        - asset: fonts/montserrat/montserrat_bold.ttf
           weight: 700
-    # Body / UI sans — everything else.
+        - asset: fonts/montserrat/montserrat_extrabold.ttf
+          weight: 800
+    # Body / UI — Inter for everything else.
     - family: Inter
       fonts:
         - asset: fonts/inter/inter_regular.ttf

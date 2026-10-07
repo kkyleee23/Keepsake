@@ -35,7 +35,7 @@ class HomeScreen extends ConsumerWidget {
           AppSpacing.xxl,
         ),
         children: [
-          Text('Keepsake', style: AppTypography.caption),
+          Text('KEEPSAKE', style: AppTypography.eyebrow),
           const SizedBox(height: AppSpacing.sm),
           Text('Make something\nworth keeping.', style: AppTypography.display),
           const SizedBox(height: AppSpacing.sm),

@@ -2,47 +2,52 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Typography for Keepsake.
+/// Typography for Keepsake — "Sage" direction.
 ///
-/// Two families, used with discipline (design system 1.4, section 4):
-///  - [serif] Playfair Display — the ONE big title per screen only.
-///  - [sans]  Inter — every other piece of text (hierarchy by size + weight).
+/// Two families used with discipline:
+///  - Montserrat ([headingFamily]) — structural headings and the big title.
+///  - Inter ([sans]) — running text, labels, captions.
 ///
-/// Line-height: body x1.5, headings x1.25.
+/// Hierarchy comes from size + weight. Headings get tight tracking for a
+/// modern, confident feel; body stays at a comfortable 1.5 line-height.
 abstract final class AppTypography {
-  static const String serif = 'Playfair Display';
+  static const String headingFamily = 'Montserrat';
   static const String sans = 'Inter';
 
-  /// Editorial title. Reserve for a single focal headline per screen.
+  /// The one focal headline per screen.
   static const TextStyle display = TextStyle(
-    fontFamily: serif,
+    fontFamily: headingFamily,
     fontSize: 34,
-    fontWeight: FontWeight.w600,
-    height: 1.25,
+    fontWeight: FontWeight.w700,
+    height: 1.12,
+    letterSpacing: -0.6,
     color: AppColors.ink,
   );
 
   static const TextStyle displaySmall = TextStyle(
-    fontFamily: serif,
+    fontFamily: headingFamily,
     fontSize: 26,
-    fontWeight: FontWeight.w600,
-    height: 1.25,
+    fontWeight: FontWeight.w700,
+    height: 1.15,
+    letterSpacing: -0.4,
     color: AppColors.ink,
   );
 
   static const TextStyle title = TextStyle(
-    fontFamily: sans,
+    fontFamily: headingFamily,
     fontSize: 22,
     fontWeight: FontWeight.w600,
-    height: 1.3,
+    height: 1.2,
+    letterSpacing: -0.2,
     color: AppColors.ink,
   );
 
   static const TextStyle heading = TextStyle(
-    fontFamily: sans,
+    fontFamily: headingFamily,
     fontSize: 18,
     fontWeight: FontWeight.w600,
-    height: 1.3,
+    height: 1.25,
+    letterSpacing: -0.1,
     color: AppColors.ink,
   );
 
@@ -75,6 +80,16 @@ abstract final class AppTypography {
     fontSize: 13,
     fontWeight: FontWeight.w400,
     height: 1.4,
+    color: AppColors.inkFaint,
+  );
+
+  /// Small uppercase eyebrow (e.g. the "KEEPSAKE" kicker, occasion labels).
+  static const TextStyle eyebrow = TextStyle(
+    fontFamily: sans,
+    fontSize: 12,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+    letterSpacing: 1.6,
     color: AppColors.inkFaint,
   );
 
