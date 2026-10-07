@@ -50,3 +50,6 @@ app.*.map.json
 # Design reference docs (kept local, per project owner)
 DESIGN-SYSTEM-AND-WORKFLOW(NO NEED FOR NOW).md
 DESIGN_SYSTEM_STANDALONE.md
+
+# pub lockfile: resolved per-machine (Flutter versions differ across dev machines)
+pubspec.lock
