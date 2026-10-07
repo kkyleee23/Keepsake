@@ -156,7 +156,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
             AppSpacing.xl,
           ),
           children: [
-            const Wordmark(height: 30),
+            const Wordmark(height: 42),
             const SizedBox(height: AppSpacing.xl),
             Text(
               _signUp ? 'Create your account' : 'Welcome back',

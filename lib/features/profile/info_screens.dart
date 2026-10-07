@@ -22,9 +22,9 @@ class AboutScreen extends StatelessWidget {
             AppSpacing.xxl,
           ),
           children: [
-            const Center(child: Mascot(size: 150)),
+            const Center(child: Mascot(size: 150, pose: MascotPose.hugging)),
             const SizedBox(height: AppSpacing.lg),
-            const Center(child: Wordmark(height: 30)),
+            const Center(child: Wordmark(height: 40)),
             const SizedBox(height: AppSpacing.md),
             Text(
               'Make something worth keeping, and give it to someone.',

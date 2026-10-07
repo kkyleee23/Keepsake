@@ -9,27 +9,28 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/primary_button.dart';
 
 class _Slide {
-  const _Slide(this.title, this.body, this.mascot);
+  const _Slide(this.title, this.body, {this.pose, this.brand = false});
   final String title;
   final String body;
-  final bool mascot; // mascot art vs. the app mark
+  final MascotPose? pose; // mascot expression for this slide
+  final bool brand; // show the app mark instead of the mascot
 }
 
 const _slides = [
   _Slide(
     'Make something worth keeping.',
     'A letter, a memory, a small gift. Made for one person to keep.',
-    true,
+    pose: MascotPose.happy,
   ),
   _Slide(
     'Give it your way.',
     'Send a private link or a QR code. They open it without making an account.',
-    false,
+    brand: true,
   ),
   _Slide(
     'Yours to revisit.',
     'Everything you make and receive stays in one quiet place.',
-    true,
+    pose: MascotPose.hugging,
   ),
 ];
 
@@ -122,10 +123,10 @@ class _SlideView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (slide.mascot)
-            const Mascot(size: 200)
+          if (slide.brand)
+            const BrandMark(size: 132)
           else
-            const BrandMark(size: 132),
+            Mascot(size: 200, pose: slide.pose, animate: true),
           const SizedBox(height: AppSpacing.xl),
           Text(
             slide.title,

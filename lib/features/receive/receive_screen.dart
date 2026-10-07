@@ -15,6 +15,7 @@ import '../../data/remote/auth_service.dart';
 import '../../data/remote/keepsake_backend.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import '../reader/keepsake_content_view.dart';
+import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
 
@@ -346,13 +347,25 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (title, message) = switch (status) {
-      'expired' => ('This keepsake has expired', 'The link is no longer active.'),
-      'not_found' => ('Keepsake not found', 'This link may be wrong or removed.'),
-      _ => ('Something went wrong', 'Please check the link and try again.'),
+    final (title, message, pose) = switch (status) {
+      'expired' => (
+          'This keepsake has expired',
+          'The link is no longer active.',
+          MascotPose.sad,
+        ),
+      'not_found' => (
+          'Keepsake not found',
+          'This link may be wrong or removed.',
+          MascotPose.sad,
+        ),
+      _ => (
+          'Something went wrong',
+          'Please check the link and try again.',
+          MascotPose.offline,
+        ),
     };
     return EmptyState(
-      icon: Icons.lock_outline,
+      illustration: Mascot(size: 140, pose: pose),
       title: title,
       message: message,
       actionLabel: 'Go home',

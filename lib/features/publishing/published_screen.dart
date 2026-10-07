@@ -84,7 +84,13 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
             AppSpacing.xxl,
           ),
           children: [
-            const Center(child: Mascot(size: 120)),
+            const Center(
+              child: Mascot(
+                size: 136,
+                pose: MascotPose.celebrating,
+                animate: true,
+              ),
+            ),
             const SizedBox(height: AppSpacing.md),
             Text('Ready to give', style: AppTypography.display),
             const SizedBox(height: AppSpacing.xs),

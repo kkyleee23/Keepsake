@@ -40,7 +40,7 @@ class HomeScreen extends ConsumerWidget {
         children: [
           const Align(
             alignment: Alignment.centerLeft,
-            child: Wordmark(height: 24),
+            child: Wordmark(height: 34),
           ),
           const SizedBox(height: AppSpacing.lg),
           Text('Make something\nworth keeping.', style: AppTypography.display),
