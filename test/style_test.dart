@@ -80,4 +80,31 @@ void main() {
       expect(KeepsakeStyle.standard.toJson().containsKey('stickers'), isFalse);
     });
   });
+
+  group('Initials on the seal', () {
+    test('one or two capital letters only', () {
+      expect(KeepsakeStyle.cleanMono('S'), 'S');
+      expect(KeepsakeStyle.cleanMono('sm'), 'SM');
+      expect(KeepsakeStyle.cleanMono(' sm '), 'SM');
+      expect(KeepsakeStyle.cleanMono('ABC'), isNull);
+      expect(KeepsakeStyle.cleanMono('<b>'), isNull);
+      expect(KeepsakeStyle.cleanMono('A1'), isNull);
+      expect(KeepsakeStyle.cleanMono(''), isNull);
+      expect(KeepsakeStyle.cleanMono(7), isNull);
+    });
+
+    test('kept through JSON, dropped when tampered with', () {
+      const style = KeepsakeStyle(mono: 'SM');
+      expect(KeepsakeStyle.fromJson(style.toJson()).mono, 'SM');
+      expect(KeepsakeStyle.fromJson({'mono': 'x<y'}).mono, isNull);
+      expect(KeepsakeStyle.standard.toJson().containsKey('mono'), isFalse);
+    });
+
+    test('empty text clears them, null keeps them', () {
+      const style = KeepsakeStyle(mono: 'SM');
+      expect(style.copyWith(mono: '').mono, isNull);
+      expect(style.copyWith(seal: SealColor.plum).mono, 'SM');
+      expect(style.copyWith(mono: 'a').mono, 'A');
+    });
+  });
 }

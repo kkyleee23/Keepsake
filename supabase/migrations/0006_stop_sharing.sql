@@ -9,7 +9,8 @@
 --    it could publish something else at the same address. Every deleted
 --    link is now remembered (as a one-way hash) and publishing refuses it.
 -- 3. Stickers on the envelope. Only known stickers are kept, at most six,
---    with every position, angle and size clamped to sane values.
+--    with every position, angle and size clamped to sane values. Initials
+--    on the seal: one or two capital letters, nothing else.
 --
 -- Run this once in the Supabase SQL editor after 0005_wrapping.sql. It is
 -- safe to run again (if you ran an earlier copy, run this one too).
@@ -62,6 +63,9 @@ language sql immutable set search_path = public, pg_temp as $$
                      then p_style->>'envelope' end,
     'seal', case when p_style->>'seal' in ('evergreen', 'terracotta', 'honey', 'plum', 'night')
                  then p_style->>'seal' end,
+    'mono', case when jsonb_typeof(p_style->'mono') = 'string'
+                  and p_style->>'mono' ~ '^[A-Z]{1,2}$'
+                 then p_style->>'mono' end,
     'stickers', (
       select jsonb_agg(jsonb_build_object(
         'id', e->>'id',

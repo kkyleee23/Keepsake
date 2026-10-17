@@ -168,6 +168,7 @@ final _cover = CoverResult(
   style: KeepsakeStyle(
     envelope: 'kraft',
     seal: SealColor.terracotta,
+    mono: 'S',
     stickers: [
       PlacedSticker(kind: StickerKind.stamp, x: 0.85, y: 0.2, turn: 6),
       PlacedSticker(kind: StickerKind.sprig, x: 0.14, y: 0.76, turn: -12),

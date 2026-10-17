@@ -147,6 +147,7 @@ class _GiftCoverState extends State<GiftCover>
                           rise: _rise.value,
                           paper: LetterPaper.fromId(widget.style.envelope),
                           sealColor: widget.style.seal.color,
+                          sealMono: widget.style.mono,
                           stickers: widget.style.stickers,
                         ),
                       ),

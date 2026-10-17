@@ -72,22 +72,35 @@ class _LeafPainter extends CustomPainter {
   bool shouldRepaint(_LeafPainter old) => old.color != color;
 }
 
-/// The wax seal: an evergreen disc with a white leaf. Closes every envelope.
+/// The wax seal: an evergreen disc with a white leaf, or the sender's
+/// initials pressed in. Closes every envelope.
 class LeafSeal extends StatelessWidget {
-  const LeafSeal({super.key, this.size = 40, this.color = AppColors.accent});
+  const LeafSeal({
+    super.key,
+    this.size = 40,
+    this.color = AppColors.accent,
+    this.mono,
+  });
 
   final double size;
   final Color color;
 
+  /// Letters pressed into the wax instead of the leaf.
+  final String? mono;
+
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: Size.square(size), painter: _SealPainter(color));
+    return CustomPaint(
+      size: Size.square(size),
+      painter: _SealPainter(color, mono),
+    );
   }
 }
 
 class _SealPainter extends CustomPainter {
-  _SealPainter(this.color);
+  _SealPainter(this.color, this.mono);
   final Color color;
+  final String? mono;
 
   @override
   void paint(Canvas canvas, Size size) => paintSeal(
@@ -95,10 +108,12 @@ class _SealPainter extends CustomPainter {
     size.center(Offset.zero),
     size.shortestSide / 2,
     color: color,
+    mono: mono,
   );
 
   @override
-  bool shouldRepaint(_SealPainter old) => old.color != color;
+  bool shouldRepaint(_SealPainter old) =>
+      old.color != color || old.mono != mono;
 }
 
 /// Draws the seal centered at [c] with radius [r]. A slightly wavy rim reads
@@ -109,6 +124,7 @@ void paintSeal(
   double r, {
   double opacity = 1,
   Color color = AppColors.accent,
+  String? mono,
 }) {
   if (opacity <= 0) return;
   final rim = Path();
@@ -129,6 +145,32 @@ void paintSeal(
       ..style = PaintingStyle.stroke
       ..strokeWidth = math.max(1, r * 0.06),
   );
+  if (mono != null && mono.isNotEmpty) {
+    // Letters pressed into the wax: a darker groove under a pale face.
+    TextPainter letters(Color ink) => TextPainter(
+      text: TextSpan(
+        text: mono,
+        style: TextStyle(
+          fontFamily: 'Playfair',
+          fontWeight: FontWeight.w700,
+          fontSize: r * (mono.length == 1 ? 1.05 : 0.74),
+          height: 1,
+          color: ink,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    final groove = letters(
+      Color.lerp(color, Colors.black, 0.35)!.withValues(alpha: opacity),
+    );
+    final face = letters(Colors.white.withValues(alpha: 0.93 * opacity));
+    final at = c - Offset(face.width / 2, face.height / 2);
+    groove.paint(canvas, at.translate(0, r * 0.05));
+    face.paint(canvas, at);
+    groove.dispose();
+    face.dispose();
+    return;
+  }
   final leafRect = Rect.fromCenter(
     center: c,
     width: r * 0.95,
@@ -151,6 +193,7 @@ class EnvelopeArt extends StatelessWidget {
     this.showSeal = true,
     this.paper = LetterPaper.cream,
     this.sealColor = AppColors.accent,
+    this.sealMono,
     this.stickers = const [],
   });
 
@@ -161,6 +204,9 @@ class EnvelopeArt extends StatelessWidget {
 
   /// Stuck on the front; they peel away as the envelope opens.
   final List<PlacedSticker> stickers;
+
+  /// Initials on the seal instead of the leaf.
+  final String? sealMono;
 
   /// The envelope's paper (cream, kraft, seed, linen).
   final LetterPaper paper;
@@ -182,6 +228,7 @@ class EnvelopeArt extends StatelessWidget {
         seal: showSeal,
         paper: paper,
         sealColor: sealColor,
+        sealMono: sealMono,
       ),
     );
     // Extra headroom above so the opened flap and the rising letter fit.
@@ -217,6 +264,7 @@ class _EnvelopePainter extends CustomPainter {
     required this.seal,
     required this.paper,
     required this.sealColor,
+    this.sealMono,
   }) : super(repaint: PaperTextures.instance);
 
   final double open;
@@ -224,6 +272,7 @@ class _EnvelopePainter extends CustomPainter {
   final bool seal;
   final LetterPaper paper;
   final Color sealColor;
+  final String? sealMono;
 
   /// Cream envelopes are the cream texture tinted to the envelope tones;
   /// other papers use their own texture, a shade darker on the inside.
@@ -358,6 +407,7 @@ class _EnvelopePainter extends CustomPainter {
         h * 0.13,
         opacity: (1 - open * 2.5).clamp(0, 1),
         color: sealColor,
+        mono: sealMono,
       );
     }
   }
@@ -391,7 +441,8 @@ class _EnvelopePainter extends CustomPainter {
       old.rise != rise ||
       old.seal != seal ||
       old.paper != paper ||
-      old.sealColor != sealColor;
+      old.sealColor != sealColor ||
+      old.sealMono != sealMono;
 }
 
 /// Letter paper: a warm sheet with a folded top-right corner.

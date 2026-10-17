@@ -26,6 +26,7 @@ String describeStyle(KeepsakeStyle s) {
   final n = s.stickers.length;
   return '${paper[0].toUpperCase()}${paper.substring(1)} envelope, '
       '${s.seal.label.toLowerCase()} seal'
+      '${s.mono == null ? '' : ' with ${s.mono}'}'
       '${n == 0 ? '' : ', $n sticker${n == 1 ? '' : 's'}'}';
 }
 
@@ -54,6 +55,7 @@ class WrappingRow extends StatelessWidget {
               width: 56,
               paper: LetterPaper.fromId(style.envelope),
               sealColor: style.seal.color,
+              sealMono: style.mono,
               stickers: style.stickers,
             ),
             const SizedBox(width: AppSpacing.md),
@@ -114,6 +116,13 @@ const _spots = [
 
 class _WrappingSheetState extends State<_WrappingSheet> {
   late KeepsakeStyle _style = widget.initial;
+  late final _mono = TextEditingController(text: widget.initial.mono ?? '');
+
+  @override
+  void dispose() {
+    _mono.dispose();
+    super.dispose();
+  }
 
   /// The sticker being moved or changed, by its place in the list.
   int? _selected;
@@ -303,7 +312,11 @@ class _WrappingSheetState extends State<_WrappingSheet> {
                                   width: 2,
                                 ),
                               ),
-                              child: LeafSeal(size: 40, color: c.color),
+                              child: LeafSeal(
+                                size: 40,
+                                color: c.color,
+                                mono: _style.mono,
+                              ),
                             ),
                             const SizedBox(height: AppSpacing.xxs),
                             Text(c.label, style: AppTypography.caption),
@@ -312,6 +325,49 @@ class _WrappingSheetState extends State<_WrappingSheet> {
                       ),
                     ),
                   ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            // Initials pressed into the wax instead of the leaf.
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Your initials', style: AppTypography.label),
+                      Text(
+                        'Pressed into the seal. Leave empty for the leaf.',
+                        style: AppTypography.caption,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                SizedBox(
+                  width: 84,
+                  child: TextField(
+                    controller: _mono,
+                    textAlign: TextAlign.center,
+                    textCapitalization: TextCapitalization.characters,
+                    autocorrect: false,
+                    enableSuggestions: false,
+                    style: AppTypography.heading.copyWith(letterSpacing: 2),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp('[A-Za-z]')),
+                      LengthLimitingTextInputFormatter(2),
+                      TextInputFormatter.withFunction(
+                        (_, v) => v.copyWith(text: v.text.toUpperCase()),
+                      ),
+                    ],
+                    decoration: const InputDecoration(
+                      hintText: 'SM',
+                      isDense: true,
+                    ),
+                    onChanged: (v) =>
+                        setState(() => _style = _style.copyWith(mono: v)),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -378,10 +434,11 @@ class _StickerBoard extends StatelessWidget {
               child: AnimatedSwitcher(
                 duration: Motion.of(context, Motion.medium),
                 child: EnvelopeArt(
-                  key: ValueKey((style.envelope, style.seal)),
+                  key: ValueKey((style.envelope, style.seal, style.mono)),
                   width: width,
                   paper: LetterPaper.fromId(style.envelope),
                   sealColor: style.seal.color,
+                  sealMono: style.mono,
                 ),
               ),
             ),

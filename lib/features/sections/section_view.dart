@@ -29,6 +29,7 @@ class SectionView extends StatelessWidget {
     required this.section,
     this.senderName,
     this.sealColor = AppColors.accent,
+    this.sealMono,
   });
 
   final KeepsakeSection section;
@@ -38,6 +39,9 @@ class SectionView extends StatelessWidget {
 
   /// The keepsake's wax seal colour, used where letters are sealed.
   final Color sealColor;
+
+  /// Initials on the little seal by the signature.
+  final String? sealMono;
 
   String? _s(String key) {
     final v = (section.content[key] as String?)?.trim();
@@ -56,6 +60,7 @@ class SectionView extends StatelessWidget {
           paper: LetterPaper.fromId(_s('paper')),
           font: LetterFont.fromId(_s('font')),
           sealColor: sealColor,
+          sealMono: sealMono,
         );
       case SectionType.book:
         final pages = [
@@ -162,6 +167,7 @@ class _Letter extends StatelessWidget {
     this.from,
     this.paper = LetterPaper.cream,
     this.sealColor = AppColors.accent,
+    this.sealMono,
     this.font = LetterFont.clean,
   });
 
@@ -172,6 +178,9 @@ class _Letter extends StatelessWidget {
   final String? from;
   final LetterPaper paper;
   final Color sealColor;
+
+  /// Initials on the little seal by the signature.
+  final String? sealMono;
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +204,8 @@ class _Letter extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
           ],
-          if (body != null) LetterBody(text: body!, fill: paper.color, style: font.body),
+          if (body != null)
+            LetterBody(text: body!, fill: paper.color, style: font.body),
           const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerRight,
@@ -221,7 +231,7 @@ class _Letter extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(width: AppSpacing.xs),
-                    LeafSeal(size: 26, color: sealColor),
+                    LeafSeal(size: 26, color: sealColor, mono: sealMono),
                   ],
                 ),
               ],
