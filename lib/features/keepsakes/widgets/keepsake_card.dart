@@ -9,6 +9,7 @@ import '../../../data/models/enums.dart';
 import '../../../data/models/keepsake.dart';
 import '../../../shared/widgets/motion.dart';
 import '../../../shared/widgets/paper.dart';
+import '../../publishing/new_replies.dart';
 
 /// A library/home card for one Keepsake. Communicates the essentials only -
 /// title, who it's for, occasion, and state - without overloading (brief).
@@ -59,14 +60,19 @@ class KeepsakeCard extends StatelessWidget {
                       style: AppTypography.body,
                     ),
                     const SizedBox(height: AppSpacing.xs),
-                    Row(
+                    // Wraps rather than squeezing: the replies tag drops to
+                    // its own line on narrow screens or with large text.
+                    Wrap(
+                      spacing: AppSpacing.xs,
+                      runSpacing: AppSpacing.xxs,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _StatusTag(status: keepsake.status),
-                        const SizedBox(width: AppSpacing.xs),
                         Text(
                           DateFormat.yMMMd().format(keepsake.updatedAt),
                           style: AppTypography.caption,
                         ),
+                        NewRepliesTag(keepsake: keepsake),
                       ],
                     ),
                   ],

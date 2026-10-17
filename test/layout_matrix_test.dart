@@ -156,6 +156,17 @@ class _FakeBackend extends KeepsakeBackend {
   Future<List<KeepsakeResponse>?> fetchResponses(String token) async => [];
 }
 
+/// Two replies waiting on every link.
+class _RepliesBackend extends _FakeBackend {
+  _RepliesBackend() : super(_cover, 'ok');
+  @override
+  Future<List<KeepsakeResponse>?> fetchResponses(String token) async => [
+        KeepsakeResponse(id: 'r1', createdAt: DateTime.now(), message: 'Oh!'),
+        KeepsakeResponse(
+            id: 'r2', createdAt: DateTime.now(), reaction: Reaction.love),
+      ];
+}
+
 /// The tab screens inside a bottom bar like the real shell.
 Widget _tab(Widget screen) => Scaffold(
       body: screen,
@@ -197,6 +208,10 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
   'create': (() => _tab(const CreateScreen()), const []),
   'create-picked': (() => _tab(const CreateScreen()), const []),
   'library': (() => _tab(const KeepsakesScreen()), const []),
+  'library-replies': (
+    () => _tab(const KeepsakesScreen()),
+    [keepsakeBackendProvider.overrideWithValue(_RepliesBackend())]
+  ),
   'profile': (() => _tab(const ProfileScreen()), const []),
   'editor': (() => const EditorScreen(keepsakeId: 'd1'), const []),
   'editor-stickers': (() => const EditorScreen(keepsakeId: 'd1'), const []),
@@ -298,6 +313,9 @@ final Map<String, Future<void> Function(WidgetTester)> actions = {
     await t.drag(board, const Offset(-30, -12));
     await _settle(t);
     expect(find.text('Peel Off'), findsOneWidget);
+  },
+  'library-replies': (t) async {
+    expect(find.text('2 new replies'), findsOneWidget);
   },
   'published-stopped': (t) async {
     await t.scrollUntilVisible(find.text('Stop Sharing'), 200,

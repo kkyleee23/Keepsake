@@ -51,8 +51,9 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
   }
 
   Future<void> _load() async {
-    final k =
-        await ref.read(keepsakeRepositoryProvider).getById(widget.keepsakeId);
+    final k = await ref
+        .read(keepsakeRepositoryProvider)
+        .getById(widget.keepsakeId);
     if (!mounted) return;
     setState(() {
       _keepsake = k;
@@ -183,9 +184,11 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 icon: const Icon(Icons.event_outlined, size: 20),
                 label: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(_openAt == null
-                      ? 'Pick a date & time'
-                      : DateFormat.yMMMMd().add_jm().format(_openAt!)),
+                  child: Text(
+                    _openAt == null
+                        ? 'Pick a date & time'
+                        : DateFormat.yMMMMd().add_jm().format(_openAt!),
+                  ),
                 ),
               ),
             ],
@@ -196,8 +199,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               title: Text('Require a PIN', style: AppTypography.bodyLarge),
-              subtitle: Text('They enter it to open.',
-                  style: AppTypography.caption),
+              subtitle: Text(
+                'They enter it to open.',
+                style: AppTypography.caption,
+              ),
               value: _usePin,
               onChanged: (v) => setState(() => _usePin = v),
             ),
@@ -216,8 +221,10 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               title: Text('Set an expiry', style: AppTypography.bodyLarge),
-              subtitle: Text('The link stops working after this.',
-                  style: AppTypography.caption),
+              subtitle: Text(
+                'The link stops working after this.',
+                style: AppTypography.caption,
+              ),
               value: _useExpiry,
               onChanged: (v) => setState(() {
                 _useExpiry = v;
@@ -233,9 +240,11 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 icon: const Icon(Icons.timer_off_outlined, size: 20),
                 label: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(_expiresAt == null
-                      ? 'Pick an expiry'
-                      : DateFormat.yMMMMd().add_jm().format(_expiresAt!)),
+                  child: Text(
+                    _expiresAt == null
+                        ? 'Pick an expiry'
+                        : DateFormat.yMMMMd().add_jm().format(_expiresAt!),
+                  ),
                 ),
               ),
 

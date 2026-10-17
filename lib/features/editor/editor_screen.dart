@@ -26,6 +26,7 @@ import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/paper.dart';
 import '../publishing/replies_section.dart';
+import '../publishing/new_replies.dart';
 
 /// The assembly surface: the creator builds a Keepsake here.
 ///
@@ -40,7 +41,11 @@ class EditorScreen extends ConsumerStatefulWidget {
   ConsumerState<EditorScreen> createState() => _EditorScreenState();
 }
 
-class _EditorScreenState extends ConsumerState<EditorScreen> {
+class _EditorScreenState extends ConsumerState<EditorScreen>
+    with MarksRepliesSeen {
+  @override
+  String get seenKeepsakeId => widget.keepsakeId;
+
   Keepsake? _draft;
   bool _loading = true;
 

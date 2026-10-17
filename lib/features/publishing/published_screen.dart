@@ -20,6 +20,7 @@ import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/motion.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import 'replies_section.dart';
+import 'new_replies.dart';
 
 /// Confirmation after publishing: the link and QR to give to the recipient.
 class PublishedScreen extends ConsumerStatefulWidget {
@@ -38,7 +39,11 @@ class PublishedScreen extends ConsumerStatefulWidget {
   ConsumerState<PublishedScreen> createState() => _PublishedScreenState();
 }
 
-class _PublishedScreenState extends ConsumerState<PublishedScreen> {
+class _PublishedScreenState extends ConsumerState<PublishedScreen>
+    with MarksRepliesSeen {
+  @override
+  String get seenKeepsakeId => widget.keepsakeId;
+
   Keepsake? _keepsake;
   bool _loading = true;
   bool _stopping = false;

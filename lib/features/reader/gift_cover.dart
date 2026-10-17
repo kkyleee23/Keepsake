@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -78,6 +79,8 @@ class _GiftCoverState extends State<GiftCover>
       return;
     }
     setState(() => _opening = true);
+    // A small click as the seal breaks.
+    HapticFeedback.mediumImpact();
     await _c.forward();
     if (mounted) widget.onOpen();
   }
@@ -139,13 +142,13 @@ class _GiftCoverState extends State<GiftCover>
                       Positioned(
                         bottom: AppSpacing.md,
                         child: EnvelopeArt(
-                            width: w,
-                            open: _open.value,
-                            rise: _rise.value,
-                            paper: LetterPaper.fromId(widget.style.envelope),
-                            sealColor: widget.style.seal.color,
-                            stickers: widget.style.stickers,
-                          ),
+                          width: w,
+                          open: _open.value,
+                          rise: _rise.value,
+                          paper: LetterPaper.fromId(widget.style.envelope),
+                          sealColor: widget.style.seal.color,
+                          stickers: widget.style.stickers,
+                        ),
                       ),
                       // The mascot sits on the envelope's corner, then hops
                       // away as it opens.

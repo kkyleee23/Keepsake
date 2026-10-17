@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -15,12 +16,7 @@ import '../../shared/widgets/motion.dart';
 /// Shown under an opened keepsake: one quiet way to send something back.
 /// Only the person who made it can read the reply.
 class ReplyCard extends ConsumerStatefulWidget {
-  const ReplyCard({
-    super.key,
-    required this.token,
-    this.pin,
-    this.senderName,
-  });
+  const ReplyCard({super.key, required this.token, this.pin, this.senderName});
 
   final String token;
   final String? pin;
@@ -47,8 +43,7 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
     super.dispose();
   }
 
-  bool get _canSend =>
-      _reaction != null || _message.text.trim().isNotEmpty;
+  bool get _canSend => _reaction != null || _message.text.trim().isNotEmpty;
 
   String get _sender {
     final s = widget.senderName?.trim() ?? '';
@@ -60,7 +55,9 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
       _sending = true;
       _error = null;
     });
-    final status = await ref.read(keepsakeBackendProvider).respond(
+    final status = await ref
+        .read(keepsakeBackendProvider)
+        .respond(
           widget.token,
           pin: widget.pin,
           reaction: _reaction,
@@ -73,18 +70,22 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
       switch (status) {
         case 'ok':
           _sent = true;
+          HapticFeedback.lightImpact();
         case 'rate_limited':
           _error = 'Lots of replies came in just now. Try again a bit later.';
         case 'too_long':
-          _error = 'That note is a little long. Keep it under '
+          _error =
+              'That note is a little long. Keep it under '
               '$_maxMessage characters.';
         case 'locked':
-          _error = 'Too many PIN tries on this keepsake. Try again a bit '
+          _error =
+              'Too many PIN tries on this keepsake. Try again a bit '
               'later.';
         case 'empty':
           _error = 'Pick a reaction or write a few words first.';
         default:
-          _error = "Couldn't send your reply. Check your connection and "
+          _error =
+              "Couldn't send your reply. Check your connection and "
               'try again.';
       }
     });
@@ -110,8 +111,10 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
           transitionBuilder: (child, anim) => FadeTransition(
             opacity: anim,
             child: ScaleTransition(
-              scale: Tween<double>(begin: 0.92, end: 1)
-                  .animate(CurvedAnimation(parent: anim, curve: Motion.pop)),
+              scale: Tween<double>(
+                begin: 0.92,
+                end: 1,
+              ).animate(CurvedAnimation(parent: anim, curve: Motion.pop)),
               child: child,
             ),
           ),
@@ -128,11 +131,7 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
       children: [
         const Mascot(size: 96, pose: MascotPose.received),
         const SizedBox(height: AppSpacing.md),
-        Text(
-          'Sent',
-          style: AppTypography.heading,
-          textAlign: TextAlign.center,
-        ),
+        Text('Sent', style: AppTypography.heading, textAlign: TextAlign.center),
         const SizedBox(height: AppSpacing.xs),
         Text(
           widget.senderName?.trim().isNotEmpty ?? false
@@ -151,10 +150,7 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
       children: [
         Text('Send something back', style: AppTypography.heading),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          'Only $_sender will see this.',
-          style: AppTypography.body,
-        ),
+        Text('Only $_sender will see this.', style: AppTypography.body),
         const SizedBox(height: AppSpacing.md),
         Wrap(
           spacing: AppSpacing.xs,
@@ -164,9 +160,8 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
               ChoiceTag(
                 label: r.label,
                 selected: _reaction == r,
-                onTap: () => setState(
-                  () => _reaction = _reaction == r ? null : r,
-                ),
+                onTap: () =>
+                    setState(() => _reaction = _reaction == r ? null : r),
               ),
           ],
         ),

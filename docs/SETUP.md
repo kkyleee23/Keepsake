@@ -19,7 +19,10 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** Stickers on the envelope (in `0006`, so no extra file).
+- **Latest:** New replies show on your keepsake cards ("2 new replies"),
+  counted from when you last opened that keepsake. Light haptics when the
+  seal breaks, a reply is sent and tabs change. No setup.
+- **Before that:** Stickers on the envelope (in `0006`, so no extra file).
   Twelve stickers (a stamp, a pressed sprig, a stitched heart, a daisy, a
   moon, an airmail label and six mascot ones) can be stuck on the envelope,
   dragged, tilted and resized. The server keeps only known stickers, at most
