@@ -193,7 +193,7 @@ class _Letter extends StatelessWidget {
                     signoff!.endsWith(',') ? signoff! : '$signoff,',
                     style: AppTypography.eyebrow.copyWith(
                       fontSize: 24,
-                      color: AppColors.inkSoft,
+                      color: paper.softInk,
                     ),
                   ),
                 Row(
@@ -203,7 +203,7 @@ class _Letter extends StatelessWidget {
                       Text(
                         signoff != null ? name : 'From $name',
                         style: AppTypography.label.copyWith(
-                          color: AppColors.sage,
+                          color: paper.signature,
                         ),
                       ),
                     const SizedBox(width: AppSpacing.xs),

@@ -55,6 +55,8 @@ class BookCoverArt extends StatelessWidget {
             height: h,
             decoration: BoxDecoration(
               color: AppColors.accent,
+              // Woven book cloth, dyed evergreen.
+              image: _cloth(AppColors.accent),
               borderRadius: const BorderRadius.horizontal(
                 left: Radius.circular(4),
                 right: Radius.circular(10),
@@ -65,9 +67,10 @@ class BookCoverArt extends StatelessWidget {
               children: [
                 Container(
                   width: spine,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: AppColors.accentPressed,
-                    borderRadius: BorderRadius.horizontal(
+                    image: _cloth(AppColors.accentPressed),
+                    borderRadius: const BorderRadius.horizontal(
                       left: Radius.circular(3),
                     ),
                   ),
@@ -118,7 +121,23 @@ class BookCoverArt extends StatelessWidget {
   }
 }
 
+DecorationImage _cloth(Color dye) => DecorationImage(
+  image: const AssetImage(PaperTextures.cloth),
+  repeat: ImageRepeat.repeat,
+  scale: 1 / PaperTextures.tileScale,
+  colorFilter: ColorFilter.mode(dye, BlendMode.multiply),
+);
+
+/// Book paper, for the pages.
+const DecorationImage _bookPaper = DecorationImage(
+  image: AssetImage(PaperTextures.cream),
+  repeat: ImageRepeat.repeat,
+  scale: 1 / PaperTextures.tileScale,
+);
+
 class _PageBlockPainter extends CustomPainter {
+  _PageBlockPainter() : super(repaint: PaperTextures.instance);
+
   @override
   void paint(Canvas canvas, Size size) {
     final r = RRect.fromRectAndCorners(
@@ -126,7 +145,11 @@ class _PageBlockPainter extends CustomPainter {
       topRight: const Radius.circular(8),
       bottomRight: const Radius.circular(8),
     );
-    canvas.drawRRect(r, Paint()..color = AppColors.giftPaper);
+    canvas.drawRRect(
+      r,
+      PaperTextures.instance.paint(PaperTextures.cream) ??
+          (Paint()..color = AppColors.giftPaper),
+    );
     final edge = Paint()
       ..color = AppColors.giftEdge
       ..style = PaintingStyle.stroke
@@ -277,6 +300,7 @@ class _MiniTitlePage extends StatelessWidget {
       height: width * 1.32,
       decoration: BoxDecoration(
         color: AppColors.giftPaper,
+        image: _bookPaper,
         borderRadius: const BorderRadius.horizontal(right: Radius.circular(10)),
         border: Border.all(color: AppColors.giftEdge),
       ),
@@ -523,6 +547,7 @@ class _Paper extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.giftPaper,
+        image: _bookPaper,
         borderRadius: const BorderRadius.horizontal(
           left: Radius.circular(3),
           right: Radius.circular(14),

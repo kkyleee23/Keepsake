@@ -1,6 +1,8 @@
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
@@ -162,11 +164,14 @@ class EnvelopeArt extends StatelessWidget {
 }
 
 class _EnvelopePainter extends CustomPainter {
-  _EnvelopePainter({
-    required this.open,
-    required this.rise,
-    required this.seal,
-  });
+  _EnvelopePainter({required this.open, required this.rise, required this.seal})
+    : super(repaint: PaperTextures.instance);
+
+  /// Envelope paper: the cream texture tinted to [c], or flat [c] until the
+  /// texture is ready.
+  static Paint _paper(Color c) =>
+      PaperTextures.instance.paint(PaperTextures.cream, tint: c) ??
+      (Paint()..color = c);
 
   final double open;
   final double rise;
@@ -189,7 +194,7 @@ class _EnvelopePainter extends CustomPainter {
 
     // Back panel.
     final back = RRect.fromRectAndRadius(body, radius);
-    canvas.drawRRect(back, Paint()..color = AppColors.envelopeShade);
+    canvas.drawRRect(back, _paper(AppColors.envelopeShade));
     canvas.drawRRect(back, edge);
 
     final flapDepth = h * 0.56;
@@ -213,10 +218,7 @@ class _EnvelopePainter extends CustomPainter {
         ..close();
       canvas.drawPath(
         flap,
-        Paint()
-          ..color = flapScale >= 0
-              ? AppColors.envelope
-              : AppColors.envelopeShade,
+        _paper(flapScale >= 0 ? AppColors.envelope : AppColors.envelopeShade),
       );
       canvas.drawPath(flap, edge);
     }
@@ -233,7 +235,7 @@ class _EnvelopePainter extends CustomPainter {
       );
       canvas.save();
       canvas.clipRect(Rect.fromLTWH(0, 0, w, top + h * 0.98));
-      canvas.drawRRect(letter, Paint()..color = AppColors.giftPaper);
+      canvas.drawRRect(letter, _paper(AppColors.giftPaper));
       canvas.drawRRect(letter, edge);
       // A few quiet "written" lines and a tiny heart on the letter.
       final line = Paint()
@@ -264,7 +266,7 @@ class _EnvelopePainter extends CustomPainter {
       ..lineTo(radius.x, top + h)
       ..quadraticBezierTo(0, top + h, 0, top + h - radius.y)
       ..close();
-    canvas.drawPath(pocket, Paint()..color = AppColors.envelope);
+    canvas.drawPath(pocket, _paper(AppColors.envelope));
     // Fold lines from the bottom corners.
     final fold = Path()
       ..moveTo(w * 0.02, top + h * 0.98)
@@ -314,24 +316,145 @@ class _EnvelopePainter extends CustomPainter {
 
 /// Letter paper: a warm sheet with a folded top-right corner.
 /// The stationery a letter can be written on.
-enum LetterPaper {
-  cream('cream', 'Cream', AppColors.giftPaper, AppColors.giftEdge, false),
-  dotted('dotted', 'Dotted', AppColors.giftPaper, AppColors.giftEdge, true),
-  sage('sage', 'Sage', Color(0xFFEDF1E5), Color(0xFFD3DCC6), false),
-  kraft('kraft', 'Kraft', Color(0xFFEADDC6), Color(0xFFD5C2A2), false);
+/// The real-looking paper textures (made by tool/make_paper_textures.py),
+/// loaded once into memory so painters can tile them. Until they load,
+/// surfaces fall back to their flat colour, then repaint.
+class PaperTextures extends ChangeNotifier {
+  PaperTextures._();
 
-  const LetterPaper(this.id, this.label, this.color, this.edge, this.dots);
+  static final PaperTextures instance = PaperTextures._();
+
+  static const cream = 'assets/textures/paper_cream.jpg';
+  static const kraft = 'assets/textures/paper_kraft.jpg';
+  static const seed = 'assets/textures/paper_sage.jpg';
+  static const linen = 'assets/textures/paper_linen.jpg';
+  static const cloth = 'assets/textures/cloth.jpg';
+
+  /// Each 768 px tile covers 256 logical px: about one texture pixel per
+  /// screen pixel on a 3x phone.
+  static const double tileScale = 1 / 3;
+
+  final Map<String, ui.Image> _images = {};
+  Future<void>? _loading;
+
+  ui.Image? operator [](String asset) => _images[asset];
+
+  Future<void> load() => _loading ??= _load();
+
+  Future<void> _load() async {
+    for (final asset in [cream, kraft, seed, linen, cloth]) {
+      try {
+        final data = await rootBundle.load(asset);
+        final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+        _images[asset] = (await codec.getNextFrame()).image;
+      } catch (_) {
+        // A missing texture just means the flat colour is used.
+      }
+    }
+    notifyListeners();
+  }
+
+  /// A paint that tiles [asset], optionally tinted by multiplying [tint].
+  Paint? paint(String? asset, {Color? tint}) {
+    final img = asset == null ? null : _images[asset];
+    if (img == null) return null;
+    final p = Paint()
+      ..shader = ImageShader(
+        img,
+        TileMode.repeated,
+        TileMode.repeated,
+        Matrix4.diagonal3Values(tileScale, tileScale, 1).storage,
+        filterQuality: FilterQuality.medium,
+      );
+    if (tint != null) {
+      p.colorFilter = ColorFilter.mode(tint, BlendMode.multiply);
+    }
+    return p;
+  }
+}
+
+enum LetterPaper {
+  cream(
+    'cream',
+    'Cream',
+    PaperTextures.cream,
+    AppColors.giftPaper,
+    AppColors.giftEdge,
+    false,
+  ),
+  dotted(
+    'dotted',
+    'Dotted',
+    PaperTextures.cream,
+    AppColors.giftPaper,
+    AppColors.giftEdge,
+    true,
+  ),
+  linen(
+    'linen',
+    'Linen',
+    PaperTextures.linen,
+    Color(0xFFF5EFE3),
+    Color(0xFFE0D6C4),
+    false,
+  ),
+  sage(
+    'sage',
+    'Seed',
+    PaperTextures.seed,
+    Color(0xFFE1E6D3),
+    Color(0xFFC9D2B8),
+    false,
+    signature: AppColors.accent,
+  ),
+  // Darker inks so everything stays readable on brown paper.
+  kraft(
+    'kraft',
+    'Kraft',
+    PaperTextures.kraft,
+    Color(0xFFC49B6C),
+    Color(0xFFA9824F),
+    false,
+    softInk: Color(0xFF4A3420),
+    faintInk: Color(0xFF6E5236),
+    signature: Color(0xFF1E4634),
+  );
+
+  const LetterPaper(
+    this.id,
+    this.label,
+    this.texture,
+    this.color,
+    this.edge,
+    this.dots, {
+    this.softInk = AppColors.inkSoft,
+    this.faintInk = AppColors.inkFaint,
+    this.signature = AppColors.sage,
+  });
+
+  /// Secondary text (sign-offs, counts) that reads well on this paper.
+  final Color softInk;
+
+  /// Hints and placeholders on this paper.
+  final Color faintInk;
+
+  /// The handwritten sign-off and the writer's name.
+  final Color signature;
 
   final String id;
   final String label;
+  final String texture;
+
+  /// The paper's average colour: used until the texture loads, and where a
+  /// flat fill is needed.
   final Color color;
   final Color edge;
   final bool dots;
 
   static LetterPaper fromId(String? id) => LetterPaper.values.firstWhere(
-        (p) => p.id == id,
-        orElse: () => LetterPaper.cream,
-      );
+    (p) => p.id == id,
+    orElse: () => LetterPaper.cream,
+  );
 }
 
 /// A soft dot grid, like a bullet-journal page.
@@ -365,6 +488,7 @@ class PaperSheet extends StatelessWidget {
     this.color = AppColors.giftPaper,
     this.edge = AppColors.giftEdge,
     this.dots = false,
+    this.texture = PaperTextures.cream,
   });
 
   /// A sheet in one of the letter papers.
@@ -374,16 +498,16 @@ class PaperSheet extends StatelessWidget {
     required Widget child,
     EdgeInsets padding = const EdgeInsets.all(AppSpacing.lg),
     double fold = 22,
-  }) =>
-      PaperSheet(
-        key: key,
-        padding: padding,
-        fold: fold,
-        color: paper.color,
-        edge: paper.edge,
-        dots: paper.dots,
-        child: child,
-      );
+  }) => PaperSheet(
+    key: key,
+    padding: padding,
+    fold: fold,
+    color: paper.color,
+    edge: paper.edge,
+    dots: paper.dots,
+    texture: paper.texture,
+    child: child,
+  );
 
   final Widget child;
   final EdgeInsets padding;
@@ -392,10 +516,19 @@ class PaperSheet extends StatelessWidget {
   final Color edge;
   final bool dots;
 
+  /// Texture asset (see [PaperTextures]); null for a flat colour.
+  final String? texture;
+
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _PaperPainter(fold: fold, color: color, edge: edge, dots: dots),
+      painter: _PaperPainter(
+        fold: fold,
+        color: color,
+        edge: edge,
+        dots: dots,
+        texture: texture,
+      ),
       child: Padding(padding: padding, child: child),
     );
   }
@@ -407,12 +540,15 @@ class _PaperPainter extends CustomPainter {
     required this.color,
     required Color edge,
     required this.dots,
-  }) : edgeColor = edge;
+    this.texture,
+  }) : edgeColor = edge,
+       super(repaint: PaperTextures.instance);
 
   final double fold;
   final Color color;
   final Color edgeColor;
   final bool dots;
+  final String? texture;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -441,12 +577,16 @@ class _PaperPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(sheet, Paint()..color = color);
+    canvas.drawPath(
+      sheet,
+      PaperTextures.instance.paint(texture) ?? (Paint()..color = color),
+    );
     if (dots) {
       canvas.save();
       canvas.clipPath(sheet);
-      DotGridPainter(color: edgeColor.withValues(alpha: 0.9))
-          .paint(canvas, size);
+      DotGridPainter(
+        color: edgeColor.withValues(alpha: 0.9),
+      ).paint(canvas, size);
       canvas.restore();
     }
     canvas.drawPath(sheet, edge);
@@ -470,7 +610,8 @@ class _PaperPainter extends CustomPainter {
       old.fold != fold ||
       old.color != color ||
       old.edgeColor != edgeColor ||
-      old.dots != dots;
+      old.dots != dots ||
+      old.texture != texture;
 }
 
 /// A strip of washi tape, as if holding a photo or note in place.

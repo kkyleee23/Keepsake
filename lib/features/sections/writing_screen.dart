@@ -198,164 +198,182 @@ class _WritingScreenState extends State<WritingScreen> {
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _maybeLeave();
       },
-      child: Scaffold(
-        backgroundColor: _paper.color,
-        appBar: AppBar(
-          backgroundColor: _paper.color,
-          leading: IconButton(
-            icon: const Icon(Icons.close),
-            tooltip: 'Close',
-            onPressed: _maybeLeave,
+      // The whole writing space is the chosen paper.
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _paper.color,
+          image: DecorationImage(
+            image: AssetImage(_paper.texture),
+            repeat: ImageRepeat.repeat,
+            scale: 1 / PaperTextures.tileScale,
           ),
-          title: Text(widget.heading ?? ''),
-          actions: [
-            if (widget.kind == WritingKind.letter)
-              IconButton(
-                onPressed: _choosePaper,
-                tooltip: 'Choose paper',
-                icon: const Icon(Icons.style_outlined),
-              ),
-            TextButton(onPressed: _done, child: const Text('Done')),
-            const SizedBox(width: AppSpacing.xs),
-          ],
         ),
-        body: SafeArea(
-          child: Column(
-            children: [
-              Expanded(
-                child: CustomPaint(
-                  painter: _paper.dots
-                      ? DotGridPainter(color: _paper.edge)
-                      : null,
-                  child: GestureDetector(
-                    // Tapping empty paper below the text puts the cursor in it.
-                    behavior: HitTestBehavior.translucent,
-                    onTap: () => _bodyFocus.requestFocus(),
-                    child: ListView(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.gutter,
-                        AppSpacing.md,
-                        AppSpacing.gutter,
-                        AppSpacing.xxxl,
-                      ),
-                      children: [
-                        TextField(
-                          controller: _title,
-                          style: AppTypography.title,
-                          maxLength: 120,
-                          textCapitalization: TextCapitalization.sentences,
-                          decoration: bare.copyWith(
-                            hintText: _titleHint,
-                            hintStyle: AppTypography.title.copyWith(
-                              color: AppColors.inkFaint,
-                            ),
-                          ),
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              tooltip: 'Close',
+              onPressed: _maybeLeave,
+            ),
+            title: Text(widget.heading ?? ''),
+            actions: [
+              if (widget.kind == WritingKind.letter)
+                IconButton(
+                  onPressed: _choosePaper,
+                  tooltip: 'Choose paper',
+                  icon: const Icon(Icons.style_outlined),
+                ),
+              TextButton(onPressed: _done, child: const Text('Done')),
+              const SizedBox(width: AppSpacing.xs),
+            ],
+          ),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: CustomPaint(
+                    painter: _paper.dots
+                        ? DotGridPainter(color: _paper.edge)
+                        : null,
+                    child: GestureDetector(
+                      // Tapping empty paper below the text puts the cursor in it.
+                      behavior: HitTestBehavior.translucent,
+                      onTap: () => _bodyFocus.requestFocus(),
+                      child: ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.gutter,
+                          AppSpacing.md,
+                          AppSpacing.gutter,
+                          AppSpacing.xxxl,
                         ),
-                        if (widget.kind == WritingKind.essay) ...[
-                          const SizedBox(height: AppSpacing.xs),
+                        children: [
                           TextField(
-                            controller: _subtitle,
-                            style: AppTypography.bodyLarge.copyWith(
-                              color: AppColors.inkSoft,
-                            ),
-                            maxLength: 160,
+                            controller: _title,
+                            style: AppTypography.title,
+                            maxLength: 120,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: bare.copyWith(
-                              hintText: 'A line under the title (optional)',
-                              hintStyle: AppTypography.bodyLarge.copyWith(
-                                color: AppColors.inkFaint,
+                              hintText: _titleHint,
+                              hintStyle: AppTypography.title.copyWith(
+                                color: _paper.faintInk,
                               ),
                             ),
                           ),
-                        ],
-                        const SizedBox(height: AppSpacing.md),
-                        Container(height: 1, color: AppColors.giftEdge),
-                        const SizedBox(height: AppSpacing.md),
-                        TextField(
-                          controller: _body,
-                          focusNode: _bodyFocus,
-                          autofocus: widget.body.isEmpty,
-                          maxLines: null,
-                          minLines: 12,
-                          maxLength: WritingScreen.maxBody,
-                          keyboardType: TextInputType.multiline,
-                          textCapitalization: TextCapitalization.sentences,
-                          style: AppTypography.bodyLarge.copyWith(height: 1.7),
-                          decoration: bare.copyWith(
-                            hintText: _bodyHint,
-                            hintMaxLines: 4,
-                            hintStyle: AppTypography.bodyLarge.copyWith(
+                          if (widget.kind == WritingKind.essay) ...[
+                            const SizedBox(height: AppSpacing.xs),
+                            TextField(
+                              controller: _subtitle,
+                              style: AppTypography.bodyLarge.copyWith(
+                                color: AppColors.inkSoft,
+                              ),
+                              maxLength: 160,
+                              textCapitalization: TextCapitalization.sentences,
+                              decoration: bare.copyWith(
+                                hintText: 'A line under the title (optional)',
+                                hintStyle: AppTypography.bodyLarge.copyWith(
+                                  color: _paper.faintInk,
+                                ),
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: AppSpacing.md),
+                          Container(height: 1, color: AppColors.giftEdge),
+                          const SizedBox(height: AppSpacing.md),
+                          TextField(
+                            controller: _body,
+                            focusNode: _bodyFocus,
+                            autofocus: widget.body.isEmpty,
+                            maxLines: null,
+                            minLines: 12,
+                            maxLength: WritingScreen.maxBody,
+                            keyboardType: TextInputType.multiline,
+                            textCapitalization: TextCapitalization.sentences,
+                            style: AppTypography.bodyLarge.copyWith(
                               height: 1.7,
-                              color: AppColors.inkFaint,
+                            ),
+                            decoration: bare.copyWith(
+                              hintText: _bodyHint,
+                              hintMaxLines: 4,
+                              hintStyle: AppTypography.bodyLarge.copyWith(
+                                height: 1.7,
+                                color: _paper.faintInk,
+                              ),
                             ),
                           ),
-                        ),
-                        if (widget.kind == WritingKind.letter) ...[
-                          const SizedBox(height: AppSpacing.lg),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: SizedBox(
-                              width: 220,
-                              child: TextField(
-                                controller: _signoff,
-                                maxLength: 60,
-                                textAlign: TextAlign.right,
-                                style: AppTypography.eyebrow.copyWith(
-                                  fontSize: 24,
-                                ),
-                                decoration: bare.copyWith(
-                                  hintText: 'Sign-off, like "With love"',
-                                  hintStyle: AppTypography.body.copyWith(
-                                    color: AppColors.inkFaint,
+                          if (widget.kind == WritingKind.letter) ...[
+                            const SizedBox(height: AppSpacing.lg),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: SizedBox(
+                                width: 220,
+                                child: TextField(
+                                  controller: _signoff,
+                                  maxLength: 60,
+                                  textAlign: TextAlign.right,
+                                  style: AppTypography.eyebrow.copyWith(
+                                    fontSize: 24,
+                                    color: _paper.signature,
+                                  ),
+                                  decoration: bare.copyWith(
+                                    hintText: 'Sign-off, like "With love"',
+                                    hintStyle: AppTypography.body.copyWith(
+                                      color: _paper.faintInk,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.gutter,
-                  AppSpacing.xxs,
-                  AppSpacing.xs,
-                  AppSpacing.xxs,
-                ),
-                decoration: BoxDecoration(
-                  border: Border(top: BorderSide(color: _paper.edge)),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      words == 0
-                          ? 'No words yet'
-                          : '$words ${words == 1 ? 'word' : 'words'}'
-                                '  ·  ${Reading.minutesLabel(_body.text)}',
-                      style: AppTypography.caption,
-                    ),
-                    const Spacer(),
-                    if (left < 2000)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.gutter,
+                    AppSpacing.xxs,
+                    AppSpacing.xs,
+                    AppSpacing.xxs,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: _paper.edge)),
+                  ),
+                  child: Row(
+                    children: [
                       Text(
-                        '$left left',
+                        words == 0
+                            ? 'No words yet'
+                            : '$words ${words == 1 ? 'word' : 'words'}'
+                                  '  ·  ${Reading.minutesLabel(_body.text)}',
                         style: AppTypography.caption.copyWith(
-                          color: left < 200 ? AppColors.error : null,
+                          color: _paper.softInk,
                         ),
-                      )
-                    else
-                      TextButton.icon(
-                        onPressed: _showIdeas,
-                        icon: const Icon(Icons.lightbulb_outline, size: 18),
-                        label: const Text('Need a Start?'),
                       ),
-                  ],
+                      const Spacer(),
+                      if (left < 2000)
+                        Text(
+                          '$left left',
+                          style: AppTypography.caption.copyWith(
+                            color: left < 200
+                                ? AppColors.error
+                                : _paper.softInk,
+                          ),
+                        )
+                      else
+                        TextButton.icon(
+                          onPressed: _showIdeas,
+                          icon: const Icon(Icons.lightbulb_outline, size: 18),
+                          label: const Text('Need a Start?'),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

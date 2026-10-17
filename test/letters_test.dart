@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keepsake/core/text/prompts.dart';
 import 'package:keepsake/data/models/enums.dart';
@@ -18,6 +20,13 @@ void main() {
         expect(p.contains('—'), isFalse, reason: p);
       }
     }
+  });
+
+  test('every paper has a real texture file', () {
+    for (final p in LetterPaper.values) {
+      expect(File(p.texture).existsSync(), isTrue, reason: p.texture);
+    }
+    expect(File(PaperTextures.cloth).existsSync(), isTrue);
   });
 
   test('unknown paper falls back to cream', () {

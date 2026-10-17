@@ -92,11 +92,26 @@ class _LetterBodyState extends State<LetterBody> {
                   child: Stack(
                     children: [
                       Positioned.fill(
-                        child: ClipRect(
-                          child: OverflowBox(
-                            alignment: Alignment.topCenter,
-                            maxHeight: double.infinity,
-                            child: Paragraphs(text: widget.text),
+                        // The last lines fade into the paper (an alpha mask,
+                        // so any paper texture shows through).
+                        child: ShaderMask(
+                          blendMode: BlendMode.dstIn,
+                          shaderCallback: (r) => const LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0, 0.72, 0.97],
+                            colors: [
+                              Color(0xFF000000),
+                              Color(0xFF000000),
+                              Color(0x00000000),
+                            ],
+                          ).createShader(r),
+                          child: ClipRect(
+                            child: OverflowBox(
+                              alignment: Alignment.topCenter,
+                              maxHeight: double.infinity,
+                              child: Paragraphs(text: widget.text),
+                            ),
                           ),
                         ),
                       ),
@@ -132,21 +147,16 @@ class _LetterBodyState extends State<LetterBody> {
   }
 }
 
-/// The bottom of a folded letter: solid paper with a dashed fold line.
+/// The fold in a long letter: a dashed line across the paper.
 class _FoldEdge extends StatelessWidget {
   const _FoldEdge();
 
   @override
   Widget build(BuildContext context) {
-    final fill =
-        context.findAncestorWidgetOfExactType<LetterBody>()?.fill ??
-        AppColors.giftPaper;
-    return Container(
-      height: 28,
-      color: fill,
-      alignment: Alignment.bottomCenter,
+    return const SizedBox(
+      height: 2,
       child: CustomPaint(
-        size: const Size(double.infinity, 1),
+        size: Size(double.infinity, 1),
         painter: _DashPainter(),
       ),
     );
@@ -154,6 +164,8 @@ class _FoldEdge extends StatelessWidget {
 }
 
 class _DashPainter extends CustomPainter {
+  const _DashPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
     final p = Paint()
