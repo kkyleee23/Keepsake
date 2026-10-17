@@ -19,7 +19,20 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** Website round two (no setup). A box where someone can paste a
+- **Latest:** More ways to make it yours (no new setup file, but **run
+  `0006` again** if you ran it before; it's safe twice):
+  - Occasion tags printed for their occasion (confetti and a candle, gold
+    rings, an airmail border, a graduation tassel...) and shelved in three
+    groups on the Create screen.
+  - Your initials pressed into the wax seal. The server keeps only one or
+    two capital letters.
+  - Sign a letter by hand with your finger, and pick the ink (classic,
+    blue-black, sepia, evergreen). Signatures are size-limited and checked
+    when read.
+  - Website: the new tags, initials and signature shown, sample name now
+    Jamie, and every picture regenerated from the app
+    (`test/site/site_shots_test.dart` then `tool/build_site_media.py`).
+- **Before that:** Website round two (no setup). A box where someone can paste a
   link or code they were sent (it only ever opens links on your site), a
   questions section, a plain-English privacy page (`privacy.html`, read it
   and add a contact address before launch), and a 404 page. Security: every

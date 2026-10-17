@@ -7,6 +7,7 @@
 // Raw frames go to build/site_raw/ (not committed).
 
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
@@ -53,6 +54,7 @@ const _letter =
 const _style = KeepsakeStyle(
   envelope: 'kraft',
   seal: SealColor.terracotta,
+  mono: 'S',
   stickers: [
     PlacedSticker(kind: StickerKind.stamp, x: 0.85, y: 0.2, turn: 6),
     PlacedSticker(kind: StickerKind.sprig, x: 0.14, y: 0.76, turn: -12),
@@ -66,6 +68,19 @@ const _style = KeepsakeStyle(
   ],
 );
 
+/// A quick cursive scribble, like signing a card.
+final _signature = [
+  [
+    for (var i = 0; i <= 60; i++) ...[
+      0.1 + i * 0.012,
+      0.5 -
+          0.28 * math.sin(i / 60 * math.pi * 4.5) * (1 - i / 90) -
+          (i < 12 ? (12 - i) * 0.015 : 0),
+    ],
+  ],
+  [0.12, 0.84, 0.45, 0.8, 0.86, 0.82],
+];
+
 KeepsakeSection _sec(int i, SectionType t, Map<String, dynamic> c) =>
     KeepsakeSection(
       id: 's$i',
@@ -78,9 +93,9 @@ KeepsakeSection _sec(int i, SectionType t, Map<String, dynamic> c) =>
 
 final _gift = Keepsake(
   id: 'mia',
-  title: "For Mia's 30th",
+  title: "For Jamie's 30th",
   occasion: Occasion.birthday,
-  recipientName: 'Mia',
+  recipientName: 'Jamie',
   senderName: 'Sam',
   status: KeepsakeStatus.published,
   shareToken: 'sampleTOKEN000000000a',
@@ -90,11 +105,12 @@ final _gift = Keepsake(
   style: _style,
   sections: [
     _sec(0, SectionType.letter, {
-      'title': 'Dear Mia',
+      'title': 'Dear Jamie',
       'body': _letter,
       'signoff': 'Love, always',
       'paper': 'kraft',
       'font': 'hand',
+      'signature': _signature,
     }),
     _sec(2, SectionType.openWhen, {
       'title': 'Open when',
@@ -121,7 +137,7 @@ class _Backend extends KeepsakeBackend {
   Future<CoverResult> fetchCover(String token) async => CoverResult(
     status: 'available',
     occasion: 'birthday',
-    recipientName: 'Mia',
+    recipientName: 'Jamie',
     senderName: 'Sam',
     coverNote: _gift.coverNote,
     style: _style,
@@ -225,14 +241,15 @@ void main() {
   testWidgets('writer', skip: !_site, (t) async {
     await _setUp(
       t,
-      const WritingScreen(
+      WritingScreen(
         kind: WritingKind.letter,
         heading: 'Letter',
-        title: 'Dear Mia',
+        title: 'Dear Jamie',
         body: _letter,
         signoff: 'Love, always',
         paper: 'kraft',
         font: 'hand',
+        signature: _signature,
       ),
     );
     await _save(t, 'writer');
@@ -269,7 +286,7 @@ void main() {
       const BookReaderScreen(
         title: 'The Year in Small Things',
         author: 'Sam',
-        dedication: 'For Mia, who reads the last page first.',
+        dedication: 'For Jamie, who reads the last page first.',
         pages: [
           BookPage(
             title: 'January',

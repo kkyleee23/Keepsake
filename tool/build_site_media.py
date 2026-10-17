@@ -29,6 +29,15 @@ for path in sorted(glob.glob(f'{RAW}/*.png')):
     im.save(f'{SITE}/img/{name}.webp', 'WEBP', quality=82, method=6)
     print('img', name, im.size)
 
+# The mascot, straight from the app's own pictures.
+for pose, name in [('waving', 'pup-wave'), ('hugging', 'pup-hug'), ('sleepy', 'pup-sleep')]:
+    im = Image.open(f'assets/brand/states/{pose}.png').convert('RGBA')
+    im = im.crop(im.getchannel('A').point(lambda v: 255 if v > 8 else 0).getbbox())
+    w = 360
+    im = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
+    im.save(f'{SITE}/img/{name}.webp', 'WEBP', quality=86, method=6)
+    print('img', name, im.size)
+
 # The opening clip: H.264 so it plays on every phone, small, starts fast.
 frames = sorted(glob.glob(f'{RAW}/clip/f*.png'))
 if frames:
