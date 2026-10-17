@@ -327,6 +327,8 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
           signoff: text('signoff'),
           paper: text('paper'),
           font: text('font'),
+          ink: text('ink'),
+          signature: c['signature'],
           occasion: _draft!.occasion,
         );
       case SectionType.essay:

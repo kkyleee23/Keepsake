@@ -6,6 +6,8 @@
 // notch and home bar, the same iPhone with very large text, a tablet, and a
 // phone in landscape.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +36,7 @@ import 'package:keepsake/features/receive/receive_screen.dart';
 import 'package:keepsake/features/sections/book_editor_screen.dart';
 import 'package:keepsake/features/sections/photo_editor_screen.dart';
 import 'package:keepsake/features/sections/writing_screen.dart';
+import 'package:keepsake/shared/widgets/eager_pan.dart';
 import 'package:keepsake/shared/widgets/gift_art.dart';
 import 'package:keepsake/shared/widgets/nav_icons.dart';
 import 'package:keepsake/shared/widgets/paper.dart';
@@ -91,6 +94,17 @@ Keepsake _ks(String id, KeepsakeStatus st,
       sections: sections,
     );
 
+/// A loopy hand-drawn "K"-ish squiggle and an underline.
+final _sampleSignature = [
+  [
+    for (var i = 0; i <= 40; i++) ...[
+      0.08 + i * 0.016,
+      0.55 - 0.3 * math.sin(i / 40 * math.pi * 3) * (1 - i / 60),
+    ],
+  ],
+  [0.1, 0.82, 0.5, 0.78, 0.9, 0.8],
+];
+
 final _sections = [
   _sec(0, SectionType.letter, {
     'title': 'Dear Maximiliana',
@@ -98,6 +112,8 @@ final _sections = [
     'signoff': 'With all my love',
     'paper': 'kraft',
     'font': 'hand',
+    'ink': 'blue',
+    'signature': _sampleSignature,
   }),
   _sec(1, SectionType.reasons, {
     'title': 'Reasons',
@@ -228,6 +244,18 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
         font: 'hand'),
     const []
   ),
+  'writer-signing': (
+    () => const WritingScreen(
+        kind: WritingKind.letter,
+        heading: 'Letter',
+        title: 'Dear you',
+        body: _letter,
+        signoff: 'Love',
+        paper: 'cream',
+        font: 'hand',
+        ink: 'sepia'),
+    const []
+  ),
   'essay': (
     () => const EssayReaderScreen(
         title: 'On staying', body: '$_letter\n\n$_letter', author: 'Kyle'),
@@ -257,6 +285,27 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
 /// Screens that need a tap or two first. Each runs after the first frames and
 /// can check what the tap did.
 final Map<String, Future<void> Function(WidgetTester)> actions = {
+  'writer-signing': (t) async {
+    await t.scrollUntilVisible(find.text('Sign It by Hand'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await t.ensureVisible(find.text('Sign It by Hand'));
+    await _settle(t);
+    await t.tap(find.text('Sign It by Hand'));
+    await _settle(t);
+    // Draw a stroke across the pad.
+    final pad = find.byWidgetPredicate(
+        (w) => w is RawGestureDetector && w.gestures.containsKey(EagerPan));
+    final g = await t.startGesture(t.getTopLeft(pad) + const Offset(30, 40));
+    for (var i = 1; i <= 12; i++) {
+      await g.moveBy(Offset(14, i.isEven ? 8 : -8));
+      await t.pump(const Duration(milliseconds: 16));
+    }
+    await g.up();
+    await _settle(t);
+    await t.tap(find.text('Use Signature'));
+    await _settle(t);
+    expect(find.text('Remove Signature'), findsOneWidget);
+  },
   'editor-stickers': (t) async {
     await t.ensureVisible(find.text('Wrapping'));
     await t.tap(find.text('Wrapping'));

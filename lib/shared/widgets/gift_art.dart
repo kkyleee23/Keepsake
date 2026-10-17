@@ -874,3 +874,28 @@ class _TapePainter extends CustomPainter {
   @override
   bool shouldRepaint(_TapePainter old) => old.color != color;
 }
+
+/// The ink a letter is written in.
+enum LetterInk {
+  classic('classic', 'Classic', null),
+  blueBlack('blue', 'Blue-black', Color(0xFF1F3561)),
+  sepia('sepia', 'Sepia', Color(0xFF5B3A1E)),
+  evergreen('green', 'Evergreen', Color(0xFF22513A));
+
+  const LetterInk(this.id, this.label, this._color);
+
+  final String id;
+  final String label;
+  final Color? _color;
+
+  /// The writing colour on [paper]. Classic is the paper's own dark ink.
+  Color on(LetterPaper paper) => _color ?? AppColors.ink;
+
+  /// The signature colour on [paper].
+  Color signatureOn(LetterPaper paper) => _color ?? paper.signature;
+
+  static LetterInk fromId(String? id) => LetterInk.values.firstWhere(
+    (i) => i.id == id,
+    orElse: () => LetterInk.classic,
+  );
+}

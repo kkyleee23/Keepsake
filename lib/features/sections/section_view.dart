@@ -16,6 +16,8 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../reader/book_view.dart';
 import '../reader/long_form.dart';
+import '../../data/models/signature.dart';
+import '../../shared/widgets/signature.dart';
 
 /// Read-only rendering of a single section, styled as part of a gift: letters
 /// on paper, memories taped down, reasons on little leaves, Open When notes in
@@ -59,6 +61,8 @@ class SectionView extends StatelessWidget {
           from: senderName,
           paper: LetterPaper.fromId(_s('paper')),
           font: LetterFont.fromId(_s('font')),
+          ink: LetterInk.fromId(_s('ink')),
+          signature: Signature.fromJson(section.content['signature']),
           sealColor: sealColor,
           sealMono: sealMono,
         );
@@ -169,9 +173,15 @@ class _Letter extends StatelessWidget {
     this.sealColor = AppColors.accent,
     this.sealMono,
     this.font = LetterFont.clean,
+    this.ink = LetterInk.classic,
+    this.signature,
   });
 
   final LetterFont font;
+  final LetterInk ink;
+
+  /// Drawn by hand under the letter, when there is one.
+  final Signature? signature;
   final String? title;
   final String? body;
   final String? signoff;
@@ -200,12 +210,19 @@ class _Letter extends StatelessWidget {
           if (title != null) ...[
             Padding(
               padding: const EdgeInsets.only(right: AppSpacing.lg),
-              child: Text(title!, style: font.title),
+              child: Text(
+                title!,
+                style: font.title.copyWith(color: ink.on(paper)),
+              ),
             ),
             const SizedBox(height: AppSpacing.sm),
           ],
           if (body != null)
-            LetterBody(text: body!, fill: paper.color, style: font.body),
+            LetterBody(
+              text: body!,
+              fill: paper.color,
+              style: font.body.copyWith(color: ink.on(paper)),
+            ),
           const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerRight,
@@ -220,6 +237,12 @@ class _Letter extends StatelessWidget {
                       color: paper.softInk,
                     ),
                   ),
+                if (signature != null)
+                  SignatureView(
+                    signature: signature!,
+                    color: ink.signatureOn(paper),
+                    width: 160,
+                  ),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -227,7 +250,7 @@ class _Letter extends StatelessWidget {
                       Text(
                         signoff != null ? name : 'From $name',
                         style: AppTypography.label.copyWith(
-                          color: paper.signature,
+                          color: ink.signatureOn(paper),
                         ),
                       ),
                     const SizedBox(width: AppSpacing.xs),

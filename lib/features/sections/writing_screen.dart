@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/text/prompts.dart';
 import '../../core/text/reading.dart';
@@ -10,6 +11,8 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../data/models/signature.dart';
+import '../../shared/widgets/signature.dart';
 
 /// What a [WritingScreen] is being used for. Each kind shows the fields that
 /// make sense for it.
@@ -33,6 +36,8 @@ class WritingScreen extends StatefulWidget {
     this.occasion,
     this.paper,
     this.font,
+    this.ink,
+    this.signature,
   });
 
   final WritingKind kind;
@@ -53,6 +58,12 @@ class WritingScreen extends StatefulWidget {
   /// Handwriting id for letters (see [LetterFont]).
   final String? font;
 
+  /// Ink id for letters (see [LetterInk]).
+  final String? ink;
+
+  /// A hand-drawn signature for letters, as stored (see [Signature]).
+  final Object? signature;
+
   /// Long enough for a real essay (about 8,000 words), small enough to keep a
   /// keepsake light.
   static const int maxBody = 50000;
@@ -71,6 +82,9 @@ class _WritingScreenState extends State<WritingScreen> {
   late LetterFont _font = widget.kind == WritingKind.letter
       ? LetterFont.fromId(widget.font)
       : LetterFont.clean;
+  late LetterInk _ink = LetterInk.fromId(widget.ink);
+  late Signature? _signature = Signature.fromJson(widget.signature);
+  bool _signatureChanged = false;
 
   bool get _changed =>
       _paper != LetterPaper.fromId(widget.paper) ||
@@ -79,7 +93,9 @@ class _WritingScreenState extends State<WritingScreen> {
       _title.text != widget.title ||
       _subtitle.text != widget.subtitle ||
       _body.text != widget.body ||
-      _signoff.text != widget.signoff;
+      _signoff.text != widget.signoff ||
+      (widget.kind == WritingKind.letter &&
+          (_ink != LetterInk.fromId(widget.ink) || _signatureChanged));
 
   @override
   void initState() {
@@ -105,6 +121,9 @@ class _WritingScreenState extends State<WritingScreen> {
     if (widget.kind == WritingKind.letter) 'signoff': _signoff.text.trim(),
     if (widget.kind == WritingKind.letter) 'paper': _paper.id,
     if (widget.kind == WritingKind.letter) 'font': _font.id,
+    if (widget.kind == WritingKind.letter) 'ink': _ink.id,
+    if (widget.kind == WritingKind.letter && _signature != null)
+      'signature': _signature!.toJson(),
   };
 
   void _done() => Navigator.of(context).pop(_result());
@@ -168,18 +187,44 @@ class _WritingScreenState extends State<WritingScreen> {
   }
 
   Future<void> _choosePaper() async {
-    final picked = await showModalBottomSheet<(LetterPaper, LetterFont)>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => _StationerySheet(paper: _paper, font: _font),
-    );
+    final picked =
+        await showModalBottomSheet<(LetterPaper, LetterFont, LetterInk)>(
+          context: context,
+          isScrollControlled: true,
+          builder: (ctx) =>
+              _StationerySheet(paper: _paper, font: _font, ink: _ink),
+        );
     if (picked != null && mounted) {
       setState(() {
         _paper = picked.$1;
         _font = picked.$2;
+        _ink = picked.$3;
       });
     }
   }
+
+  Future<void> _sign() async {
+    final picked = await showSignaturePad(
+      context,
+      paper: _paper,
+      ink: _ink.signatureOn(_paper),
+    );
+    if (picked != null && mounted) {
+      HapticFeedback.lightImpact();
+      setState(() {
+        _signature = picked;
+        _signatureChanged = true;
+      });
+    }
+  }
+
+  /// The letter's text styles in the chosen ink.
+  TextStyle get _titleStyle => widget.kind == WritingKind.letter
+      ? _font.title.copyWith(color: _ink.on(_paper))
+      : _font.title;
+  TextStyle get _bodyStyle => widget.kind == WritingKind.letter
+      ? _font.body.copyWith(color: _ink.on(_paper))
+      : _font.body;
 
   String get _bodyHint => switch (widget.kind) {
     WritingKind.letter =>
@@ -268,7 +313,7 @@ class _WritingScreenState extends State<WritingScreen> {
                         children: [
                           TextField(
                             controller: _title,
-                            style: _font.title,
+                            style: _titleStyle,
                             maxLength: 120,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: bare.copyWith(
@@ -307,7 +352,7 @@ class _WritingScreenState extends State<WritingScreen> {
                             maxLength: WritingScreen.maxBody,
                             keyboardType: TextInputType.multiline,
                             textCapitalization: TextCapitalization.sentences,
-                            style: _font.body,
+                            style: _bodyStyle,
                             decoration: bare.copyWith(
                               hintText: _bodyHint,
                               hintMaxLines: 4,
@@ -328,7 +373,7 @@ class _WritingScreenState extends State<WritingScreen> {
                                   textAlign: TextAlign.right,
                                   style: AppTypography.eyebrow.copyWith(
                                     fontSize: 24,
-                                    color: _paper.signature,
+                                    color: _ink.signatureOn(_paper),
                                   ),
                                   decoration: bare.copyWith(
                                     hintText: 'Sign-off, like "With love"',
@@ -337,6 +382,43 @@ class _WritingScreenState extends State<WritingScreen> {
                                     ),
                                   ),
                                 ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: AnimatedSwitcher(
+                                duration: Motion.of(context, Motion.medium),
+                                child: _signature == null
+                                    ? TextButton.icon(
+                                        key: const ValueKey('none'),
+                                        onPressed: _sign,
+                                        icon: const Icon(Icons.draw_outlined),
+                                        label: const Text('Sign It by Hand'),
+                                      )
+                                    : Column(
+                                        key: ValueKey(_signature),
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          GestureDetector(
+                                            onTap: _sign,
+                                            child: SignatureView(
+                                              signature: _signature!,
+                                              color: _ink.signatureOn(_paper),
+                                            ),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => setState(() {
+                                              _signature = null;
+                                              _signatureChanged = true;
+                                            }),
+                                            child: const Text(
+                                              'Remove Signature',
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                               ),
                             ),
                           ],
@@ -480,10 +562,15 @@ class _IdeasSheet extends StatelessWidget {
 
 /// Paper and handwriting, chosen together, with live previews.
 class _StationerySheet extends StatefulWidget {
-  const _StationerySheet({required this.paper, required this.font});
+  const _StationerySheet({
+    required this.paper,
+    required this.font,
+    required this.ink,
+  });
 
   final LetterPaper paper;
   final LetterFont font;
+  final LetterInk ink;
 
   @override
   State<_StationerySheet> createState() => _StationerySheetState();
@@ -492,6 +579,7 @@ class _StationerySheet extends StatefulWidget {
 class _StationerySheetState extends State<_StationerySheet> {
   late LetterPaper _paper = widget.paper;
   late LetterFont _font = widget.font;
+  late LetterInk _ink = widget.ink;
 
   @override
   Widget build(BuildContext context) {
@@ -508,7 +596,7 @@ class _StationerySheetState extends State<_StationerySheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Paper and handwriting', style: AppTypography.heading),
+            Text('Paper, ink and handwriting', style: AppTypography.heading),
             const SizedBox(height: AppSpacing.xxs),
             Text(
               'They will read your letter just like this.',
@@ -520,7 +608,7 @@ class _StationerySheetState extends State<_StationerySheet> {
               duration: Motion.of(context, Motion.medium),
               child: PaperSheet.of(
                 _paper,
-                key: ValueKey((_paper, _font)),
+                key: ValueKey((_paper, _font, _ink)),
                 fold: 16,
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: SizedBox(
@@ -532,12 +620,13 @@ class _StationerySheetState extends State<_StationerySheet> {
                         'Dear you,',
                         style: _font.title.copyWith(
                           fontSize: _font.title.fontSize! * 0.8,
+                          color: _ink.on(_paper),
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xxs),
                       Text(
                         'I keep thinking about that day by the lake.',
-                        style: _font.body,
+                        style: _font.body.copyWith(color: _ink.on(_paper)),
                       ),
                     ],
                   ),
@@ -658,9 +747,63 @@ class _StationerySheetState extends State<_StationerySheet> {
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
+            Text('Ink', style: AppTypography.label),
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                for (final ink in LetterInk.values)
+                  Expanded(
+                    child: Semantics(
+                      button: true,
+                      selected: ink == _ink,
+                      label: '${ink.label} ink',
+                      child: GestureDetector(
+                        onTap: () => setState(() => _ink = ink),
+                        child: Pressable(
+                          scale: 0.9,
+                          child: Column(
+                            children: [
+                              AnimatedContainer(
+                                duration: d,
+                                padding: const EdgeInsets.all(3),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: ink == _ink
+                                        ? AppColors.accent
+                                        : Colors.transparent,
+                                    width: 2,
+                                  ),
+                                ),
+                                // An ink blot in the colour.
+                                child: CircleAvatar(
+                                  radius: 15,
+                                  backgroundColor: ink.on(_paper),
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xxs),
+                              Text(
+                                ink.label,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.caption.copyWith(
+                                  color: ink == _ink
+                                      ? AppColors.accent
+                                      : AppColors.inkSoft,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
               label: 'Use These',
-              onPressed: () => Navigator.pop(context, (_paper, _font)),
+              onPressed: () => Navigator.pop(context, (_paper, _font, _ink)),
             ),
           ],
         ),

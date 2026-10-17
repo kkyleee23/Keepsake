@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -8,6 +7,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake_style.dart';
+import '../../shared/widgets/eager_pan.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/paper.dart';
@@ -382,16 +382,6 @@ class _WrappingSheetState extends State<_WrappingSheet> {
   }
 }
 
-/// Claims a drag the moment a finger lands on a sticker, so the sheet's
-/// scrolling doesn't take it.
-class _EagerPan extends PanGestureRecognizer {
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    resolve(GestureDisposition.accepted);
-  }
-}
-
 /// The envelope with stickers you can drag around.
 class _StickerBoard extends StatelessWidget {
   const _StickerBoard({
@@ -457,8 +447,8 @@ class _StickerBoard extends StatelessWidget {
                 onTap: () => onSelect(i),
                 child: RawGestureDetector(
                   gestures: {
-                    _EagerPan: GestureRecognizerFactoryWithHandlers<_EagerPan>(
-                      _EagerPan.new,
+                    EagerPan: GestureRecognizerFactoryWithHandlers<EagerPan>(
+                      EagerPan.new,
                       (r) {
                         r.onDown = (_) => onSelect(i);
                         r.onUpdate = (d) => onMove(
