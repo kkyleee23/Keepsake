@@ -8,6 +8,7 @@ import '../../data/providers.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/whole_words.dart';
 
 class _Slide {
   const _Slide(this.title, this.body, {this.pose, this.brand = false});
@@ -77,7 +78,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
-                padding: const EdgeInsets.only(right: AppSpacing.xs, top: AppSpacing.xs),
+                padding: const EdgeInsets.only(
+                  right: AppSpacing.xs,
+                  top: AppSpacing.xs,
+                ),
                 child: TextButton(
                   onPressed: _finish,
                   child: const Text('Skip'),
@@ -119,27 +123,58 @@ class _SlideView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final scale = MediaQuery.textScalerOf(context).scale(1);
+    // Smaller art on short screens and with large text, so the words fit.
+    final art = (size.height * 0.26 / (scale > 1 ? 1 + (scale - 1) * 0.5 : 1))
+        .clamp(88.0, 200.0);
+    final picture = slide.brand
+        ? BrandMark(size: art * 0.66)
+        : Mascot(size: art, pose: slide.pose, animate: true);
+    final wide = size.width > size.height;
+    final words = [
+      WholeWords(
+        slide.title,
+        style: wide ? AppTypography.displaySmall : AppTypography.display,
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: AppSpacing.sm),
+      Text(
+        slide.body,
+        style: AppTypography.bodyLarge.copyWith(color: AppColors.inkSoft),
+        textAlign: TextAlign.center,
+      ),
+    ];
+
+    // Landscape phones: the picture sits beside the words.
+    if (wide) {
+      return FillScroll(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.sm,
+        ),
+        child: Row(
+          children: [
+            picture,
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: words,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return FillScroll(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (slide.brand)
-            const BrandMark(size: 132)
-          else
-            Mascot(size: 200, pose: slide.pose, animate: true),
+          picture,
           const SizedBox(height: AppSpacing.xl),
-          Text(
-            slide.title,
-            style: AppTypography.display,
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            slide.body,
-            style: AppTypography.bodyLarge.copyWith(color: AppColors.inkSoft),
-            textAlign: TextAlign.center,
-          ),
+          ...words,
         ],
       ),
     );
@@ -164,7 +199,9 @@ class _Dots extends StatelessWidget {
             width: i == active ? 22 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: i == active ? AppColors.accent : AppColors.inkFaint.withValues(alpha: 0.45),
+              color: i == active
+                  ? AppColors.accent
+                  : AppColors.inkFaint.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(4),
             ),
           ),

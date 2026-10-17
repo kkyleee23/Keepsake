@@ -10,6 +10,7 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/whole_words.dart';
 
 /// The moment before opening: a sealed envelope with the mascot peeking from
 /// behind it. Tapping Open lifts the flap, breaks the seal and slides the
@@ -108,7 +109,7 @@ class _GiftCoverState extends State<GiftCover>
             ),
             const SizedBox(height: AppSpacing.xs),
           ],
-          Text(
+          WholeWords(
             heading,
             style: AppTypography.display,
             textAlign: TextAlign.center,

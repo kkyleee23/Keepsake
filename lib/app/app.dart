@@ -20,32 +20,45 @@ class KeepsakeApp extends ConsumerWidget {
       routerConfig: router,
       // Keep the phone-first layout centered in a readable column on wide
       // screens (desktop, tablet), instead of stretching edge to edge.
-      builder: (context, child) {
-        // Around the column (tablets, desktop) the same stone paper, with a
-        // hairline on each side so the column reads as a sheet on a table.
-        return DecoratedBox(
-          decoration: BoxDecoration(
-            color: AppColors.paper,
-            image: paperImage(PaperTextures.stone),
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 480),
-              child: DecoratedBox(
-                position: DecorationPosition.foreground,
-                decoration: BoxDecoration(
-                  border: MediaQuery.sizeOf(context).width > 480
-                      ? const Border.symmetric(
-                          vertical: BorderSide(color: AppColors.hairline),
-                        )
-                      : null,
-                ),
-                child: child ?? const SizedBox.shrink(),
-              ),
+      builder: (context, child) => AppFrame(child: child),
+    );
+  }
+}
+
+/// Keeps the phone-first layout in a readable column on wide screens
+/// (tablets, desktop, landscape) instead of stretching edge to edge. Around
+/// the column, the same stone paper, with a hairline on each side so the
+/// column reads as a sheet on a table.
+class AppFrame extends StatelessWidget {
+  const AppFrame({super.key, this.child});
+
+  final Widget? child;
+
+  static const double maxWidth = 480;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: AppColors.paper,
+        image: paperImage(PaperTextures.stone),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: maxWidth),
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(
+              border: MediaQuery.sizeOf(context).width > maxWidth
+                  ? const Border.symmetric(
+                      vertical: BorderSide(color: AppColors.hairline),
+                    )
+                  : null,
             ),
+            child: child ?? const SizedBox.shrink(),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

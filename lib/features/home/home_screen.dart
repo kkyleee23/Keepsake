@@ -17,6 +17,7 @@ import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/paper.dart';
 import '../../shared/widgets/gift_art.dart';
+import '../../shared/widgets/whole_words.dart';
 
 /// Home prioritizes meaningful actions over statistics (product brief).
 class HomeScreen extends ConsumerWidget {
@@ -169,7 +170,7 @@ class _Hero extends StatelessWidget {
               FractionallySizedBox(
                 widthFactor: 0.66,
                 alignment: Alignment.centerLeft,
-                child: Text(
+                child: WholeWords(
                   'Make something worth keeping.',
                   style: AppTypography.title.copyWith(height: 1.25),
                 ),

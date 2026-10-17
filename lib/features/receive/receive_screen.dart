@@ -21,6 +21,7 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/whole_words.dart';
 
 enum _Phase { loading, cover, sealed, pin, opening, content, error }
 
@@ -251,7 +252,7 @@ class _SealedViewState extends State<_SealedView> {
           const SizedBox(height: AppSpacing.lg),
           Text('Sealed', style: AppTypography.eyebrow, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.md),
-          Text(
+          WholeWords(
             (widget.cover?.recipientName ?? '').isEmpty
                 ? 'This keepsake is waiting for you.'
                 : 'This keepsake is waiting for ${widget.cover!.recipientName}.',

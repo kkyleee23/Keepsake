@@ -18,7 +18,15 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** Wrapping (envelope paper and seal colour) and letter
+- **Latest:** Screen-size safety (no setup). Every main screen is now
+  checked on a small Android phone with 3-button navigation, a notched
+  iPhone, an iPhone with very large text, a tablet and a phone in landscape
+  (`test/layout_matrix_test.dart`, 85 checks). It fails if anything
+  overflows or if a main button sits under the system bars. Fixes from it:
+  long names and words shrink instead of splitting mid-word, buttons wrap
+  their label, library filters grow with large text, and onboarding goes
+  side by side in landscape.
+- **Before that:** Wrapping (envelope paper and seal colour) and letter
   handwriting. Run **`0005_wrapping.sql`** after `0004` so recipients see
   the chosen envelope before opening; until then the gift still publishes,
   with the standard cream envelope on the cover. Paper everywhere (no

@@ -96,13 +96,14 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.md),
-          SizedBox(
-            height: 36,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.gutter,
-              ),
+          // Sized by its tags, so large text grows the row instead of
+          // clipping it.
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.gutter,
+            ),
+            child: Row(
               children: [
                 for (final f in _Lib.values)
                   Padding(

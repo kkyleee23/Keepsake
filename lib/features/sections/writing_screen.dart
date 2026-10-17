@@ -358,16 +358,19 @@ class _WritingScreenState extends State<WritingScreen> {
                   ),
                   child: Row(
                     children: [
-                      Text(
-                        words == 0
-                            ? 'No words yet'
-                            : '$words ${words == 1 ? 'word' : 'words'}'
-                                  '  ·  ${Reading.minutesLabel(_body.text)}',
-                        style: AppTypography.caption.copyWith(
-                          color: _paper.softInk,
+                      Expanded(
+                        child: Text(
+                          words == 0
+                              ? 'No words yet'
+                              : '$words ${words == 1 ? 'word' : 'words'}'
+                                    '  ·  ${Reading.minutesLabel(_body.text)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.caption.copyWith(
+                            color: _paper.softInk,
+                          ),
                         ),
                       ),
-                      const Spacer(),
                       if (left < 2000)
                         Text(
                           '$left left',
