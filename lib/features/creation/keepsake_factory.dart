@@ -38,7 +38,11 @@ abstract final class KeepsakeFactory {
   static Map<String, dynamic> _defaultContent(SectionType type) {
     switch (type) {
       case SectionType.letter:
-        return {'title': '', 'body': ''};
+        return {'title': '', 'body': '', 'signoff': ''};
+      case SectionType.essay:
+        return {'title': '', 'subtitle': '', 'body': ''};
+      case SectionType.book:
+        return {'title': '', 'dedication': '', 'pages': <Map<String, dynamic>>[]};
       case SectionType.memory:
         return {'title': '', 'body': '', 'date': null};
       case SectionType.reasons:

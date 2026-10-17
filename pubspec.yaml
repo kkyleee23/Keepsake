@@ -63,9 +63,10 @@ flutter_launcher_icons:
   image_path: "assets/brand/icon_1024.png"
   adaptive_icon_background: "#798669"
   adaptive_icon_foreground: "assets/brand/icon_foreground.png"
+  # Web icons and favicons are made by tool/make_favicons.py (leaf seal for
+  # tabs, mascot for home screens), so this tool leaves web/ alone.
   web:
-    generate: true
-    image_path: "assets/brand/icon_1024.png"
+    generate: false
 
 flutter:
   uses-material-design: true

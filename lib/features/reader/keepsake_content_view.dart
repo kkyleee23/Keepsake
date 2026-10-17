@@ -7,6 +7,7 @@ import '../../data/models/keepsake.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../sections/section_view.dart';
+import '../../shared/widgets/motion.dart';
 
 /// The opened gift: who it's for, each section as its own little object, a
 /// sprig between them, and a closing note from the person who made it.
@@ -33,18 +34,22 @@ class KeepsakeContentView extends StatelessWidget {
         AppSpacing.xxxl,
       ),
       children: [
-        _Header(keepsake: k),
+        RiseIn(child: _Header(keepsake: k)),
         const SizedBox(height: AppSpacing.xl),
-        for (var i = 0; i < sections.length; i++) ...[
-          if (i > 0) const _Sprig(),
-          SectionView(section: sections[i], senderName: from),
-        ],
+        for (var i = 0; i < sections.length; i++)
+          RiseIn(
+            key: ValueKey(sections[i].id),
+            index: i + 1,
+            child: Column(
+              children: [
+                if (i > 0) const _Sprig(),
+                SectionView(section: sections[i], senderName: from),
+              ],
+            ),
+          ),
         const SizedBox(height: AppSpacing.xxl),
         _Closing(from: from),
-        if (footer != null) ...[
-          const SizedBox(height: AppSpacing.xl),
-          footer!,
-        ],
+        if (footer != null) ...[const SizedBox(height: AppSpacing.xl), footer!],
       ],
     );
   }
@@ -93,11 +98,7 @@ class _Sprig extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget line() => Container(
-          width: 36,
-          height: 1,
-          color: AppColors.giftEdge,
-        );
+    Widget line() => Container(width: 36, height: 1, color: AppColors.giftEdge);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
       child: Row(

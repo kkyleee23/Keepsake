@@ -51,6 +51,8 @@ enum KeepsakeStatus {
 /// required to support it structurally.
 enum SectionType {
   letter('letter', 'Letter'),
+  essay('essay', 'Essay'),
+  book('book', 'Book'),
   photo('photo', 'Photos'),
   photoGallery('photo_gallery', 'Photo Gallery'),
   memory('memory', 'Memory'),

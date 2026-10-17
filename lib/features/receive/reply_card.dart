@@ -10,6 +10,7 @@ import '../../data/providers.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/choice_tag.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/motion.dart';
 
 /// Shown under an opened keepsake: one quiet way to send something back.
 /// Only the person who made it can read the reply.
@@ -97,10 +98,24 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
         border: Border.all(color: AppColors.hairline),
       ),
       child: AnimatedSize(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
+        duration: Motion.of(context, Motion.medium),
+        curve: Motion.settle,
         alignment: Alignment.topCenter,
-        child: _sent ? _sentView() : _form(),
+        // The form gives way to a little "Sent" moment that pops in.
+        child: AnimatedSwitcher(
+          duration: Motion.of(context, Motion.medium),
+          transitionBuilder: (child, anim) => FadeTransition(
+            opacity: anim,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.92, end: 1)
+                  .animate(CurvedAnimation(parent: anim, curve: Motion.pop)),
+              child: child,
+            ),
+          ),
+          child: _sent
+              ? KeyedSubtree(key: const ValueKey('sent'), child: _sentView())
+              : KeyedSubtree(key: const ValueKey('form'), child: _form()),
+        ),
       ),
     );
   }

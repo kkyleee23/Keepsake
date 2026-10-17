@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import 'motion.dart';
 
 /// The one filled, full-width primary action for a screen.
 ///
@@ -40,18 +41,18 @@ class PrimaryButton extends StatelessWidget {
       child: child,
     );
 
-    return expand ? SizedBox(width: double.infinity, child: button) : button;
+    final sized = expand
+        ? SizedBox(width: double.infinity, child: button)
+        : button;
+    // A small, springy press so taps feel physical.
+    return onPressed == null || loading ? sized : Pressable(child: sized);
   }
 
   Widget _content() {
     if (icon == null) return Text(label);
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 20),
-        const SizedBox(width: 8),
-        Text(label),
-      ],
+      children: [Icon(icon, size: 20), const SizedBox(width: 8), Text(label)],
     );
   }
 }

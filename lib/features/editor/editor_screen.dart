@@ -15,10 +15,13 @@ import '../keepsakes/application/keepsakes_controller.dart';
 import '../sections/open_when_editor_screen.dart';
 import '../sections/section_display.dart';
 import '../sections/section_editor_screen.dart';
+import '../sections/book_editor_screen.dart';
 import '../sections/photo_editor_screen.dart';
 import '../sections/timeline_editor_screen.dart';
+import '../sections/writing_screen.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/motion.dart';
 
 /// The assembly surface: the creator builds a Keepsake here.
 ///
@@ -41,6 +44,8 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   /// offers a dead end.
   static const _addable = [
     SectionType.letter,
+    SectionType.essay,
+    SectionType.book,
     SectionType.photo,
     SectionType.memory,
     SectionType.openWhen,
@@ -237,12 +242,15 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
                 onReorder: _reorder,
                 itemBuilder: (context, index) {
                   final s = sections[index];
-                  return _SectionCard(
+                  return RiseIn(
                     key: ValueKey(s.id),
-                    section: s,
                     index: index,
-                    onTap: () => _openSection(s),
-                    onDelete: () => _deleteSection(s),
+                    child: _SectionCard(
+                      section: s,
+                      index: index,
+                      onTap: () => _openSection(s),
+                      onDelete: () => _deleteSection(s),
+                    ),
                   );
                 },
               ),
@@ -268,7 +276,27 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   }
 
   Widget _editorFor(KeepsakeSection section) {
+    final c = section.content;
+    String text(String key) => (c[key] as String?) ?? '';
     switch (section.type) {
+      case SectionType.letter:
+        return WritingScreen(
+          kind: WritingKind.letter,
+          heading: 'Letter',
+          title: text('title'),
+          body: text('body'),
+          signoff: text('signoff'),
+        );
+      case SectionType.essay:
+        return WritingScreen(
+          kind: WritingKind.essay,
+          heading: 'Essay',
+          title: text('title'),
+          subtitle: text('subtitle'),
+          body: text('body'),
+        );
+      case SectionType.book:
+        return BookEditorScreen(section: section);
       case SectionType.openWhen:
         return OpenWhenEditorScreen(section: section);
       case SectionType.timeline:
@@ -291,6 +319,10 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         return Icons.mail_outline;
       case SectionType.photo:
         return Icons.photo_library_outlined;
+      case SectionType.essay:
+        return Icons.article_outlined;
+      case SectionType.book:
+        return Icons.menu_book_outlined;
       case SectionType.memory:
         return Icons.auto_stories_outlined;
       case SectionType.openWhen:
@@ -363,7 +395,6 @@ class _CoverCard extends StatelessWidget {
 
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
-    super.key,
     required this.section,
     required this.index,
     required this.onTap,

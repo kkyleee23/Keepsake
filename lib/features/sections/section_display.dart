@@ -1,3 +1,4 @@
+import '../../core/text/reading.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/keepsake_section.dart';
 
@@ -9,6 +10,8 @@ abstract final class SectionDisplay {
     switch (s.type) {
       case SectionType.letter:
       case SectionType.memory:
+      case SectionType.essay:
+      case SectionType.book:
         final t = (s.content['title'] as String?)?.trim();
         return (t == null || t.isEmpty) ? s.type.label : t;
       case SectionType.reasons:
@@ -32,6 +35,14 @@ abstract final class SectionDisplay {
       case SectionType.memory:
       case SectionType.customMessage:
         return _firstLine(s.content['body'] as String?);
+      case SectionType.essay:
+        final body = s.content['body'] as String? ?? '';
+        return body.trim().isEmpty
+            ? ''
+            : '${Reading.words(body)} words  ·  ${Reading.minutesLabel(body)}';
+      case SectionType.book:
+        final n = (s.content['pages'] as List?)?.length ?? 0;
+        return n == 0 ? '' : '$n ${n == 1 ? 'page' : 'pages'}';
       case SectionType.question:
         return _firstLine(s.content['prompt'] as String?);
       case SectionType.reasons:

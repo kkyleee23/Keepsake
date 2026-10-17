@@ -13,6 +13,7 @@ import '../keepsakes/widgets/keepsake_card.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/section_header.dart';
+import '../../shared/widgets/motion.dart';
 
 /// Home prioritizes meaningful actions over statistics (product brief).
 class HomeScreen extends ConsumerWidget {
@@ -66,12 +67,20 @@ class HomeScreen extends ConsumerWidget {
           ),
           if (drafts.isEmpty)
             const _QuietPlaceholder(
-              message: 'Nothing in progress. When you start something, '
+              message:
+                  'Nothing in progress. When you start something, '
                   'it waits for you here.',
             )
           else
-            for (final k in drafts.take(3))
-              KeepsakeCard(keepsake: k, onTap: () => _open(context, k)),
+            for (final (i, k) in drafts.take(3).indexed)
+              RiseIn(
+                key: ValueKey('d${k.id}'),
+                index: i,
+                child: KeepsakeCard(
+                  keepsake: k,
+                  onTap: () => _open(context, k),
+                ),
+              ),
           const SizedBox(height: AppSpacing.xl),
 
           const SectionHeader(title: 'Recently created'),
@@ -80,8 +89,15 @@ class HomeScreen extends ConsumerWidget {
               message: 'Keepsakes you finish and share will show up here.',
             )
           else
-            for (final k in created.take(3))
-              KeepsakeCard(keepsake: k, onTap: () => _open(context, k)),
+            for (final (i, k) in created.take(3).indexed)
+              RiseIn(
+                key: ValueKey('c${k.id}'),
+                index: i + 2,
+                child: KeepsakeCard(
+                  keepsake: k,
+                  onTap: () => _open(context, k),
+                ),
+              ),
         ],
       ),
     );

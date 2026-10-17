@@ -4,6 +4,7 @@ import 'app_colors.dart';
 import 'app_radius.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
+import '../../shared/widgets/motion.dart';
 
 /// Assembles the single Keepsake [ThemeData] from the design-system tokens.
 ///
@@ -32,6 +33,19 @@ abstract final class AppTheme {
       highlightColor: AppColors.surfaceAlt,
       fontFamily: AppTypography.sans,
       textTheme: AppTypography.textTheme,
+
+      // Screens rise softly into place.
+      pageTransitionsTheme: PageTransitionsTheme(
+        builders: {
+          // Start from Flutter's defaults (which keep iOS and macOS on the
+          // native slide with swipe-back), then use the soft rise elsewhere.
+          ...const PageTransitionsTheme().builders,
+          TargetPlatform.android: const SoftRisePageTransitionsBuilder(),
+          TargetPlatform.windows: const SoftRisePageTransitionsBuilder(),
+          TargetPlatform.linux: const SoftRisePageTransitionsBuilder(),
+          TargetPlatform.fuchsia: const SoftRisePageTransitionsBuilder(),
+        },
+      ),
 
       appBarTheme: const AppBarTheme(
         backgroundColor: AppColors.paper,
@@ -205,7 +219,7 @@ abstract final class AppTheme {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         iconTheme: WidgetStateProperty.resolveWith(
           (s) => IconThemeData(
-            size: 24,
+            size: 26,
             color: s.contains(WidgetState.selected)
                 ? AppColors.accent
                 : AppColors.inkSoft,

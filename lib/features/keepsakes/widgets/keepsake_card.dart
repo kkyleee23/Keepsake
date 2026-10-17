@@ -7,6 +7,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../data/models/enums.dart';
 import '../../../data/models/keepsake.dart';
+import '../../../shared/widgets/motion.dart';
 
 /// A library/home card for one Keepsake. Communicates the essentials only -
 /// title, who it's for, occasion, and state - without overloading (brief).
@@ -31,52 +32,57 @@ class KeepsakeCard extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: Material(
-        color: AppColors.surface,
-        borderRadius: AppRadius.card,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onLongPress,
+      child: Pressable(
+        scale: 0.985,
+        child: Material(
+          color: AppColors.surface,
           borderRadius: AppRadius.card,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.card,
-              border: Border.all(color: AppColors.hairline),
-            ),
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        keepsake.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.heading,
-                      ),
-                      const SizedBox(height: 2),
-                      Text(meta,
+          child: InkWell(
+            onTap: onTap,
+            onLongPress: onLongPress,
+            borderRadius: AppRadius.card,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: AppRadius.card,
+                border: Border.all(color: AppColors.hairline),
+              ),
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          keepsake.title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: AppTypography.body),
-                      const SizedBox(height: AppSpacing.xs),
-                      Row(
-                        children: [
-                          _StatusTag(status: keepsake.status),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            DateFormat.yMMMd().format(keepsake.updatedAt),
-                            style: AppTypography.caption,
-                          ),
-                        ],
-                      ),
-                    ],
+                          style: AppTypography.heading,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          meta,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.body,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Row(
+                          children: [
+                            _StatusTag(status: keepsake.status),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              DateFormat.yMMMd().format(keepsake.updatedAt),
+                              style: AppTypography.caption,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                const Icon(Icons.chevron_right, color: AppColors.inkFaint),
-              ],
+                  const Icon(Icons.chevron_right, color: AppColors.inkFaint),
+                ],
+              ),
             ),
           ),
         ),
@@ -93,7 +99,10 @@ class _StatusTag extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xs,
+        vertical: 2,
+      ),
       decoration: BoxDecoration(
         color: AppColors.surfaceAlt,
         borderRadius: BorderRadius.circular(AppRadius.sm),

@@ -15,6 +15,7 @@ import 'widgets/keepsake_card.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/choice_tag.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/motion.dart';
 
 enum _Lib {
   created('Created'),
@@ -66,8 +67,9 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
   @override
   Widget build(BuildContext context) {
     final all = ref.watch(keepsakesControllerProvider).valueOrNull ?? const [];
-    final items =
-        all.where((k) => _filter.matches(k) && _matchesQuery(k)).toList();
+    final items = all
+        .where((k) => _filter.matches(k) && _matchesQuery(k))
+        .toList();
 
     return SafeArea(
       child: Column(
@@ -98,8 +100,9 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
             height: 36,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.gutter,
+              ),
               children: [
                 for (final f in _Lib.values)
                   Padding(
@@ -115,24 +118,37 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           Expanded(
-            child: items.isEmpty
-                ? _emptyFor(_filter)
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.gutter,
-                      0,
-                      AppSpacing.gutter,
-                      AppSpacing.xxl,
-                    ),
-                    children: [
-                      for (final k in items)
-                        KeepsakeCard(
-                          keepsake: k,
-                          onTap: () => _open(k),
-                          onLongPress: () => _showActions(k),
+            // Switching filters cross-fades the list instead of snapping.
+            child: AnimatedSwitcher(
+              duration: Motion.of(context, Motion.medium),
+              switchInCurve: Motion.settle,
+              switchOutCurve: Curves.easeIn,
+              child: KeyedSubtree(
+                key: ValueKey(_filter),
+                child: items.isEmpty
+                    ? _emptyFor(_filter)
+                    : ListView(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.gutter,
+                          0,
+                          AppSpacing.gutter,
+                          AppSpacing.xxl,
                         ),
-                    ],
-                  ),
+                        children: [
+                          for (final (i, k) in items.indexed)
+                            RiseIn(
+                              key: ValueKey(k.id),
+                              index: i,
+                              child: KeepsakeCard(
+                                keepsake: k,
+                                onTap: () => _open(k),
+                                onLongPress: () => _showActions(k),
+                              ),
+                            ),
+                        ],
+                      ),
+              ),
+            ),
           ),
         ],
       ),
@@ -190,8 +206,10 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
             const SizedBox(height: AppSpacing.sm),
             ListTile(
               leading: const Icon(Icons.open_in_new, color: AppColors.inkSoft),
-              title: Text(k.isDraft ? 'Keep editing' : 'Open',
-                  style: AppTypography.bodyLarge),
+              title: Text(
+                k.isDraft ? 'Keep editing' : 'Open',
+                style: AppTypography.bodyLarge,
+              ),
               onTap: () {
                 Navigator.pop(ctx);
                 _open(k);
@@ -204,7 +222,8 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
                 onTap: () async {
                   Navigator.pop(ctx);
                   await Clipboard.setData(
-                      ClipboardData(text: AppConfig.shareUrl(k.shareToken!)));
+                    ClipboardData(text: AppConfig.shareUrl(k.shareToken!)),
+                  );
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Link copied')),
@@ -214,11 +233,15 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
               ),
             ListTile(
               leading: Icon(
-                k.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+                k.isArchived
+                    ? Icons.unarchive_outlined
+                    : Icons.archive_outlined,
                 color: AppColors.inkSoft,
               ),
-              title: Text(k.isArchived ? 'Unarchive' : 'Archive',
-                  style: AppTypography.bodyLarge),
+              title: Text(
+                k.isArchived ? 'Unarchive' : 'Archive',
+                style: AppTypography.bodyLarge,
+              ),
               onTap: () {
                 Navigator.pop(ctx);
                 final c = ref.read(keepsakesControllerProvider.notifier);
@@ -231,9 +254,10 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.delete_outline, color: AppColors.error),
-              title: Text('Delete',
-                  style: AppTypography.bodyLarge
-                      .copyWith(color: AppColors.error)),
+              title: Text(
+                'Delete',
+                style: AppTypography.bodyLarge.copyWith(color: AppColors.error),
+              ),
               onTap: () {
                 Navigator.pop(ctx);
                 _confirmDelete(k);

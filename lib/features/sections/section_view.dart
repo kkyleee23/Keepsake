@@ -14,6 +14,8 @@ import '../../data/models/enums.dart';
 import '../../data/models/keepsake_section.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/gift_art.dart';
+import '../reader/book_view.dart';
+import '../reader/long_form.dart';
 
 /// Read-only rendering of a single section, styled as part of a gift: letters
 /// on paper, memories taped down, reasons on little leaves, Open When notes in
@@ -38,7 +40,37 @@ class SectionView extends StatelessWidget {
   Widget build(BuildContext context) {
     switch (section.type) {
       case SectionType.letter:
-        return _Letter(title: _s('title'), body: _s('body'), from: senderName);
+        return _Letter(
+          title: _s('title'),
+          body: _s('body'),
+          signoff: _s('signoff'),
+          from: senderName,
+        );
+      case SectionType.book:
+        final pages = [
+          for (final e in (section.content['pages'] as List?) ?? const [])
+            if (e is Map)
+              BookPage(
+                title: (e['title'] as String?)?.trim() ?? '',
+                body: (e['body'] as String?)?.trim() ?? '',
+              ),
+        ].where((p) => p.title.isNotEmpty || p.body.isNotEmpty).toList();
+        if (pages.isEmpty) return const SizedBox.shrink();
+        return BookGift(
+          title: _s('title') ?? 'A book for you',
+          dedication: _s('dedication'),
+          author: senderName,
+          pages: pages,
+        );
+      case SectionType.essay:
+        final body = _s('body');
+        if (body == null) return const SizedBox.shrink();
+        return EssayCard(
+          title: _s('title'),
+          subtitle: _s('subtitle'),
+          body: body,
+          author: senderName,
+        );
       case SectionType.memory:
         return _Memory(title: _s('title'), body: _s('body'), date: _s('date'));
       case SectionType.customMessage:
@@ -109,18 +141,20 @@ class _SectionTitle extends StatelessWidget {
   }
 }
 
-/// A letter on warm paper with a folded corner, signed at the bottom.
+/// A letter on warm paper with a folded corner, signed at the bottom with
+/// the writer's sign-off ("With love,") in handwriting and their name.
 class _Letter extends StatelessWidget {
-  const _Letter({this.title, this.body, this.from});
+  const _Letter({this.title, this.body, this.signoff, this.from});
 
   final String? title;
   final String? body;
+  final String? signoff;
   final String? from;
 
   @override
   Widget build(BuildContext context) {
     if (title == null && body == null) return const SizedBox.shrink();
-    final sign = from?.trim() ?? '';
+    final name = from?.trim() ?? '';
     return PaperSheet(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
@@ -138,21 +172,35 @@ class _Letter extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
           ],
-          if (body != null)
-            Text(body!, style: AppTypography.bodyLarge.merge(_readingStyle)),
+          if (body != null) LetterBody(text: body!),
           const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerRight,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                if (sign.isNotEmpty)
+                if (signoff != null)
                   Text(
-                    'From $sign',
-                    style: AppTypography.label.copyWith(color: AppColors.sage),
+                    signoff!.endsWith(',') ? signoff! : '$signoff,',
+                    style: AppTypography.eyebrow.copyWith(
+                      fontSize: 24,
+                      color: AppColors.inkSoft,
+                    ),
                   ),
-                const SizedBox(width: AppSpacing.xs),
-                const LeafSeal(size: 26),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (name.isNotEmpty)
+                      Text(
+                        signoff != null ? name : 'From $name',
+                        style: AppTypography.label.copyWith(
+                          color: AppColors.sage,
+                        ),
+                      ),
+                    const SizedBox(width: AppSpacing.xs),
+                    const LeafSeal(size: 26),
+                  ],
+                ),
               ],
             ),
           ),

@@ -3,6 +3,26 @@
 What has to be set up outside the code for everything to work. Do the steps
 in order. Each one says how to check it worked.
 
+## Status
+
+| Step | State |
+| --- | --- |
+| 0001_init.sql | Done |
+| 0002_responses.sql (replies) | To do |
+| 0003_payload_limit.sql (size cap, conflict fix) | To do |
+| Confirm email turned off for testing | Done |
+| Anonymous sign-ins turned off | To do |
+| Web hosting for share links (step 4) | Later |
+
+## What changed in each session
+
+- **Latest:** Essays, long letters (with a sign-off), Book gifts, new nav
+  icons, favicons and motion. **No new database setup needed**: essays and
+  books are stored inside the keepsake like everything else, and the 5 MB
+  cap from `0003` already covers them (a full essay is around 50 KB).
+- **Before that:** Photos (inside the keepsake, no Storage bucket), and
+  migration `0003`. Replies and migration `0002`.
+
 ## 1. Database (Supabase SQL Editor)
 
 Open your project at supabase.com, go to **SQL Editor**, click **New query**,
@@ -24,19 +44,20 @@ and `my_keepsake_responses`.
 ## 2. Sign-in settings (Authentication)
 
 1. **Authentication > Sign In / Providers > Email**: make sure Email is on.
-2. **Confirm email**: while you are testing, turn it **off**. With it on,
-   the confirmation link opens `localhost:3000`, which is a page that doesn't
-   exist on your phone. Turn it back on once step 4 is done.
+2. **Confirm email**: off for now (done). With it on, the confirmation link
+   opens `localhost:3000`, which is a page that doesn't exist on your phone.
+   Turn it back on once step 4 is done.
 3. **Anonymous sign-ins**: turn this **off**. The app no longer uses it, and
    anonymous accounts are treated as signed out.
 
 **Check:** create an account in the app. You should land on Home right away.
 
-## 3. Nothing else for photos
+## 3. Nothing else for photos, essays or books
 
-Photos are stored inside the keepsake (shrunk on the phone, location data
-removed), so there is no Storage bucket to create. Up to 6 photos per
-keepsake.
+Photos (shrunk on the phone, location data removed), essays, long letters
+and book pages are all stored inside the keepsake, so there is no Storage
+bucket to create. Limits: 6 photos and 40 book pages per keepsake, about
+8,000 words per letter, essay or page.
 
 ## 4. Later: a home for share links
 

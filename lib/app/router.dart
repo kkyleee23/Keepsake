@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../shared/widgets/motion.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/models/enums.dart';
@@ -74,9 +76,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AuthScreen(),
       ),
 
-      StatefulShellRoute.indexedStack(
+      StatefulShellRoute(
         builder: (context, state, navigationShell) =>
             HomeShell(navigationShell: navigationShell),
+        // Tabs keep their state and cross-fade when you switch.
+        navigatorContainerBuilder: (context, navigationShell, children) =>
+            FadingTabs(index: navigationShell.currentIndex, children: children),
         branches: [
           StatefulShellBranch(routes: [
             GoRoute(

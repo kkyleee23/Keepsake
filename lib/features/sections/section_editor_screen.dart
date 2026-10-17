@@ -11,8 +11,9 @@ import '../../shared/widgets/primary_button.dart';
 /// Edits one section's content. Pops with the updated content [Map] on save, or
 /// null on cancel. The editor screen applies the result to the draft.
 ///
-/// Handles the single-field and simple-list types. Open When and Timeline have
-/// their own editors because they manage richer item lists.
+/// Handles the single-field and simple-list types. Letters and essays use the
+/// full-screen WritingScreen; Open When, Timeline, Photos and Book have their
+/// own editors because they manage richer item lists.
 class SectionEditorScreen extends StatefulWidget {
   const SectionEditorScreen({super.key, required this.section});
 
@@ -43,7 +44,8 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
     _prompt = TextEditingController(text: c['prompt'] as String? ?? '');
     _dateLabel = c['date'] as String?;
     _targetDate = DateTime.tryParse((c['date'] as String?) ?? '');
-    final items = (c['items'] as List?)?.map((e) => e.toString()).toList() ??
+    final items =
+        (c['items'] as List?)?.map((e) => e.toString()).toList() ??
         const <String>[];
     for (final item in items) {
       _reasons.add(TextEditingController(text: item));
@@ -92,17 +94,19 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
     );
     if (time == null) return;
     setState(() {
-      _targetDate =
-          DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _targetDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
     });
   }
 
   void _save() {
     final content = <String, dynamic>{};
     switch (_type) {
-      case SectionType.letter:
-        content['title'] = _title.text.trim();
-        content['body'] = _body.text.trim();
       case SectionType.memory:
         content['title'] = _title.text.trim();
         content['body'] = _body.text.trim();
@@ -150,14 +154,6 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
 
   List<Widget> _fields() {
     switch (_type) {
-      case SectionType.letter:
-        return [
-          _label('Title (Optional)'),
-          _line(_title, hint: 'A quick note'),
-          const SizedBox(height: AppSpacing.lg),
-          _label('Your letter'),
-          _multiline(_body, hint: 'Write what you want them to read.'),
-        ];
       case SectionType.memory:
         return [
           _label('Title (Optional)'),
@@ -175,10 +171,7 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
           _multiline(_body, hint: 'Tell the story.'),
         ];
       case SectionType.customMessage:
-        return [
-          _label('Message'),
-          _multiline(_body, hint: 'Say it your way.'),
-        ];
+        return [_label('Message'), _multiline(_body, hint: 'Say it your way.')];
       case SectionType.question:
         return [
           _label('Your question'),
@@ -217,10 +210,7 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
         ];
       default:
         return [
-          Text(
-            'This section type is coming soon.',
-            style: AppTypography.body,
-          ),
+          Text('This section type is coming soon.', style: AppTypography.body),
         ];
     }
   }
@@ -254,25 +244,28 @@ class _SectionEditorScreenState extends State<SectionEditorScreen> {
   }
 
   Widget _label(String text) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-        child: Text(text, style: AppTypography.label),
-      );
+    padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+    child: Text(text, style: AppTypography.label),
+  );
 
   Widget _line(TextEditingController c, {String? hint}) => TextField(
-        controller: c,
-        textCapitalization: TextCapitalization.sentences,
-        decoration: InputDecoration(hintText: hint),
-      );
+    controller: c,
+    textCapitalization: TextCapitalization.sentences,
+    decoration: InputDecoration(hintText: hint),
+  );
 
-  Widget _multiline(TextEditingController c, {String? hint, int minLines = 6}) =>
-      TextField(
-        controller: c,
-        minLines: minLines,
-        maxLines: null,
-        keyboardType: TextInputType.multiline,
-        textCapitalization: TextCapitalization.sentences,
-        decoration: InputDecoration(hintText: hint),
-      );
+  Widget _multiline(
+    TextEditingController c, {
+    String? hint,
+    int minLines = 6,
+  }) => TextField(
+    controller: c,
+    minLines: minLines,
+    maxLines: null,
+    keyboardType: TextInputType.multiline,
+    textCapitalization: TextCapitalization.sentences,
+    decoration: InputDecoration(hintText: hint),
+  );
 }
 
 /// A labelled button that opens a picker and shows the chosen value.

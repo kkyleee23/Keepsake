@@ -13,6 +13,7 @@ import '../../data/models/keepsake.dart';
 import '../../data/providers.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/primary_button.dart';
 
 /// Choose how and when a keepsake opens, then publish it.
@@ -279,36 +280,75 @@ class _Choice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final d = Motion.of(context, Motion.short);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.xs),
-      child: Material(
-        color: selected ? AppColors.surfaceAlt : AppColors.surface,
-        borderRadius: AppRadius.card,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: AppRadius.card,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              borderRadius: AppRadius.card,
-              border: Border.all(
-                color: selected ? AppColors.accent : AppColors.hairline,
-                width: selected ? 1.5 : 1,
+      child: Pressable(
+        scale: 0.985,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: AppRadius.card,
+            child: AnimatedContainer(
+              duration: d,
+              curve: Motion.settle,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: selected ? AppColors.surfaceAlt : AppColors.surface,
+                borderRadius: AppRadius.card,
+                border: Border.all(
+                  color: selected ? AppColors.accent : AppColors.hairline,
+                  width: selected ? 1.5 : 1,
+                ),
+              ),
+              child: Row(
+                children: [
+                  _RadioDot(selected: selected),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(label, style: AppTypography.bodyLarge),
+                ],
               ),
             ),
-            child: Row(
-              children: [
-                Icon(
-                  selected
-                      ? Icons.radio_button_checked
-                      : Icons.radio_button_unchecked,
-                  color: selected ? AppColors.accent : AppColors.inkFaint,
-                  size: 20,
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(label, style: AppTypography.bodyLarge),
-              ],
-            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A radio dot whose center pops in when chosen.
+class _RadioDot extends StatelessWidget {
+  const _RadioDot({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final d = Motion.of(context, Motion.medium);
+    return AnimatedContainer(
+      duration: d,
+      curve: Motion.settle,
+      width: 20,
+      height: 20,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? AppColors.accent : AppColors.inkFaint,
+          width: 2,
+        ),
+      ),
+      alignment: Alignment.center,
+      child: AnimatedScale(
+        scale: selected ? 1 : 0,
+        duration: d,
+        curve: Motion.pop,
+        child: Container(
+          width: 10,
+          height: 10,
+          decoration: const BoxDecoration(
+            color: AppColors.accent,
+            shape: BoxShape.circle,
           ),
         ),
       ),
