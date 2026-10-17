@@ -53,6 +53,8 @@ abstract final class KeepsakeFactory {
         return {'title': '', 'entries': <Map<String, dynamic>>[]};
       case SectionType.countdown:
         return {'label': '', 'date': null};
+      case SectionType.photo:
+        return {'title': '', 'photos': <Map<String, dynamic>>[]};
       default:
         return const {};
     }

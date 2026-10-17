@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,6 +9,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/media/photo_codec.dart';
 import '../../data/models/enums.dart';
 import '../../data/models/keepsake_section.dart';
 import '../../shared/widgets/brand.dart';
@@ -45,7 +48,8 @@ class SectionView extends StatelessWidget {
       case SectionType.reasons:
         return _Reasons(
           title: _s('title'),
-          items: (section.content['items'] as List?)
+          items:
+              (section.content['items'] as List?)
                   ?.map((e) => e.toString().trim())
                   .where((e) => e.isNotEmpty)
                   .toList() ??
@@ -60,6 +64,14 @@ class SectionView extends StatelessWidget {
         return _Timeline(
           title: _s('title'),
           entries: (section.content['entries'] as List?) ?? const [],
+        );
+      case SectionType.photo:
+        return _Photos(
+          title: _s('title'),
+          photos: [
+            for (final e in (section.content['photos'] as List?) ?? const [])
+              Map<String, dynamic>.from(e as Map),
+          ],
         );
       case SectionType.countdown:
         return _Countdown(
@@ -186,18 +198,17 @@ class _Memory extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    date ?? 'A memory',
-                    style: AppTypography.eyebrow,
-                  ),
+                  Text(date ?? 'A memory', style: AppTypography.eyebrow),
                   if (title != null) ...[
                     const SizedBox(height: AppSpacing.xs),
                     Text(title!, style: AppTypography.heading),
                   ],
                   if (body != null) ...[
                     const SizedBox(height: AppSpacing.xs),
-                    Text(body!,
-                        style: AppTypography.bodyLarge.merge(_readingStyle)),
+                    Text(
+                      body!,
+                      style: AppTypography.bodyLarge.merge(_readingStyle),
+                    ),
                   ],
                 ],
               ),
@@ -409,7 +420,8 @@ class _OpenWhenEnvelopeState extends State<_OpenWhenEnvelope>
 
   @override
   Widget build(BuildContext context) {
-    final open = _c.status == AnimationStatus.forward ||
+    final open =
+        _c.status == AnimationStatus.forward ||
         _c.status == AnimationStatus.completed;
     return Semantics(
       button: true,
@@ -445,10 +457,7 @@ class _OpenWhenEnvelopeState extends State<_OpenWhenEnvelope>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                'Open when',
-                                style: AppTypography.eyebrow,
-                              ),
+                              Text('Open when', style: AppTypography.eyebrow),
                               const SizedBox(height: AppSpacing.xxs),
                               Text(widget.label, style: AppTypography.label),
                             ],
@@ -478,8 +487,9 @@ class _OpenWhenEnvelopeState extends State<_OpenWhenEnvelope>
                                 widget.body.isEmpty
                                     ? 'A little something, just for now.'
                                     : widget.body,
-                                style: AppTypography.bodyLarge
-                                    .merge(_readingStyle),
+                                style: AppTypography.bodyLarge.merge(
+                                  _readingStyle,
+                                ),
                               ),
                             ),
                           ),
@@ -506,19 +516,16 @@ class _Timeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items =
-        entries.map((e) => Map<String, dynamic>.from(e as Map)).toList();
+    final items = entries
+        .map((e) => Map<String, dynamic>.from(e as Map))
+        .toList();
     if (items.isEmpty) return const SizedBox.shrink();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title != null) _SectionTitle(title!),
         for (var i = 0; i < items.length; i++)
-          _VineEntry(
-            data: items[i],
-            index: i,
-            last: i == items.length - 1,
-          ),
+          _VineEntry(data: items[i], index: i, last: i == items.length - 1),
       ],
     );
   }
@@ -576,8 +583,7 @@ class _VineEntry extends StatelessWidget {
                   if (date != null)
                     Text(
                       DateFormat.yMMMMd().format(date),
-                      style:
-                          AppTypography.eyebrow,
+                      style: AppTypography.eyebrow,
                     ),
                   if (title.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xxs),
@@ -585,8 +591,10 @@ class _VineEntry extends StatelessWidget {
                   ],
                   if (body.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xxs),
-                    Text(body,
-                        style: AppTypography.bodyLarge.merge(_readingStyle)),
+                    Text(
+                      body,
+                      style: AppTypography.bodyLarge.merge(_readingStyle),
+                    ),
                   ],
                 ],
               ),
@@ -638,8 +646,11 @@ class _CountdownState extends State<_Countdown> {
       child: Column(
         children: [
           if (widget.label != null) ...[
-            Text(widget.label!,
-                style: AppTypography.heading, textAlign: TextAlign.center),
+            Text(
+              widget.label!,
+              style: AppTypography.heading,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.md),
           ],
           if (date != null && !arrived)
@@ -703,6 +714,273 @@ class _Tile extends StatelessWidget {
               ),
             ),
             Text(unit, style: AppTypography.caption),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoItem {
+  _PhotoItem(this.bytes, this.caption);
+  final Uint8List bytes;
+  final String caption;
+}
+
+/// Photos as little instant prints: white frames, a handwritten caption,
+/// a strip of tape, each tilted a touch differently. Tap to see it large.
+class _Photos extends StatefulWidget {
+  const _Photos({this.title, required this.photos});
+
+  final String? title;
+  final List<Map<String, dynamic>> photos;
+
+  @override
+  State<_Photos> createState() => _PhotosState();
+}
+
+class _PhotosState extends State<_Photos> {
+  late List<_PhotoItem> _items = _decode();
+
+  // Decoding base64 is not free, so it happens once, not on every build.
+  List<_PhotoItem> _decode() => [
+    for (final m in widget.photos)
+      if (PhotoCodec.decode(m['data'] as String?) case final bytes?)
+        _PhotoItem(bytes, (m['caption'] as String?)?.trim() ?? ''),
+  ];
+
+  @override
+  void didUpdateWidget(_Photos old) {
+    super.didUpdateWidget(old);
+    if (old.photos != widget.photos) _items = _decode();
+  }
+
+  void _view(int index) {
+    Navigator.of(context).push(
+      PageRouteBuilder<void>(
+        opaque: false,
+        barrierColor: AppColors.ink.withValues(alpha: 0.92),
+        barrierDismissible: true,
+        pageBuilder: (_, _, _) => _PhotoViewer(items: _items, initial: index),
+        transitionsBuilder: (_, anim, _, child) =>
+            FadeTransition(opacity: anim, child: child),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_items.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.title != null) _SectionTitle(widget.title!),
+        LayoutBuilder(
+          builder: (context, box) {
+            if (_items.length == 1) {
+              return Center(
+                child: SizedBox(
+                  width: math.min(box.maxWidth - AppSpacing.lg, 320),
+                  child: _Print(
+                    item: _items.first,
+                    angle: -0.025,
+                    tape: true,
+                    onTap: () => _view(0),
+                  ),
+                ),
+              );
+            }
+            final w = (box.maxWidth - AppSpacing.md) / 2;
+            return Wrap(
+              spacing: AppSpacing.md,
+              runSpacing: AppSpacing.lg,
+              children: [
+                for (var i = 0; i < _items.length; i++)
+                  Padding(
+                    // Stagger the right column a little, like prints laid
+                    // down by hand.
+                    padding: EdgeInsets.only(top: i.isOdd ? AppSpacing.md : 0),
+                    child: SizedBox(
+                      width: w,
+                      child: _Print(
+                        item: _items[i],
+                        angle: const [
+                          -0.035,
+                          0.03,
+                          0.02,
+                          -0.025,
+                          -0.015,
+                          0.035,
+                        ][i % 6],
+                        tape: i % 3 != 2,
+                        onTap: () => _view(i),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _Print extends StatelessWidget {
+  const _Print({
+    required this.item,
+    required this.angle,
+    required this.tape,
+    required this.onTap,
+  });
+
+  final _PhotoItem item;
+  final double angle;
+  final bool tape;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      image: true,
+      button: true,
+      label: item.caption.isEmpty ? 'Photo' : item.caption,
+      child: Transform.rotate(
+        angle: angle,
+        child: Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.topCenter,
+          children: [
+            GestureDetector(
+              onTap: onTap,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.xs,
+                  AppSpacing.xs,
+                  AppSpacing.xs,
+                  0,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(3),
+                  border: Border.all(color: AppColors.giftEdge),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.memory(
+                        item.bytes,
+                        fit: BoxFit.cover,
+                        gaplessPlayback: true,
+                      ),
+                    ),
+                    SizedBox(
+                      height: 40,
+                      child: Center(
+                        child: Text(
+                          item.caption,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.eyebrow.copyWith(
+                            color: AppColors.inkSoft,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (tape)
+              const Positioned(
+                top: -9,
+                child: WashiTape(width: 56, height: 18),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Full-screen photos on a dark backdrop. Swipe between them, pinch to zoom,
+/// tap outside or Close to go back.
+class _PhotoViewer extends StatefulWidget {
+  const _PhotoViewer({required this.items, required this.initial});
+
+  final List<_PhotoItem> items;
+  final int initial;
+
+  @override
+  State<_PhotoViewer> createState() => _PhotoViewerState();
+}
+
+class _PhotoViewerState extends State<_PhotoViewer> {
+  late final PageController _pages = PageController(
+    initialPage: widget.initial,
+  );
+  late int _index = widget.initial;
+
+  @override
+  void dispose() {
+    _pages.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final caption = widget.items[_index].caption;
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: TextButton.styleFrom(foregroundColor: Colors.white),
+                child: const Text('Close'),
+              ),
+            ),
+            Expanded(
+              child: PageView.builder(
+                controller: _pages,
+                itemCount: widget.items.length,
+                onPageChanged: (i) => setState(() => _index = i),
+                itemBuilder: (_, i) => InteractiveViewer(
+                  maxScale: 4,
+                  child: Center(child: Image.memory(widget.items[i].bytes)),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                children: [
+                  if (caption.isNotEmpty)
+                    Text(
+                      caption,
+                      style: AppTypography.eyebrow.copyWith(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  if (widget.items.length > 1) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      '${_index + 1} of ${widget.items.length}',
+                      style: AppTypography.caption.copyWith(
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ],
         ),
       ),

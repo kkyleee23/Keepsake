@@ -14,6 +14,7 @@ abstract final class SectionDisplay {
       case SectionType.reasons:
       case SectionType.openWhen:
       case SectionType.timeline:
+      case SectionType.photo:
         final t = (s.content['title'] as String?)?.trim();
         return (t == null || t.isEmpty) ? s.type.label : t;
       case SectionType.countdown:
@@ -45,15 +46,22 @@ abstract final class SectionDisplay {
       case SectionType.countdown:
         final d = DateTime.tryParse((s.content['date'] as String?) ?? '');
         return d == null ? '' : 'Counting down';
+      case SectionType.photo:
+        final n = (s.content['photos'] as List?)?.length ?? 0;
+        return n == 0 ? '' : '$n ${n == 1 ? 'photo' : 'photos'}';
       default:
         return '';
     }
   }
 
   /// True when the section has no meaningful content yet.
-  static bool isEmpty(KeepsakeSection s) => preview(s).isEmpty &&
-      heading(s) == s.type.label &&
-      s.type != SectionType.photo;
+  static bool isEmpty(KeepsakeSection s) =>
+      preview(s).isEmpty && heading(s) == s.type.label;
+
+  /// How many photos a section holds (0 for non-photo sections).
+  static int photoCount(KeepsakeSection s) => s.type == SectionType.photo
+      ? ((s.content['photos'] as List?)?.length ?? 0)
+      : 0;
 
   static String _firstLine(String? text) {
     final t = text?.trim() ?? '';

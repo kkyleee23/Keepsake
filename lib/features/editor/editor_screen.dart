@@ -15,6 +15,7 @@ import '../keepsakes/application/keepsakes_controller.dart';
 import '../sections/open_when_editor_screen.dart';
 import '../sections/section_display.dart';
 import '../sections/section_editor_screen.dart';
+import '../sections/photo_editor_screen.dart';
 import '../sections/timeline_editor_screen.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
@@ -40,6 +41,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   /// offers a dead end.
   static const _addable = [
     SectionType.letter,
+    SectionType.photo,
     SectionType.memory,
     SectionType.openWhen,
     SectionType.reasons,
@@ -271,6 +273,13 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
         return OpenWhenEditorScreen(section: section);
       case SectionType.timeline:
         return TimelineEditorScreen(section: section);
+      case SectionType.photo:
+        return PhotoEditorScreen(
+          section: section,
+          otherPhotos: _draft!.orderedSections
+              .where((s) => s.id != section.id)
+              .fold(0, (n, s) => n + SectionDisplay.photoCount(s)),
+        );
       default:
         return SectionEditorScreen(section: section);
     }
@@ -280,6 +289,8 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     switch (type) {
       case SectionType.letter:
         return Icons.mail_outline;
+      case SectionType.photo:
+        return Icons.photo_library_outlined;
       case SectionType.memory:
         return Icons.auto_stories_outlined;
       case SectionType.openWhen:

@@ -100,8 +100,15 @@ class KeepsakeBackend {
 
     final map = Map<String, dynamic>.from(res as Map);
     final status = map['status'] as String?;
+    if (status == 'too_large') {
+      throw StateError(
+          'This keepsake is too large to send. Try removing a photo or two.');
+    }
+    if (status == 'unauthenticated') {
+      throw StateError('Please sign in again, then publish.');
+    }
     if (status != 'ok') {
-      throw StateError('Could not publish (${status ?? 'unknown'}).');
+      throw StateError('Something went wrong on our side. Try again.');
     }
     return token;
   }

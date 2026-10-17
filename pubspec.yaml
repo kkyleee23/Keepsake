@@ -28,6 +28,11 @@ dependencies:
   # Backend (published keepsakes, recipient access with server-side rules)
   supabase_flutter: ^2.8.0
 
+  # Photos: pick from the library, then shrink and re-encode on device so a
+  # keepsake stays small (images travel inside the keepsake itself).
+  image_picker: ^1.1.2
+  image: ^4.2.0
+
   # Sharing a published keepsake
   qr_flutter: ^4.1.0
   share_plus: ^10.1.2

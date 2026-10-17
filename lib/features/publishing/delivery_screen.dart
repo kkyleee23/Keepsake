@@ -117,7 +117,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       if (!mounted) return;
       setState(() => _publishing = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Couldn't publish. $e")),
+        SnackBar(
+          content: Text(
+            e is StateError
+                ? e.message
+                : "Couldn't publish. Check your connection and try again.",
+          ),
+        ),
       );
     }
   }
