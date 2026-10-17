@@ -8,6 +8,8 @@ import '../../core/theme/app_typography.dart';
 import '../../data/models/enums.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/brand.dart';
+import '../../shared/widgets/motion.dart';
+import '../../shared/widgets/paper.dart';
 
 /// First step of the creation flow: choose what this is for (or start blank).
 ///
@@ -50,14 +52,17 @@ class _CreateScreenState extends State<CreateScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('What is this for?',
-                          style: AppTypography.displaySmall),
+                      Text(
+                        'What is this for?',
+                        style: AppTypography.displaySmall,
+                      ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         'Pick an occasion to start from, or begin with a '
                         'blank one.',
-                        style: AppTypography.bodyLarge
-                            .copyWith(color: AppColors.inkSoft),
+                        style: AppTypography.bodyLarge.copyWith(
+                          color: AppColors.inkSoft,
+                        ),
                       ),
                     ],
                   ),
@@ -69,7 +74,9 @@ class _CreateScreenState extends State<CreateScreen> {
           Expanded(
             child: GridView.count(
               crossAxisCount: 2,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.gutter,
+              ),
               childAspectRatio: 2.6,
               crossAxisSpacing: AppSpacing.sm,
               mainAxisSpacing: AppSpacing.sm,
@@ -107,29 +114,77 @@ class _OccasionTile extends StatelessWidget {
   final bool selected;
   final VoidCallback onTap;
 
+  static IconData _icon(Occasion o) => switch (o) {
+    Occasion.birthday => Icons.cake_outlined,
+    Occasion.anniversary => Icons.favorite_border,
+    Occasion.love => Icons.volunteer_activism_outlined,
+    Occasion.longDistance => Icons.flight_takeoff,
+    Occasion.friendship => Icons.diversity_1_outlined,
+    Occasion.family => Icons.cottage_outlined,
+    Occasion.graduation => Icons.school_outlined,
+    Occasion.congratulations => Icons.celebration_outlined,
+    Occasion.thankYou => Icons.redeem_outlined,
+    Occasion.apology => Icons.spa_outlined,
+    Occasion.encouragement => Icons.wb_sunny_outlined,
+    Occasion.justBecause => Icons.local_florist_outlined,
+    Occasion.custom => Icons.edit_outlined,
+  };
+
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.surfaceAlt : AppColors.surface,
-      borderRadius: AppRadius.card,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.card,
-        child: Container(
-          alignment: Alignment.centerLeft,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          decoration: BoxDecoration(
-            borderRadius: AppRadius.card,
-            border: Border.all(
-              color: selected ? AppColors.accent : AppColors.hairline,
-              width: selected ? 1.5 : 1,
-            ),
+    final d = Motion.of(context, Motion.short);
+    return Pressable(
+      child: AnimatedContainer(
+        duration: d,
+        decoration: BoxDecoration(
+          borderRadius: AppRadius.card,
+          border: Border.all(
+            color: selected ? AppColors.accent : Colors.transparent,
+            width: 1.5,
           ),
-          child: Text(
-            occasion.label,
-            style: AppTypography.label.copyWith(
-              color: selected ? AppColors.accent : AppColors.ink,
-            ),
+        ),
+        child: PaperCard(
+          onTap: onTap,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+          edge: selected ? AppColors.accent : AppColors.hairline,
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: d,
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? AppColors.accent : AppColors.sageSoft,
+                ),
+                child: AnimatedScale(
+                  scale: selected ? 1.1 : 1,
+                  duration: Motion.of(context, Motion.medium),
+                  curve: Motion.pop,
+                  child: Icon(
+                    _icon(occasion),
+                    size: 18,
+                    color: selected ? AppColors.onAccent : AppColors.accent,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                // One line, never broken mid-word: long names shrink a little.
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    occasion.label,
+                    maxLines: 1,
+                    style: AppTypography.label.copyWith(
+                      fontSize: 15,
+                      color: selected ? AppColors.accent : AppColors.ink,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),

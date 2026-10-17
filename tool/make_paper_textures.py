@@ -187,3 +187,12 @@ save('paper_linen', compose(hexc('#F5EFE3'),
 # Book cloth: the same weave, deeper, to be tinted for the cover.
 save('cloth', compose(hexc('#EEEAE2'),
      [(weave, 0.05, 0.9), (formation, 0.025, 0.3), (tooth, 0.01, 0.4)], 1.4, 0.45))
+
+# Stone: the app's background. Very quiet; it sits behind everything.
+formation = periodic_noise(rng, 1.7, 0.003, 0.06)
+tooth = soft_tooth()
+fib = fibers(rng, 700, (10, 34), (0.6, 1.0), 0.5)
+# Cloudiness kept very low: across a whole screen even a little reads as
+# smudges.
+save('paper_stone', compose(hexc('#F1F1EB'),
+     [(formation, 0.0025, 0.08), (tooth, 0.004, 0.3), (fib, 0.009, 0.25)], 0.8, 0.12))

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'gift_art.dart' show PaperTextures;
+import 'paper.dart';
+
 /// One place for how things move in Keepsake: a few durations, a soft curve,
 /// and a page transition. Everything goes still when the phone asks for
 /// reduced motion.
@@ -23,11 +26,16 @@ abstract final class Motion {
 
   /// A route that fades in while rising a few pixels, like a card being set
   /// down. Used for pushes that aren't handled by the router.
-  static Route<T> route<T>(BuildContext context, Widget page) {
+  /// The page sits on paper ([texture]) so nothing shows through it.
+  static Route<T> route<T>(
+    BuildContext context,
+    Widget page, {
+    String texture = PaperTextures.stone,
+  }) {
     return PageRouteBuilder<T>(
       transitionDuration: of(context, medium),
       reverseTransitionDuration: of(context, short),
-      pageBuilder: (_, _, _) => page,
+      pageBuilder: (_, _, _) => PaperPage(texture: texture, child: page),
       transitionsBuilder: (_, anim, _, child) =>
           SoftRiseTransition(animation: anim, child: child),
     );
@@ -170,11 +178,7 @@ class _PressableState extends State<Pressable> {
 /// Holds every tab's screen (so each keeps its scroll and state) and
 /// cross-fades between them with a small settle, instead of a hard cut.
 class FadingTabs extends StatelessWidget {
-  const FadingTabs({
-    super.key,
-    required this.index,
-    required this.children,
-  });
+  const FadingTabs({super.key, required this.index, required this.children});
 
   final int index;
   final List<Widget> children;

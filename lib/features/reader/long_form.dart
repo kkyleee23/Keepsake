@@ -200,6 +200,7 @@ class EssayCard extends StatelessWidget {
     Navigator.of(context).push(
       Motion.route<void>(
         context,
+        texture: PaperTextures.cream,
         EssayReaderScreen(
           title: title,
           subtitle: subtitle,
@@ -300,9 +301,7 @@ class _EssayReaderScreenState extends State<EssayReaderScreen> {
   Widget build(BuildContext context) {
     final author = widget.author?.trim() ?? '';
     return Scaffold(
-      backgroundColor: AppColors.giftPaper,
       appBar: AppBar(
-        backgroundColor: AppColors.giftPaper,
         title: Text(Reading.minutesLabel(widget.body)),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(2),

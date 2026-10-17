@@ -10,13 +10,16 @@ import '../../data/remote/auth_service.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import 'edit_profile_screen.dart';
 import 'info_screens.dart';
+import '../../shared/widgets/paper.dart';
 
 /// A quiet profile: identity, a recipient entry point, then a short list.
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
   void _push(BuildContext context, Widget screen) {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => PaperPage(child: screen)));
   }
 
   /// Accepts either a raw token or a full share link and opens it.
@@ -108,10 +111,14 @@ class ProfileScreen extends ConsumerWidget {
     final error = await auth.deleteAccount();
     if (error != null) {
       await auth.signOut();
-      messenger.showSnackBar(SnackBar(
-        content: Text('Your keepsakes are deleted, but the account itself '
-            "couldn't be. $error"),
-      ));
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            'Your keepsakes are deleted, but the account itself '
+            "couldn't be. $error",
+          ),
+        ),
+      );
     }
   }
 
@@ -304,13 +311,8 @@ class _SettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Material (not a coloured box) so row ripples paint on the card.
-    return Material(
-      color: AppColors.surface,
-      clipBehavior: Clip.antiAlias,
-      shape: const RoundedRectangleBorder(
-        borderRadius: AppRadius.card,
-        side: BorderSide(color: AppColors.hairline),
-      ),
+    return PaperCard(
+      padding: EdgeInsets.zero,
       child: Column(
         children: [
           for (var i = 0; i < items.length; i++) ...[

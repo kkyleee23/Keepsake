@@ -329,6 +329,7 @@ class PaperTextures extends ChangeNotifier {
   static const seed = 'assets/textures/paper_sage.jpg';
   static const linen = 'assets/textures/paper_linen.jpg';
   static const cloth = 'assets/textures/cloth.jpg';
+  static const stone = 'assets/textures/paper_stone.jpg';
 
   /// Each 768 px tile covers 256 logical px: about one texture pixel per
   /// screen pixel on a 3x phone.
@@ -342,7 +343,7 @@ class PaperTextures extends ChangeNotifier {
   Future<void> load() => _loading ??= _load();
 
   Future<void> _load() async {
-    for (final asset in [cream, kraft, seed, linen, cloth]) {
+    for (final asset in [cream, kraft, seed, linen, cloth, stone]) {
       try {
         final data = await rootBundle.load(asset);
         final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());

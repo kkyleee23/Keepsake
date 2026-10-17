@@ -15,6 +15,8 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/section_header.dart';
 import '../../shared/widgets/motion.dart';
+import '../../shared/widgets/paper.dart';
+import '../../shared/widgets/gift_art.dart';
 
 /// Home prioritizes meaningful actions over statistics (product brief).
 class HomeScreen extends ConsumerWidget {
@@ -110,6 +112,7 @@ class _QuietPlaceholder extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: AppColors.surface,
+        image: paperImage(PaperTextures.cream),
         borderRadius: AppRadius.card,
         border: Border.all(color: AppColors.hairline),
       ),
@@ -131,10 +134,10 @@ class _Hero extends StatelessWidget {
     final part = h < 5
         ? 'Up late'
         : h < 12
-            ? 'Good morning'
-            : h < 18
-                ? 'Good afternoon'
-                : 'Good evening';
+        ? 'Good morning'
+        : h < 18
+        ? 'Good afternoon'
+        : 'Good evening';
     final first = name?.trim().split(' ').first ?? '';
     return first.isEmpty ? part : '$part, $first';
   }
@@ -154,6 +157,7 @@ class _Hero extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             color: AppColors.giftPaper,
+            image: paperImage(PaperTextures.cream),
             borderRadius: AppRadius.sheet,
             border: Border.all(color: AppColors.giftEdge),
           ),

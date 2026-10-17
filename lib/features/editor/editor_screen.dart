@@ -23,6 +23,7 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/motion.dart';
+import '../../shared/widgets/paper.dart';
 
 /// The assembly surface: the creator builds a Keepsake here.
 ///
@@ -95,7 +96,9 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
 
   Future<void> _openSection(KeepsakeSection section) async {
     final content = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(builder: (_) => _editorFor(section)),
+      MaterialPageRoute(
+        builder: (_) => PaperPage(child: _editorFor(section)),
+      ),
     );
     if (content == null) return;
     final draft = _draft!;

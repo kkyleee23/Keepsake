@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../shared/widgets/motion.dart';
+import '../shared/widgets/paper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/models/enums.dart';
@@ -69,83 +70,102 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/onboarding',
-        builder: (context, state) => const OnboardingScreen(),
+        builder: (context, state) => PaperPage(child: const OnboardingScreen()),
       ),
       GoRoute(
         path: '/auth',
-        builder: (context, state) => const AuthScreen(),
+        builder: (context, state) => PaperPage(child: const AuthScreen()),
       ),
 
       StatefulShellRoute(
         builder: (context, state, navigationShell) =>
-            HomeShell(navigationShell: navigationShell),
+            PaperPage(child: HomeShell(navigationShell: navigationShell)),
         // Tabs keep their state and cross-fade when you switch.
         navigatorContainerBuilder: (context, navigationShell, children) =>
             FadingTabs(index: navigationShell.currentIndex, children: children),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) => const HomeScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/create',
-              builder: (context, state) => const CreateScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/keepsakes',
-              builder: (context, state) => const KeepsakesScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: '/profile',
-              builder: (context, state) => const ProfileScreen(),
-            ),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) =>
+                    PaperPage(child: const HomeScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/create',
+                builder: (context, state) =>
+                    PaperPage(child: const CreateScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/keepsakes',
+                builder: (context, state) =>
+                    PaperPage(child: const KeepsakesScreen()),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/profile',
+                builder: (context, state) =>
+                    PaperPage(child: const ProfileScreen()),
+              ),
+            ],
+          ),
         ],
       ),
 
       // Focused creator flows, shown above the tab shell (no bottom nav).
       GoRoute(
         path: '/new/recipient',
-        builder: (context, state) => RecipientScreen(
-          occasion: state.extra as Occasion? ?? Occasion.custom,
+        builder: (context, state) => PaperPage(
+          child: RecipientScreen(
+            occasion: state.extra as Occasion? ?? Occasion.custom,
+          ),
         ),
       ),
       GoRoute(
         path: '/editor/:id',
-        builder: (context, state) =>
-            EditorScreen(keepsakeId: state.pathParameters['id']!),
+        builder: (context, state) => PaperPage(
+          child: EditorScreen(keepsakeId: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/preview/:id',
-        builder: (context, state) =>
-            PreviewScreen(keepsakeId: state.pathParameters['id']!),
+        builder: (context, state) => PaperPage(
+          child: PreviewScreen(keepsakeId: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/delivery/:id',
-        builder: (context, state) =>
-            DeliveryScreen(keepsakeId: state.pathParameters['id']!),
+        builder: (context, state) => PaperPage(
+          child: DeliveryScreen(keepsakeId: state.pathParameters['id']!),
+        ),
       ),
       GoRoute(
         path: '/published/:id',
-        builder: (context, state) =>
-            PublishedScreen(
-          keepsakeId: state.pathParameters['id']!,
-          justPublished: state.uri.queryParameters['new'] == '1',
+        builder: (context, state) => PaperPage(
+          child: PublishedScreen(
+            keepsakeId: state.pathParameters['id']!,
+            justPublished: state.uri.queryParameters['new'] == '1',
+          ),
         ),
       ),
 
       // Recipient route group, deliberately outside the creator shell, no account.
       GoRoute(
         path: '/receive/:token',
-        builder: (context, state) =>
-            ReceiveScreen(token: state.pathParameters['token']!),
+        builder: (context, state) => PaperPage(
+          child: ReceiveScreen(token: state.pathParameters['token']!),
+        ),
       ),
     ],
   );
