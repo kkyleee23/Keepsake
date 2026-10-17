@@ -83,6 +83,23 @@ class AuthService {
     await supabaseClientOrNull?.auth.signOut();
   }
 
+  /// Deletes the signed-in account on the server (keepsakes and replies go
+  /// with it), then signs out. Returns an error message, or null on success.
+  Future<String?> deleteAccount() async {
+    final client = supabaseClientOrNull;
+    if (client == null || currentUser == null) return 'You are not signed in.';
+    try {
+      final res = await client.rpc('delete_my_account');
+      final status = (res is Map) ? res['status'] : null;
+      if (status != 'ok') return "Couldn't delete your account. Try again.";
+    } catch (_) {
+      return "Couldn't delete your account. Check your connection and try "
+          'again.';
+    }
+    await client.auth.signOut();
+    return null;
+  }
+
   /// Sends a password-reset email. Returns an error message, or null on success.
   Future<String?> sendPasswordReset(String email) async {
     final client = supabaseClientOrNull;

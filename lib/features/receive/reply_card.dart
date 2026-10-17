@@ -78,6 +78,9 @@ class _ReplyCardState extends ConsumerState<ReplyCard> {
         case 'too_long':
           _error = 'That note is a little long. Keep it under '
               '$_maxMessage characters.';
+        case 'locked':
+          _error = 'Too many PIN tries on this keepsake. Try again a bit '
+              'later.';
         case 'empty':
           _error = 'Pick a reaction or write a few words first.';
         default:

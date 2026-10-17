@@ -80,13 +80,12 @@ class ProfileScreen extends ConsumerWidget {
     final yes = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
         icon: const Icon(Icons.warning_amber_rounded, color: AppColors.error),
-        title: Text('Delete everything?', style: AppTypography.heading),
-        content: Text(
-          'This removes every keepsake you have made and received, on this '
-          'device and on the server. This cannot be undone.',
-          style: AppTypography.body,
+        title: const Text('Delete your account?'),
+        content: const Text(
+          'This deletes your account and everything in it: every keepsake '
+          'you made (their links stop working), every reply, and everything '
+          'saved on this device. This cannot be undone.',
         ),
         actions: [
           TextButton(
@@ -96,14 +95,23 @@ class ProfileScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete Everything'),
+            child: const Text('Delete My Account'),
           ),
         ],
       ),
     );
-    if (yes == true) {
-      await ref.read(keepsakesControllerProvider.notifier).wipeEverything();
-      await ref.read(authServiceProvider).signOut();
+    if (yes != true || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    // Server keepsakes and everything on this device first, then the account.
+    await ref.read(keepsakesControllerProvider.notifier).wipeEverything();
+    final auth = ref.read(authServiceProvider);
+    final error = await auth.deleteAccount();
+    if (error != null) {
+      await auth.signOut();
+      messenger.showSnackBar(SnackBar(
+        content: Text('Your keepsakes are deleted, but the account itself '
+            "couldn't be. $error"),
+      ));
     }
   }
 
@@ -172,7 +180,7 @@ class ProfileScreen extends ConsumerWidget {
               onPressed: () => _confirmWipe(context, ref),
               style: TextButton.styleFrom(foregroundColor: AppColors.error),
               icon: const Icon(Icons.delete_outline, size: 20),
-              label: const Text('Delete my data'),
+              label: const Text('Delete My Account'),
             ),
           ],
         ],

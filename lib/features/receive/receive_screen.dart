@@ -101,6 +101,16 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           _phase = _Phase.pin;
           _pinError = 'That PIN doesn’t match. Try again.';
         });
+      case 'locked':
+        // Too many wrong PINs: the server pauses tries for a while.
+        final at = result.opensAt;
+        setState(() {
+          _phase = _Phase.pin;
+          _pinError = at == null
+              ? 'Too many tries. Please wait a bit and try again.'
+              : 'Too many tries. You can try again after '
+                  '${DateFormat.jm().format(at)}.';
+        });
       case 'sealed':
         setState(() {
           _phase = _Phase.sealed;
@@ -312,6 +322,7 @@ class _PinGateState extends State<_PinGate> {
               hintText: '••••',
               counterText: '',
               errorText: widget.error,
+              errorMaxLines: 3,
             ),
           ),
           const SizedBox(height: AppSpacing.md),

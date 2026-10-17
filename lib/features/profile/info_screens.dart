@@ -70,12 +70,16 @@ class PrivacyInfoScreen extends StatelessWidget {
             'A scheduled keepsake stays sealed until the moment you choose.'),
         _Block('Checked on the server',
             'Scheduled access, expiry, and PINs are enforced on the server, not just hidden in the app. A link alone never reveals protected content.'),
+        _Block('PIN guesses are limited',
+            'After five wrong PINs, a keepsake pauses new tries for 15 minutes, and longer each time after that. A short PIN can\'t simply be guessed.'),
         _Block('PINs are never stored in the clear',
             'A PIN is hashed on the server and never kept on your device.'),
         _Block('Replies are just for you',
             'If they send something back, only you can read it. Replies go through the same checks as opening, so only someone who could open it can reply.'),
+        _Block('Photos keep no location',
+            'Photos are resized on your phone before they leave it, and the hidden camera details, including where they were taken, are removed.'),
         _Block('You can take it back',
-            'Delete a keepsake any time and its link stops working.'),
+            'Delete a keepsake any time and its link stops working. Delete your account from Profile and everything goes with it.'),
       ],
     );
   }

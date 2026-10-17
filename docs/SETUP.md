@@ -10,13 +10,20 @@ in order. Each one says how to check it worked.
 | 0001_init.sql | Done |
 | 0002_responses.sql (replies) | To do |
 | 0003_payload_limit.sql (size cap, conflict fix) | To do |
+| 0004_security.sql (PIN lockout, locked-down writes, account deletion) | To do |
 | Confirm email turned off for testing | Done |
 | Anonymous sign-ins turned off | To do |
 | Web hosting for share links (step 4) | Later |
 
 ## What changed in each session
 
-- **Latest:** Essays, long letters (with a sign-off), Book gifts, new nav
+- **Latest:** New mascot poses (no setup). Security: run
+  **`0004_security.sql`** after `0003`. It limits PIN guessing (5 wrong
+  tries locks for 15 minutes, then longer), makes publish the only way to
+  write keepsakes, adds hard size limits on the table, and adds real account
+  deletion (Profile > Delete My Account). Until it's run, the app still
+  works, but Delete My Account only removes keepsakes, not the sign-in.
+- **Before that:** Essays, long letters (with a sign-off), Book gifts, new nav
   icons, favicons and motion. **No new database setup needed**: essays and
   books are stored inside the keepsake like everything else, and the 5 MB
   cap from `0003` already covers them (a full essay is around 50 KB).
@@ -33,13 +40,15 @@ paste the whole file, and click **Run**. Do each file once, in this order.
 | `supabase/migrations/0001_init.sql` | Keepsakes table, privacy rules, publish / cover / open functions | Yes, you ran this earlier |
 | `supabase/migrations/0002_responses.sql` | Replies from recipients (only you can read them), rate limit | Run it |
 | `supabase/migrations/0003_payload_limit.sql` | 5 MB size cap per keepsake (photos live inside it), and a fix so publishing with someone else's link reports a conflict instead of a fake success | Run it |
+| `supabase/migrations/0004_security.sql` | PIN guess limit, writes only through publish, size limits on the table, account deletion | Run it |
 
 Running a file twice is safe.
 
 **Check:** in **Table Editor** you should see `keepsakes` and
 `keepsake_responses`. In **Database > Functions** you should see
-`publish_keepsake`, `keepsake_cover`, `keepsake_open`, `respond_to_keepsake`
-and `my_keepsake_responses`.
+`publish_keepsake`, `keepsake_cover`, `keepsake_open`, `respond_to_keepsake`,
+`my_keepsake_responses`, `keepsake_pin_check` and `delete_my_account`, and a
+`keepsake_pin_attempts` table.
 
 ## 2. Sign-in settings (Authentication)
 

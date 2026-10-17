@@ -36,9 +36,12 @@ class CoverResult {
 class OpenResult {
   const OpenResult({required this.status, this.keepsake, this.opensAt});
 
-  /// One of: ok, sealed, expired, pin_required, wrong_pin, not_found, error.
+  /// One of: ok, sealed, expired, pin_required, wrong_pin, locked,
+  /// not_found, error.
   final String status;
   final Keepsake? keepsake;
+
+  /// When sealed: when it opens. When locked: when PIN tries are allowed again.
   final DateTime? opensAt;
 }
 
@@ -107,6 +110,13 @@ class KeepsakeBackend {
     if (status == 'unauthenticated') {
       throw StateError('Please sign in again, then publish.');
     }
+    if (status == 'invalid_pin') {
+      throw StateError('A PIN is 4 to 12 digits, numbers only.');
+    }
+    if (status == 'invalid') {
+      throw StateError(
+          'Something in this keepsake is too long. Try a shorter title or note.');
+    }
     if (status != 'ok') {
       throw StateError('Something went wrong on our side. Try again.');
     }
@@ -157,7 +167,10 @@ class KeepsakeBackend {
         final payload = Map<String, dynamic>.from(m['payload'] as Map);
         return OpenResult(status: status, keepsake: Keepsake.fromJson(payload));
       }
-      return OpenResult(status: status, opensAt: _parseDate(m['opens_at']));
+      return OpenResult(
+        status: status,
+        opensAt: _parseDate(m['opens_at'] ?? m['retry_at']),
+      );
     } catch (_) {
       return const OpenResult(status: 'error');
     }
