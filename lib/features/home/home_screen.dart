@@ -8,6 +8,7 @@ import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
+import '../../data/remote/auth_service.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import '../keepsakes/widgets/keepsake_card.dart';
 import '../../shared/widgets/brand.dart';
@@ -45,18 +46,11 @@ class HomeScreen extends ConsumerWidget {
             child: Wordmark(height: 34),
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Make something\nworth keeping.', style: AppTypography.display),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'A letter, a memory, a small gift for someone. '
-            'Made by you, kept by them.',
-            style: AppTypography.bodyLarge.copyWith(color: AppColors.inkSoft),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          PrimaryButton(
-            label: 'Create a Keepsake',
-            icon: Icons.add,
-            onPressed: () => context.go('/create'),
+          RiseIn(
+            child: _Hero(
+              name: ref.watch(authServiceProvider).displayName,
+              onCreate: () => context.go('/create'),
+            ),
           ),
           const SizedBox(height: AppSpacing.xxl),
 
@@ -120,6 +114,87 @@ class _QuietPlaceholder extends StatelessWidget {
         border: Border.all(color: AppColors.hairline),
       ),
       child: Text(message, style: AppTypography.body),
+    );
+  }
+}
+
+/// A warm hello: a paper card with a greeting by name, the main action, and
+/// the mascot waving from the corner.
+class _Hero extends StatelessWidget {
+  const _Hero({required this.name, required this.onCreate});
+
+  final String? name;
+  final VoidCallback onCreate;
+
+  String get _greeting {
+    final h = DateTime.now().hour;
+    final part = h < 5
+        ? 'Up late'
+        : h < 12
+            ? 'Good morning'
+            : h < 18
+                ? 'Good afternoon'
+                : 'Good evening';
+    final first = name?.trim().split(' ').first ?? '';
+    return first.isEmpty ? part : '$part, $first';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+            AppSpacing.lg,
+          ),
+          decoration: BoxDecoration(
+            color: AppColors.giftPaper,
+            borderRadius: AppRadius.sheet,
+            border: Border.all(color: AppColors.giftEdge),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_greeting, style: AppTypography.eyebrow),
+              const SizedBox(height: AppSpacing.xs),
+              FractionallySizedBox(
+                widthFactor: 0.66,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Make something worth keeping.',
+                  style: AppTypography.title.copyWith(height: 1.25),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              FractionallySizedBox(
+                widthFactor: 0.62,
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'A letter, a book, a few photos. Made by you, kept by them.',
+                  style: AppTypography.body,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              PrimaryButton(
+                label: 'Create a Keepsake',
+                icon: Icons.add,
+                onPressed: onCreate,
+                expand: false,
+              ),
+            ],
+          ),
+        ),
+        const Positioned(
+          right: -AppSpacing.xs,
+          top: AppSpacing.md,
+          child: Mascot(size: 132, pose: MascotPose.waving, animate: true),
+        ),
+      ],
     );
   }
 }

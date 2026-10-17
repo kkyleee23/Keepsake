@@ -7,6 +7,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/enums.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/brand.dart';
 
 /// First step of the creation flow: choose what this is for (or start blank).
 ///
@@ -42,16 +43,26 @@ class _CreateScreenState extends State<CreateScreen> {
               AppSpacing.gutter,
               AppSpacing.md,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text('What is this for?', style: AppTypography.displaySmall),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Pick an occasion to start from, or begin with a blank one.',
-                  style: AppTypography.bodyLarge
-                      .copyWith(color: AppColors.inkSoft),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('What is this for?',
+                          style: AppTypography.displaySmall),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Pick an occasion to start from, or begin with a '
+                        'blank one.',
+                        style: AppTypography.bodyLarge
+                            .copyWith(color: AppColors.inkSoft),
+                      ),
+                    ],
+                  ),
                 ),
+                const Mascot(size: 104, pose: MascotPose.gift),
               ],
             ),
           ),

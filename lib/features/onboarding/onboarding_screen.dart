@@ -21,7 +21,7 @@ const _slides = [
   _Slide(
     'Make something worth keeping.',
     'A letter, a memory, a small gift. Made for one person to keep.',
-    pose: MascotPose.happy,
+    pose: MascotPose.waving,
   ),
   _Slide(
     'Give it your way.',

@@ -20,6 +20,14 @@ enum MascotPose {
   error,
   offline,
   done,
+  // Made with Figma AI from the same character description, for newer
+  // features: books, writing, photos, gifts, greetings and privacy.
+  reading,
+  writing,
+  photo,
+  gift,
+  waving,
+  secure,
 }
 
 /// The app-icon mark (mascot on a green rounded square).

@@ -235,7 +235,7 @@ class _NoPages extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Mascot(size: 96, pose: MascotPose.typing),
+          const Mascot(size: 96, pose: MascotPose.reading),
           const SizedBox(height: AppSpacing.sm),
           Text('Write the first page', style: AppTypography.heading),
           const SizedBox(height: AppSpacing.xxs),

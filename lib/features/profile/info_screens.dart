@@ -58,6 +58,7 @@ class PrivacyInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const _InfoList(
       title: 'Privacy & security',
+      pose: MascotPose.secure,
       blocks: [
         _Block('Your drafts are yours',
             'Drafts live on your device and in your account. No one else can see them.'),
@@ -88,6 +89,7 @@ class HelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return const _InfoList(
       title: 'Help',
+      pose: MascotPose.thinking,
       blocks: [
         _Block('How do I send a keepsake?',
             'Create one, add what you want inside, then tap Publish. You get a link and a QR code to share.'),
@@ -113,10 +115,11 @@ class _Block {
 }
 
 class _InfoList extends StatelessWidget {
-  const _InfoList({required this.title, required this.blocks});
+  const _InfoList({required this.title, required this.blocks, this.pose});
 
   final String title;
   final List<_Block> blocks;
+  final MascotPose? pose;
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +134,10 @@ class _InfoList extends StatelessWidget {
             AppSpacing.xxl,
           ),
           children: [
+            if (pose != null) ...[
+              Center(child: Mascot(size: 140, pose: pose)),
+              const SizedBox(height: AppSpacing.lg),
+            ],
             for (final b in blocks)
               Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.lg),

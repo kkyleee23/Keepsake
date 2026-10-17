@@ -19,6 +19,7 @@ import '../sections/book_editor_screen.dart';
 import '../sections/photo_editor_screen.dart';
 import '../sections/timeline_editor_screen.dart';
 import '../sections/writing_screen.dart';
+import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/motion.dart';
@@ -487,8 +488,12 @@ class _FirstSectionPrompt extends StatelessWidget {
       ),
       child: Column(
         children: [
+          const Mascot(size: 112, pose: MascotPose.writing),
+          const SizedBox(height: AppSpacing.sm),
+          Text('What goes inside?', style: AppTypography.heading),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
-            'Start with a letter, a memory, or a few reasons.',
+            'Start with a letter, a book, a few photos, or a memory.',
             style: AppTypography.body,
             textAlign: TextAlign.center,
           ),

@@ -53,3 +53,8 @@ DESIGN_SYSTEM_STANDALONE.md
 
 # pub lockfile: resolved per-machine (Flutter versions differ across dev machines)
 pubspec.lock
+
+# Local screenshot sheets and the screenshot harness
+screenshots/
+test/_shots/
+test/_shots_test.dart

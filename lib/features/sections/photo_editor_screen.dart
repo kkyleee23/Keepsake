@@ -220,7 +220,7 @@ class _EmptyPicker extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
-              const Mascot(size: 96, pose: MascotPose.uploading),
+              const Mascot(size: 96, pose: MascotPose.photo),
               const SizedBox(height: AppSpacing.sm),
               Text('Add a few photos', style: AppTypography.heading),
               const SizedBox(height: AppSpacing.xxs),

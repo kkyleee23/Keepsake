@@ -292,7 +292,7 @@ class _PinGateState extends State<_PinGate> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Center(child: Mascot(size: 120, pose: MascotPose.thinking)),
+          const Center(child: Mascot(size: 128, pose: MascotPose.secure)),
           const SizedBox(height: AppSpacing.lg),
           Text('Enter the PIN', style: AppTypography.displaySmall,
               textAlign: TextAlign.center),
