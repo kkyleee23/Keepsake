@@ -8,8 +8,11 @@
 --    Before this, deleting a keepsake freed its link, and someone who knew
 --    it could publish something else at the same address. Every deleted
 --    link is now remembered (as a one-way hash) and publishing refuses it.
+-- 3. Stickers on the envelope. Only known stickers are kept, at most six,
+--    with every position, angle and size clamped to sane values.
 --
--- Run this once in the Supabase SQL editor after 0005_wrapping.sql.
+-- Run this once in the Supabase SQL editor after 0005_wrapping.sql. It is
+-- safe to run again (if you ran an earlier copy, run this one too).
 
 create table if not exists public.retired_share_tokens (
   token_hash text primary key,
@@ -42,6 +45,48 @@ alter table public.keepsakes add constraint keepsakes_status
   check (status in ('published', 'stopped')) not valid;
 
 alter table public.keepsakes add column if not exists stopped_at timestamptz;
+
+-- Room for six stickers on the cover (still tiny).
+alter table public.keepsakes drop constraint if exists keepsakes_cover_style_size;
+alter table public.keepsakes add constraint keepsakes_cover_style_size
+  check (cover_style is null or octet_length(cover_style::text) <= 1024) not valid;
+
+-- Keeps only what an envelope can show: a known paper, a known seal, and up
+-- to six known stickers with their numbers clamped. Anything else is dropped.
+create or replace function public.clean_cover_style(p_style jsonb)
+returns jsonb
+language sql immutable set search_path = public, pg_temp as $$
+  select case when p_style is null or jsonb_typeof(p_style) <> 'object' then null
+  else jsonb_strip_nulls(jsonb_build_object(
+    'envelope', case when p_style->>'envelope' in ('cream', 'kraft', 'sage', 'linen')
+                     then p_style->>'envelope' end,
+    'seal', case when p_style->>'seal' in ('evergreen', 'terracotta', 'honey', 'plum', 'night')
+                 then p_style->>'seal' end,
+    'stickers', (
+      select jsonb_agg(jsonb_build_object(
+        'id', e->>'id',
+        'x', round(least(greatest((e->>'x')::numeric, 0), 1), 3),
+        'y', round(least(greatest((e->>'y')::numeric, 0), 1), 3),
+        'r', round(least(greatest((e->>'r')::numeric, -40), 40)),
+        's', round(least(greatest((e->>'s')::numeric, 0.7), 1.5), 3)
+      ) order by n)
+      from (
+        select e, n from jsonb_array_elements(
+          case when jsonb_typeof(p_style->'stickers') = 'array'
+               then p_style->'stickers' else '[]'::jsonb end
+        ) with ordinality as t(e, n)
+        where jsonb_typeof(e) = 'object'
+          and e->>'id' in ('sprig', 'stamp', 'heart', 'daisy', 'moon', 'airmail',
+                           'pup_wave', 'pup_hug', 'pup_cheer', 'pup_gift',
+                           'pup_read', 'pup_sleep')
+          and jsonb_typeof(e->'x') = 'number' and jsonb_typeof(e->'y') = 'number'
+          and jsonb_typeof(e->'r') = 'number' and jsonb_typeof(e->'s') = 'number'
+        order by n
+        limit 6
+      ) kept
+    )
+  )) end;
+$$;
 
 create or replace function public.stop_sharing(p_token text)
 returns jsonb
@@ -100,14 +145,7 @@ language plpgsql security definer set search_path = public, extensions, pg_temp 
 declare
   uid uuid := auth.uid();
   affected int;
-  v_style jsonb := case
-    when p_style is null then null
-    else jsonb_strip_nulls(jsonb_build_object(
-      'envelope', case when p_style->>'envelope' in ('cream', 'kraft', 'sage', 'linen')
-                       then p_style->>'envelope' end,
-      'seal', case when p_style->>'seal' in ('evergreen', 'terracotta', 'honey', 'plum', 'night')
-                   then p_style->>'seal' end))
-  end;
+  v_style jsonb := public.clean_cover_style(p_style);
 begin
   if uid is null then
     return jsonb_build_object('status', 'unauthenticated');

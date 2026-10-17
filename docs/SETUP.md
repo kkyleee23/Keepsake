@@ -12,14 +12,20 @@ in order. Each one says how to check it worked.
 | 0003_payload_limit.sql (size cap, conflict fix) | To do |
 | 0004_security.sql (PIN lockout, locked-down writes, account deletion) | To do |
 | 0005_wrapping.sql (envelope paper and seal colour on the cover) | To do |
-| 0006_stop_sharing.sql (Stop Sharing, dead links stay dead) | To do |
+| 0006_stop_sharing.sql (Stop Sharing, dead links stay dead, stickers) | To do |
 | Confirm email turned off for testing | Done |
 | Anonymous sign-ins turned off | To do |
 | Web hosting for share links (step 4) | Later |
 
 ## What changed in each session
 
-- **Latest:** Stop Sharing and a security fix. Run
+- **Latest:** Stickers on the envelope (in `0006`, so no extra file).
+  Twelve stickers (a stamp, a pressed sprig, a stitched heart, a daisy, a
+  moon, an airmail label and six mascot ones) can be stuck on the envelope,
+  dragged, tilted and resized. The server keeps only known stickers, at most
+  six, with every number clamped (tested with hostile input). If you already
+  ran `0006`, run it again; it's safe to run twice.
+- **Before that:** Stop Sharing and a security fix. Run
   **`0006_stop_sharing.sql`** after `0005`.
   - On a keepsake's link page, **Stop Sharing** turns the link and QR code
     off at once and deletes the content from the server. The keepsake goes
@@ -77,7 +83,7 @@ paste the whole file, and click **Run**. Do each file once, in this order.
 | `supabase/migrations/0003_payload_limit.sql` | 5 MB size cap per keepsake (photos live inside it), and a fix so publishing with someone else's link reports a conflict instead of a fake success | Run it |
 | `supabase/migrations/0004_security.sql` | PIN guess limit, writes only through publish, size limits on the table, account deletion | Run it |
 | `supabase/migrations/0005_wrapping.sql` | Stores the envelope paper and seal colour, shown on the cover before opening | Run it |
-| `supabase/migrations/0006_stop_sharing.sql` | Stop Sharing, and stopped or deleted links can never be reused | Run it |
+| `supabase/migrations/0006_stop_sharing.sql` | Stop Sharing, stopped or deleted links can never be reused, and stickers on the envelope | Run it |
 
 Running a file twice is safe.
 

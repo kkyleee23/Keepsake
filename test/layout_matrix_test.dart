@@ -41,6 +41,7 @@ import 'package:keepsake/shared/widgets/gift_art.dart';
 import 'package:keepsake/shared/widgets/nav_icons.dart';
 import 'package:keepsake/shared/widgets/paper.dart';
 import 'package:keepsake/shared/widgets/primary_button.dart';
+import 'package:keepsake/shared/widgets/stickers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Device {
@@ -178,6 +179,15 @@ final _cover = CoverResult(
   senderName: 'Kyle',
   coverNote: 'Open this when you have a quiet minute and a cup of tea.',
   requiresPin: true,
+  style: KeepsakeStyle(
+    envelope: 'kraft',
+    seal: SealColor.terracotta,
+    stickers: [
+      PlacedSticker(kind: StickerKind.stamp, x: 0.85, y: 0.2, turn: 6),
+      PlacedSticker(kind: StickerKind.sprig, x: 0.14, y: 0.76, turn: -12),
+      PlacedSticker(kind: StickerKind.heart, x: 0.26, y: 0.22, turn: -8, scale: 0.8),
+    ],
+  ),
 );
 
 final Map<String, (Widget Function(), List<Override>)> screens = {
@@ -189,6 +199,7 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
   'library': (() => _tab(const KeepsakesScreen()), const []),
   'profile': (() => _tab(const ProfileScreen()), const []),
   'editor': (() => const EditorScreen(keepsakeId: 'd1'), const []),
+  'editor-stickers': (() => const EditorScreen(keepsakeId: 'd1'), const []),
   'delivery': (() => const DeliveryScreen(keepsakeId: 'd1'), const []),
   'published': (() => const PublishedScreen(keepsakeId: 'p1'), const []),
   'published-stopped': (
@@ -255,6 +266,39 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
 /// Screens that need a tap or two first. Each runs after the first frames and
 /// can check what the tap did.
 final Map<String, Future<void> Function(WidgetTester)> actions = {
+  'editor-stickers': (t) async {
+    await t.ensureVisible(find.text('Wrapping'));
+    await t.tap(find.text('Wrapping'));
+    await _settle(t);
+    final trayList = find.byWidgetPredicate(
+        (w) => w is ListView && w.scrollDirection == Axis.horizontal);
+    final tray =
+        find.descendant(of: trayList, matching: find.byType(StickerView));
+    await t.ensureVisible(trayList);
+    await _settle(t);
+    for (final i in [1, 0]) {
+      await t.tap(tray.at(i));
+      await _settle(t);
+    }
+    // Further along the tray: a pup.
+    final pup = find.descendant(
+      of: trayList,
+      matching: find.byWidgetPredicate(
+          (w) => w is StickerView && w.kind == StickerKind.pupWave),
+    );
+    await t.scrollUntilVisible(pup, 80,
+        scrollable:
+            find.descendant(of: trayList, matching: find.byType(Scrollable)));
+    await _settle(t);
+    await t.tap(pup);
+    await _settle(t);
+    expect(find.text('3 of 6'), findsOneWidget);
+    // Drag the newest one a little; it stays on the envelope.
+    final board = find.byType(StickerView).at(2);
+    await t.drag(board, const Offset(-30, -12));
+    await _settle(t);
+    expect(find.text('Peel Off'), findsOneWidget);
+  },
   'published-stopped': (t) async {
     await t.scrollUntilVisible(find.text('Stop Sharing'), 200,
         scrollable: find.byType(Scrollable).first);

@@ -76,6 +76,7 @@ flutter:
     - assets/brand/
     - assets/brand/states/
     - assets/textures/
+    - assets/stickers/
 
   fonts:
     # Headings: Montserrat, used for structural titles and the big headline.

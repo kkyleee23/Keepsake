@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../data/models/keepsake_style.dart';
+import 'stickers.dart';
 
 /// Hand-drawn pieces that make an opened keepsake feel like a gift: an
 /// envelope with a leaf seal, letter paper with a folded corner, washi tape,
@@ -149,12 +151,16 @@ class EnvelopeArt extends StatelessWidget {
     this.showSeal = true,
     this.paper = LetterPaper.cream,
     this.sealColor = AppColors.accent,
+    this.stickers = const [],
   });
 
   final double width;
   final double open;
   final double rise;
   final bool showSeal;
+
+  /// Stuck on the front; they peel away as the envelope opens.
+  final List<PlacedSticker> stickers;
 
   /// The envelope's paper (cream, kraft, seed, linen).
   final LetterPaper paper;
@@ -169,19 +175,37 @@ class EnvelopeArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final h = width * aspect;
+    final art = CustomPaint(
+      painter: _EnvelopePainter(
+        open: open,
+        rise: rise,
+        seal: showSeal,
+        paper: paper,
+        sealColor: sealColor,
+      ),
+    );
     // Extra headroom above so the opened flap and the rising letter fit.
     return SizedBox(
       width: width,
       height: h * EnvelopeArt.headroom,
-      child: CustomPaint(
-        painter: _EnvelopePainter(
-          open: open,
-          rise: rise,
-          seal: showSeal,
-          paper: paper,
-          sealColor: sealColor,
-        ),
-      ),
+      child: stickers.isEmpty
+          ? art
+          : Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(child: art),
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: (1 - open * 2.5).clamp(0.0, 1.0),
+                    child: EnvelopeStickers(
+                      stickers: stickers,
+                      width: width,
+                      top: h * (EnvelopeArt.headroom - 1),
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }
@@ -526,57 +550,57 @@ enum LetterFont {
   final String label;
 
   static LetterFont fromId(String? id) => LetterFont.values.firstWhere(
-        (f) => f.id == id,
-        orElse: () => LetterFont.clean,
-      );
+    (f) => f.id == id,
+    orElse: () => LetterFont.clean,
+  );
 
   /// The reading style for the letter's body.
   TextStyle get body => switch (this) {
-        LetterFont.clean => const TextStyle(
-            fontFamily: 'Inter',
-            fontSize: 16,
-            height: 1.75,
-            color: AppColors.ink,
-          ),
-        LetterFont.hand => const TextStyle(
-            fontFamily: 'Caveat',
-            fontSize: 23,
-            height: 1.4,
-            color: AppColors.ink,
-            fontVariations: [FontVariation('wght', 500)],
-          ),
-        LetterFont.classic => const TextStyle(
-            fontFamily: 'Playfair',
-            fontSize: 17,
-            height: 1.75,
-            color: AppColors.ink,
-          ),
-      };
+    LetterFont.clean => const TextStyle(
+      fontFamily: 'Inter',
+      fontSize: 16,
+      height: 1.75,
+      color: AppColors.ink,
+    ),
+    LetterFont.hand => const TextStyle(
+      fontFamily: 'Caveat',
+      fontSize: 23,
+      height: 1.4,
+      color: AppColors.ink,
+      fontVariations: [FontVariation('wght', 500)],
+    ),
+    LetterFont.classic => const TextStyle(
+      fontFamily: 'Playfair',
+      fontSize: 17,
+      height: 1.75,
+      color: AppColors.ink,
+    ),
+  };
 
   /// The style for the letter's title.
   TextStyle get title => switch (this) {
-        LetterFont.clean => const TextStyle(
-            fontFamily: 'Montserrat',
-            fontSize: 22,
-            fontWeight: FontWeight.w600,
-            height: 1.25,
-            color: AppColors.ink,
-          ),
-        LetterFont.hand => const TextStyle(
-            fontFamily: 'Caveat',
-            fontSize: 32,
-            height: 1.15,
-            color: AppColors.ink,
-            fontVariations: [FontVariation('wght', 700)],
-          ),
-        LetterFont.classic => const TextStyle(
-            fontFamily: 'Playfair',
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            height: 1.25,
-            color: AppColors.ink,
-          ),
-      };
+    LetterFont.clean => const TextStyle(
+      fontFamily: 'Montserrat',
+      fontSize: 22,
+      fontWeight: FontWeight.w600,
+      height: 1.25,
+      color: AppColors.ink,
+    ),
+    LetterFont.hand => const TextStyle(
+      fontFamily: 'Caveat',
+      fontSize: 32,
+      height: 1.15,
+      color: AppColors.ink,
+      fontVariations: [FontVariation('wght', 700)],
+    ),
+    LetterFont.classic => const TextStyle(
+      fontFamily: 'Playfair',
+      fontSize: 24,
+      fontWeight: FontWeight.w600,
+      height: 1.25,
+      color: AppColors.ink,
+    ),
+  };
 }
 
 /// A soft dot grid, like a bullet-journal page.

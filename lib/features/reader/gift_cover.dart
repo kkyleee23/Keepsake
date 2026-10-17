@@ -144,6 +144,7 @@ class _GiftCoverState extends State<GiftCover>
                             rise: _rise.value,
                             paper: LetterPaper.fromId(widget.style.envelope),
                             sealColor: widget.style.seal.color,
+                            stickers: widget.style.stickers,
                           ),
                       ),
                       // The mascot sits on the envelope's corner, then hops

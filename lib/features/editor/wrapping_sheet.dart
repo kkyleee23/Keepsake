@@ -1,4 +1,8 @@
+import 'dart:math' as math;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -8,6 +12,7 @@ import '../../shared/widgets/gift_art.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/paper.dart';
 import '../../shared/widgets/primary_button.dart';
+import '../../shared/widgets/stickers.dart';
 
 const _envelopes = [
   LetterPaper.cream,
@@ -18,8 +23,10 @@ const _envelopes = [
 
 String describeStyle(KeepsakeStyle s) {
   final paper = LetterPaper.fromId(s.envelope).label.toLowerCase();
+  final n = s.stickers.length;
   return '${paper[0].toUpperCase()}${paper.substring(1)} envelope, '
-      '${s.seal.label.toLowerCase()} seal';
+      '${s.seal.label.toLowerCase()} seal'
+      '${n == 0 ? '' : ', $n sticker${n == 1 ? '' : 's'}'}';
 }
 
 /// A row in the editor showing how the keepsake is wrapped.
@@ -47,6 +54,7 @@ class WrappingRow extends StatelessWidget {
               width: 56,
               paper: LetterPaper.fromId(style.envelope),
               sealColor: style.seal.color,
+              stickers: style.stickers,
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
@@ -79,6 +87,8 @@ Future<KeepsakeStyle?> showWrappingSheet(
   return showModalBottomSheet<KeepsakeStyle>(
     context: context,
     isScrollControlled: true,
+    // Dragging stickers would fight a drag-to-close sheet.
+    enableDrag: false,
     builder: (_) => _WrappingSheet(initial: current),
   );
 }
@@ -92,8 +102,59 @@ class _WrappingSheet extends StatefulWidget {
   State<_WrappingSheet> createState() => _WrappingSheetState();
 }
 
+/// Where new stickers go first: corners and edges, clear of the seal.
+const _spots = [
+  (0.84, 0.22, 6.0),
+  (0.16, 0.78, -10.0),
+  (0.84, 0.78, 8.0),
+  (0.18, 0.24, -6.0),
+  (0.5, 0.86, 3.0),
+  (0.5, 0.16, -4.0),
+];
+
 class _WrappingSheetState extends State<_WrappingSheet> {
   late KeepsakeStyle _style = widget.initial;
+
+  /// The sticker being moved or changed, by its place in the list.
+  int? _selected;
+
+  List<PlacedSticker> get _stickers => _style.stickers;
+
+  void _setStickers(List<PlacedSticker> list, {int? select}) {
+    setState(() {
+      _style = _style.copyWith(stickers: list);
+      _selected = select;
+    });
+  }
+
+  void _add(StickerKind kind) {
+    if (_stickers.length >= KeepsakeStyle.maxStickers) return;
+    // The first spot that isn't already taken.
+    final spot = _spots.firstWhere(
+      (p) =>
+          _stickers.every((s) => (s.x - p.$1).abs() + (s.y - p.$2).abs() > 0.2),
+      orElse: () => _spots[_stickers.length % _spots.length],
+    );
+    HapticFeedback.lightImpact();
+    _setStickers([
+      ..._stickers,
+      PlacedSticker(kind: kind, x: spot.$1, y: spot.$2, turn: spot.$3),
+    ], select: _stickers.length);
+  }
+
+  void _change(PlacedSticker Function(PlacedSticker) f) {
+    final i = _selected;
+    if (i == null || i >= _stickers.length) return;
+    HapticFeedback.selectionClick();
+    _setStickers([..._stickers]..[i] = f(_stickers[i]), select: i);
+  }
+
+  void _remove() {
+    final i = _selected;
+    if (i == null || i >= _stickers.length) return;
+    HapticFeedback.lightImpact();
+    _setStickers([..._stickers]..removeAt(i));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,29 +173,55 @@ class _WrappingSheetState extends State<_WrappingSheet> {
             Text('How should it arrive?', style: AppTypography.heading),
             const SizedBox(height: AppSpacing.xxs),
             Text(
-              'They see this envelope before they open it.',
+              'They see this envelope before they open it. Add stickers, '
+              'then drag them where you like.',
               style: AppTypography.body,
             ),
             const SizedBox(height: AppSpacing.md),
             Center(
-              child: AnimatedSwitcher(
-                duration: Motion.of(context, Motion.medium),
-                transitionBuilder: (c, a) => FadeTransition(
-                  opacity: a,
-                  child: ScaleTransition(
-                    scale: Tween(begin: 0.96, end: 1.0).animate(a),
-                    child: c,
-                  ),
-                ),
-                child: EnvelopeArt(
-                  key: ValueKey(_style),
-                  width: 190,
-                  paper: LetterPaper.fromId(_style.envelope),
-                  sealColor: _style.seal.color,
-                ),
+              child: _StickerBoard(
+                width: math.min(300, MediaQuery.sizeOf(context).width - 64),
+                style: _style,
+                selected: _selected,
+                onSelect: (i) => setState(() => _selected = i),
+                onMove: (i, s) => setState(() {
+                  _style = _style.copyWith(stickers: [..._stickers]..[i] = s);
+                }),
               ),
             ),
+            AnimatedSize(
+              duration: Motion.of(context, Motion.short),
+              curve: Motion.settle,
+              child: _selected == null || _selected! >= _stickers.length
+                  ? const SizedBox(width: double.infinity)
+                  : _StickerTools(
+                      onTurnLeft: () =>
+                          _change((s) => s.copyWith(turn: s.turn - 10)),
+                      onTurnRight: () =>
+                          _change((s) => s.copyWith(turn: s.turn + 10)),
+                      onSmaller: () =>
+                          _change((s) => s.copyWith(scale: s.scale - 0.15)),
+                      onBigger: () =>
+                          _change((s) => s.copyWith(scale: s.scale + 0.15)),
+                      onRemove: _remove,
+                    ),
+            ),
             const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                Expanded(child: Text('Stickers', style: AppTypography.label)),
+                Text(
+                  '${_stickers.length} of ${KeepsakeStyle.maxStickers}',
+                  style: AppTypography.caption,
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            _StickerTray(
+              full: _stickers.length >= KeepsakeStyle.maxStickers,
+              onPick: _add,
+            ),
+            const SizedBox(height: AppSpacing.lg),
             Text('Envelope', style: AppTypography.label),
             const SizedBox(height: AppSpacing.xs),
             Row(
@@ -235,6 +322,267 @@ class _WrappingSheetState extends State<_WrappingSheet> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Claims a drag the moment a finger lands on a sticker, so the sheet's
+/// scrolling doesn't take it.
+class _EagerPan extends PanGestureRecognizer {
+  @override
+  void addAllowedPointer(PointerDownEvent event) {
+    super.addAllowedPointer(event);
+    resolve(GestureDisposition.accepted);
+  }
+}
+
+/// The envelope with stickers you can drag around.
+class _StickerBoard extends StatelessWidget {
+  const _StickerBoard({
+    required this.width,
+    required this.style,
+    required this.selected,
+    required this.onSelect,
+    required this.onMove,
+  });
+
+  final double width;
+  final KeepsakeStyle style;
+  final int? selected;
+  final ValueChanged<int?> onSelect;
+  final void Function(int, PlacedSticker) onMove;
+
+  @override
+  Widget build(BuildContext context) {
+    final h = width * EnvelopeArt.aspect;
+    // EnvelopeArt keeps room above for its opening flap; none is needed
+    // here, so only a small margin is shown above the envelope.
+    final top = h * 0.08;
+    final hidden = h * (EnvelopeArt.headroom - 1) - top;
+    final reduced = Motion.reduced(context);
+    return SizedBox(
+      width: width,
+      height: h + top * 2,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          // Tapping the envelope itself puts the sticker down.
+          Positioned(
+            left: 0,
+            top: -hidden,
+            width: width,
+            height: h * EnvelopeArt.headroom,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => onSelect(null),
+              child: AnimatedSwitcher(
+                duration: Motion.of(context, Motion.medium),
+                child: EnvelopeArt(
+                  key: ValueKey((style.envelope, style.seal)),
+                  width: width,
+                  paper: LetterPaper.fromId(style.envelope),
+                  sealColor: style.seal.color,
+                ),
+              ),
+            ),
+          ),
+          for (final (i, s) in style.stickers.indexed)
+            Positioned(
+              key: ValueKey(i),
+              left: s.x * width - EnvelopeStickers.sizeFor(s, width) / 2,
+              top: top + s.y * h - EnvelopeStickers.sizeFor(s, width) / 2,
+              width: EnvelopeStickers.sizeFor(s, width),
+              height: EnvelopeStickers.sizeFor(s, width),
+              child: Semantics(
+                label: '${s.kind.label} sticker',
+                selected: selected == i,
+                button: true,
+                onTap: () => onSelect(i),
+                child: RawGestureDetector(
+                  gestures: {
+                    _EagerPan: GestureRecognizerFactoryWithHandlers<_EagerPan>(
+                      _EagerPan.new,
+                      (r) {
+                        r.onDown = (_) => onSelect(i);
+                        r.onUpdate = (d) => onMove(
+                          i,
+                          s.copyWith(
+                            x: s.x + d.delta.dx / width,
+                            y: s.y + d.delta.dy / h,
+                          ),
+                        );
+                      },
+                    ),
+                  },
+                  // Each sticker pops on when it's stuck down, and lifts a
+                  // little while it's picked up.
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween(begin: reduced ? 1 : 0.2, end: 1),
+                    duration: Motion.of(context, Motion.long),
+                    curve: Motion.pop,
+                    builder: (context, v, child) =>
+                        Transform.scale(scale: v, child: child),
+                    child: AnimatedScale(
+                      scale: selected == i ? 1.08 : 1,
+                      duration: Motion.of(context, Motion.short),
+                      curve: Motion.pop,
+                      child: Transform.rotate(
+                        angle: s.turn * math.pi / 180,
+                        child: DecoratedBox(
+                          position: DecorationPosition.foreground,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: selected == i
+                                ? Border.all(
+                                    color: AppColors.accent.withValues(
+                                      alpha: 0.7,
+                                    ),
+                                    width: 1.5,
+                                  )
+                                : null,
+                          ),
+                          child: StickerView(
+                            kind: s.kind,
+                            size: EnvelopeStickers.sizeFor(s, width),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Turn, resize or take off the picked sticker.
+class _StickerTools extends StatelessWidget {
+  const _StickerTools({
+    required this.onTurnLeft,
+    required this.onTurnRight,
+    required this.onSmaller,
+    required this.onBigger,
+    required this.onRemove,
+  });
+
+  final VoidCallback onTurnLeft;
+  final VoidCallback onTurnRight;
+  final VoidCallback onSmaller;
+  final VoidCallback onBigger;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget tool(
+      IconData icon,
+      String label,
+      VoidCallback onTap, {
+      Color? color,
+    }) => Expanded(
+      child: Tooltip(
+        message: label,
+        child: InkResponse(
+          onTap: onTap,
+          radius: 28,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 22, color: color ?? AppColors.ink),
+                const SizedBox(height: 2),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.caption.copyWith(color: color),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Row(
+        children: [
+          tool(Icons.rotate_left, 'Tilt Left', onTurnLeft),
+          tool(Icons.rotate_right, 'Tilt Right', onTurnRight),
+          tool(Icons.remove_circle_outline, 'Smaller', onSmaller),
+          tool(Icons.add_circle_outline, 'Bigger', onBigger),
+          tool(
+            Icons.delete_outline,
+            'Peel Off',
+            onRemove,
+            color: AppColors.error,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Every sticker, to tap onto the envelope.
+class _StickerTray extends StatelessWidget {
+  const _StickerTray({required this.full, required this.onPick});
+
+  final bool full;
+  final ValueChanged<StickerKind> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          height: 64,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: StickerKind.values.length,
+            separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.xs),
+            itemBuilder: (context, i) {
+              final k = StickerKind.values[i];
+              return Semantics(
+                button: true,
+                enabled: !full,
+                label: 'Add ${k.label}',
+                child: Pressable(
+                  scale: 0.9,
+                  child: GestureDetector(
+                    onTap: full ? null : () => onPick(k),
+                    child: AnimatedOpacity(
+                      duration: Motion.of(context, Motion.short),
+                      opacity: full ? 0.35 : 1,
+                      child: Container(
+                        width: 64,
+                        decoration: BoxDecoration(
+                          color: AppColors.surfaceAlt,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        alignment: Alignment.center,
+                        child: StickerView(kind: k, size: k.isPup ? 58 : 50),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+        if (full)
+          Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xs),
+            child: Text(
+              'Six is the most one envelope can hold. Peel one off to '
+              'add another.',
+              style: AppTypography.caption,
+            ),
+          ),
+      ],
     );
   }
 }
