@@ -216,8 +216,8 @@ void main() {
     await _setUp(t, _tab(const CreateScreen(), 1));
     await t.tap(find.text('Birthday'));
     await _frames(t, 12);
-    // Back up a little so the heading shows with the preview.
-    await t.drag(find.byType(Scrollable).first, const Offset(0, 90));
+    // Back to the top: the heading and the picked tag on their shelf.
+    await t.drag(find.byType(Scrollable).first, const Offset(0, 2000));
     await _frames(t, 12);
     await _save(t, 'create');
   });

@@ -42,7 +42,11 @@ abstract final class KeepsakeFactory {
       case SectionType.essay:
         return {'title': '', 'subtitle': '', 'body': ''};
       case SectionType.book:
-        return {'title': '', 'dedication': '', 'pages': <Map<String, dynamic>>[]};
+        return {
+          'title': '',
+          'dedication': '',
+          'pages': <Map<String, dynamic>>[],
+        };
       case SectionType.memory:
         return {'title': '', 'body': '', 'date': null};
       case SectionType.reasons:

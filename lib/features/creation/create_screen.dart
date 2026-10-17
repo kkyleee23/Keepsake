@@ -11,6 +11,7 @@ import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../../shared/widgets/gift_tag.dart';
+import 'occasion_tags.dart';
 
 /// First step of the creation flow: choose what this is for (or start blank).
 ///
@@ -52,6 +53,14 @@ class _CreateScreenState extends State<CreateScreen> {
     if (occasion == null) return;
     context.push('/new/recipient', extra: occasion);
   }
+
+  Widget _tag(Occasion o, int i, {String? label}) => GiftTag(
+    label: label ?? tagLabelFor(o),
+    look: tagLookFor(o),
+    tilt: _tilts[i % _tilts.length],
+    selected: _selected == o,
+    onTap: () => _pick(o),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -102,23 +111,34 @@ class _CreateScreenState extends State<CreateScreen> {
                       ],
                     ),
                   ),
-                  // A loose pile of gift tags rather than a grid of tiles:
-                  // each one sized by its word, each hung at its own angle.
-                  Wrap(
-                    spacing: AppSpacing.xs,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      for (final (i, occasion) in Occasion.values.indexed)
-                        GiftTag(
-                          label: occasion == Occasion.custom
-                              ? 'Something Else'
-                              : occasion.label,
-                          tilt: _tilts[i % _tilts.length],
-                          selected: _selected == occasion,
-                          onTap: () => _pick(occasion),
+                  // Tags shelved by what they're for, two to a row, each
+                  // printed for its occasion.
+                  for (final (title, occasions) in occasionGroups) ...[
+                    Text(title, style: AppTypography.eyebrow),
+                    const SizedBox(height: AppSpacing.xs),
+                    for (var r = 0; r < occasions.length; r += 2)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        // Both tags in a row share one height.
+                        child: IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (var c = r; c < r + 2; c++) ...[
+                                if (c > r) const SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: c < occasions.length
+                                      ? _tag(occasions[c], c)
+                                      : const SizedBox.shrink(),
+                                ),
+                              ],
+                            ],
+                          ),
                         ),
-                    ],
-                  ),
+                      ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                  _tag(Occasion.custom, 1),
                   const SizedBox(height: AppSpacing.xl),
                   _FirstLine(occasion: _selected),
                 ],
@@ -139,7 +159,9 @@ class _CreateScreenState extends State<CreateScreen> {
 }
 
 /// Small fixed tilts (degrees) so the tags look hung by hand, not printed.
-const _tilts = [-1.6, 1.1, -0.6, 1.8, -1.2, 0.7, -1.9, 1.4, -0.4, 1.0];
+/// Small tilts (degrees): left tags lean one way, right tags the other, so
+/// the shelf looks hung by hand but stays tidy.
+const _tilts = [-0.9, 0.8, 0.6, -0.7];
 
 /// A preview of how a letter for the chosen occasion might begin, on paper.
 class _FirstLine extends StatelessWidget {

@@ -305,6 +305,8 @@ final Map<String, Future<void> Function(WidgetTester)> actions = {
     expect(find.text('The link is off'), findsOneWidget);
   },
   'create-picked': (t) async {
+    await t.ensureVisible(find.text('Birthday'));
+    await _settle(t);
     await t.tap(find.text('Birthday'));
     await _settle(t);
     final b = t.widget<PrimaryButton>(find.byType(PrimaryButton));

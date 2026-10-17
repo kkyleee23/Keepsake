@@ -236,7 +236,8 @@ a:hover { color: var(--accent-press); }
   .step { scroll-snap-align: start; }
 }
 
-/* Tags: the same paper gift tags as the app. */
+/* Tags: the same paper gift tags as the app, each printed for its
+   occasion, two to a row. */
 .tags-demo {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -246,55 +247,76 @@ a:hover { color: var(--accent-press); }
 .tags-text { display: grid; gap: var(--s4); }
 .tags-text p { color: var(--ink-soft); }
 .tags-play { display: grid; gap: var(--s6); }
-.tag-pile { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s2); }
+.tag-pile { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3); max-width: 34rem; }
 
 .tag {
   --tilt: 0deg;
+  --paper: #FBF7EF;
+  --ink: #3B4733;
+  --edge: #DCCFB8;
+  --inset: 1px;
   position: relative;
   isolation: isolate;
-  min-height: 44px;
-  padding: 0 var(--s4) 0 34px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s2);
+  min-height: 54px;
+  padding: var(--s2) var(--s3) var(--s2) 34px;
   border: 0;
-  border-radius: 7px;
-  background: var(--paper-edge);
+  border-radius: 8px;
+  background: var(--edge);
   clip-path: polygon(16px 0, 100% 0, 100% 100%, 16px 100%, 0 55%, 0 45%);
   color: var(--ink);
-  font: 600 0.95rem/1 var(--font);
+  font: 600 0.95rem/1.2 var(--font);
+  text-align: left;
   cursor: pointer;
   transform: rotate(var(--tilt));
-  transition: transform 520ms cubic-bezier(.34, 1.56, .64, 1), color 160ms ease;
+  transition: transform 520ms cubic-bezier(.34, 1.56, .64, 1);
 }
 .tag::before {
   content: "";
   position: absolute;
-  inset: 1px;
+  inset: var(--inset);
   z-index: -1;
-  border-radius: 6px;
+  border-radius: 7px;
   background: var(--paper);
   clip-path: polygon(15.4px 0, 100% 0, 100% 100%, 15.4px 100%, 0 55%, 0 45%);
-  transition: background-color 160ms ease;
 }
 .tag::after {
+  /* the punched hole and its paper ring */
   content: "";
   position: absolute;
-  left: 13px; top: 50%;
+  left: 11px; top: 50%;
   width: 7px; height: 7px; margin-top: -3.5px;
   border-radius: 50%;
   background: var(--bg);
-  box-shadow: 0 0 0 2px var(--paper-edge);
+  box-shadow: 0 0 0 2px var(--edge);
 }
-.tag:nth-child(1) { --tilt: -1.6deg; }
-.tag:nth-child(2) { --tilt: 1.1deg; }
-.tag:nth-child(3) { --tilt: -0.6deg; }
-.tag:nth-child(4) { --tilt: 1.8deg; }
-.tag:nth-child(5) { --tilt: -1.2deg; }
-.tag:nth-child(6) { --tilt: 0.7deg; }
-.tag[aria-checked="true"] { color: var(--on-accent); transform: rotate(0) scale(1.05); background: var(--accent); }
-.tag[aria-checked="true"]::before { background: var(--accent); }
-.tag[aria-checked="true"]::after { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55); }
+.tag .motif { width: 26px; height: 26px; flex: none; }
+.tag:nth-child(odd) { --tilt: -0.9deg; }
+.tag:nth-child(even) { --tilt: 0.8deg; }
+
+.tag-birthday { --paper: #F8E9C8; --ink: #5E4310; --edge: #E2C98F; }
+.tag-long { --paper: #FFFCF6; --ink: #2F3B4A; --edge: #D9D2C4; }
+.tag-long::before {
+  /* airmail stripes round the edge */
+  border: 4px solid transparent;
+  border-image: url("img/airmail.svg") 4 round;
+  background: var(--paper) padding-box;
+}
+.tag-apology { --paper: #DFE6EB; --ink: #30455A; --edge: #C3CED6; }
+.tag-thanks { --paper: #E6EDDF; --ink: #2C5641; --edge: #C6D3BC; }
+.tag-friends { --paper: #DDE7D3; --ink: #2F4329; --edge: #BFCDB2; }
+.tag-just { --paper: #FBF7EF; --ink: #3B4733; --edge: #DCCFB8; }
+
+/* Picked: it swings straight, lifts a little and gets an evergreen edge. */
+.tag[aria-checked="true"] { transform: rotate(0) scale(1.04); --inset: 2.5px; background: var(--accent); }
+.tag[aria-checked="true"] span { font-weight: 700; }
 /* The clip-path hides an outline, so focus darkens the edge instead. */
-.tag:focus-visible { outline: none; background: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
-.tag:active { transform: rotate(0) scale(0.95); }
+.tag:focus-visible { outline: none; background: var(--ink); }
+.tag:focus-visible span { text-decoration: underline; text-underline-offset: 4px; }
+.tag:active { transform: rotate(0) scale(0.96); }
 
 .first-line {
   position: relative;
