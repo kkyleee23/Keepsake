@@ -9,6 +9,7 @@ import '../../data/models/enums.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/gift_art.dart';
 import '../../shared/widgets/motion.dart';
+import '../../shared/widgets/primary_button.dart';
 
 /// What a [WritingScreen] is being used for. Each kind shows the fields that
 /// make sense for it.
@@ -31,6 +32,7 @@ class WritingScreen extends StatefulWidget {
     this.heading,
     this.occasion,
     this.paper,
+    this.font,
   });
 
   final WritingKind kind;
@@ -48,6 +50,9 @@ class WritingScreen extends StatefulWidget {
   /// Stationery id for letters (see [LetterPaper]).
   final String? paper;
 
+  /// Handwriting id for letters (see [LetterFont]).
+  final String? font;
+
   /// Long enough for a real essay (about 8,000 words), small enough to keep a
   /// keepsake light.
   static const int maxBody = 50000;
@@ -63,9 +68,14 @@ class _WritingScreenState extends State<WritingScreen> {
   late final _signoff = TextEditingController(text: widget.signoff);
   final _bodyFocus = FocusNode();
   late LetterPaper _paper = LetterPaper.fromId(widget.paper);
+  late LetterFont _font = widget.kind == WritingKind.letter
+      ? LetterFont.fromId(widget.font)
+      : LetterFont.clean;
 
   bool get _changed =>
       _paper != LetterPaper.fromId(widget.paper) ||
+      (widget.kind == WritingKind.letter &&
+          _font != LetterFont.fromId(widget.font)) ||
       _title.text != widget.title ||
       _subtitle.text != widget.subtitle ||
       _body.text != widget.body ||
@@ -94,6 +104,7 @@ class _WritingScreenState extends State<WritingScreen> {
     'body': _body.text.trim(),
     if (widget.kind == WritingKind.letter) 'signoff': _signoff.text.trim(),
     if (widget.kind == WritingKind.letter) 'paper': _paper.id,
+    if (widget.kind == WritingKind.letter) 'font': _font.id,
   };
 
   void _done() => Navigator.of(context).pop(_result());
@@ -157,11 +168,17 @@ class _WritingScreenState extends State<WritingScreen> {
   }
 
   Future<void> _choosePaper() async {
-    final picked = await showModalBottomSheet<LetterPaper>(
+    final picked = await showModalBottomSheet<(LetterPaper, LetterFont)>(
       context: context,
-      builder: (ctx) => _PaperSheetPicker(current: _paper),
+      isScrollControlled: true,
+      builder: (ctx) => _StationerySheet(paper: _paper, font: _font),
     );
-    if (picked != null && mounted) setState(() => _paper = picked);
+    if (picked != null && mounted) {
+      setState(() {
+        _paper = picked.$1;
+        _font = picked.$2;
+      });
+    }
   }
 
   String get _bodyHint => switch (widget.kind) {
@@ -251,12 +268,12 @@ class _WritingScreenState extends State<WritingScreen> {
                         children: [
                           TextField(
                             controller: _title,
-                            style: AppTypography.title,
+                            style: _font.title,
                             maxLength: 120,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: bare.copyWith(
                               hintText: _titleHint,
-                              hintStyle: AppTypography.title.copyWith(
+                              hintStyle: _font.title.copyWith(
                                 color: _paper.faintInk,
                               ),
                             ),
@@ -279,7 +296,7 @@ class _WritingScreenState extends State<WritingScreen> {
                             ),
                           ],
                           const SizedBox(height: AppSpacing.md),
-                          Container(height: 1, color: AppColors.giftEdge),
+                          Container(height: 1, color: _paper.edge),
                           const SizedBox(height: AppSpacing.md),
                           TextField(
                             controller: _body,
@@ -290,14 +307,11 @@ class _WritingScreenState extends State<WritingScreen> {
                             maxLength: WritingScreen.maxBody,
                             keyboardType: TextInputType.multiline,
                             textCapitalization: TextCapitalization.sentences,
-                            style: AppTypography.bodyLarge.copyWith(
-                              height: 1.7,
-                            ),
+                            style: _font.body,
                             decoration: bare.copyWith(
                               hintText: _bodyHint,
                               hintMaxLines: 4,
-                              hintStyle: AppTypography.bodyLarge.copyWith(
-                                height: 1.7,
+                              hintStyle: _font.body.copyWith(
                                 color: _paper.faintInk,
                               ),
                             ),
@@ -461,16 +475,26 @@ class _IdeasSheet extends StatelessWidget {
   }
 }
 
-/// Four little sheets of stationery to choose from.
-class _PaperSheetPicker extends StatelessWidget {
-  const _PaperSheetPicker({required this.current});
+/// Paper and handwriting, chosen together, with live previews.
+class _StationerySheet extends StatefulWidget {
+  const _StationerySheet({required this.paper, required this.font});
 
-  final LetterPaper current;
+  final LetterPaper paper;
+  final LetterFont font;
+
+  @override
+  State<_StationerySheet> createState() => _StationerySheetState();
+}
+
+class _StationerySheetState extends State<_StationerySheet> {
+  late LetterPaper _paper = widget.paper;
+  late LetterFont _font = widget.font;
 
   @override
   Widget build(BuildContext context) {
+    final d = Motion.of(context, Motion.short);
     return SafeArea(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.gutter,
           AppSpacing.lg,
@@ -481,13 +505,45 @@ class _PaperSheetPicker extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Choose the paper', style: AppTypography.heading),
+            Text('Paper and handwriting', style: AppTypography.heading),
             const SizedBox(height: AppSpacing.xxs),
             Text(
-              'They will read your letter on it.',
+              'They will read your letter just like this.',
               style: AppTypography.body,
             ),
+            const SizedBox(height: AppSpacing.md),
+            // Live preview of the choice.
+            AnimatedSwitcher(
+              duration: Motion.of(context, Motion.medium),
+              child: PaperSheet.of(
+                _paper,
+                key: ValueKey((_paper, _font)),
+                fold: 16,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Dear you,',
+                        style: _font.title.copyWith(
+                          fontSize: _font.title.fontSize! * 0.8,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        'I keep thinking about that day by the lake.',
+                        style: _font.body,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: AppSpacing.lg),
+            Text('Paper', style: AppTypography.label),
+            const SizedBox(height: AppSpacing.xs),
             Row(
               children: [
                 for (final p in LetterPaper.values)
@@ -497,17 +553,17 @@ class _PaperSheetPicker extends StatelessWidget {
                         horizontal: AppSpacing.xxs,
                       ),
                       child: GestureDetector(
-                        onTap: () => Navigator.pop(context, p),
+                        onTap: () => setState(() => _paper = p),
                         child: Pressable(
                           child: Column(
                             children: [
                               AnimatedContainer(
-                                duration: Motion.of(context, Motion.short),
+                                duration: d,
                                 padding: const EdgeInsets.all(3),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
-                                    color: p == current
+                                    color: p == _paper
                                         ? AppColors.accent
                                         : Colors.transparent,
                                     width: 2,
@@ -517,44 +573,23 @@ class _PaperSheetPicker extends StatelessWidget {
                                   aspectRatio: 0.75,
                                   child: PaperSheet.of(
                                     p,
-                                    fold: 12,
-                                    padding: const EdgeInsets.all(10),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        for (final w in const [0.7, 0.9, 0.5])
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 6,
-                                            ),
-                                            child: FractionallySizedBox(
-                                              widthFactor: w,
-                                              child: Container(
-                                                height: 3,
-                                                decoration: BoxDecoration(
-                                                  color: p.edge,
-                                                  borderRadius:
-                                                      BorderRadius.circular(2),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
+                                    fold: 10,
+                                    padding: EdgeInsets.zero,
+                                    child: const SizedBox.expand(),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: AppSpacing.xs),
+                              const SizedBox(height: AppSpacing.xxs),
                               Text(
                                 p.label,
-                                style: AppTypography.body.copyWith(
-                                  fontWeight: p == current
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
-                                  color: p == current
+                                maxLines: 1,
+                                style: AppTypography.caption.copyWith(
+                                  color: p == _paper
                                       ? AppColors.accent
                                       : AppColors.inkSoft,
+                                  fontWeight: p == _paper
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
                                 ),
                               ),
                             ],
@@ -564,6 +599,65 @@ class _PaperSheetPicker extends StatelessWidget {
                     ),
                   ),
               ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Handwriting', style: AppTypography.label),
+            const SizedBox(height: AppSpacing.xs),
+            Row(
+              children: [
+                for (final f in LetterFont.values)
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.xxs,
+                      ),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _font = f),
+                        child: Pressable(
+                          child: AnimatedContainer(
+                            duration: d,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.sm,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: f == _font
+                                    ? AppColors.accent
+                                    : AppColors.hairline,
+                                width: f == _font ? 2 : 1,
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Aa',
+                                  style: f.title.copyWith(
+                                    fontSize: f == LetterFont.hand ? 30 : 22,
+                                  ),
+                                ),
+                                Text(
+                                  f.label,
+                                  style: AppTypography.caption.copyWith(
+                                    color: f == _font
+                                        ? AppColors.accent
+                                        : AppColors.inkSoft,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              label: 'Use These',
+              onPressed: () => Navigator.pop(context, (_paper, _font)),
             ),
           ],
         ),

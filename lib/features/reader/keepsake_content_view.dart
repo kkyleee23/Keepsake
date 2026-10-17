@@ -43,7 +43,11 @@ class KeepsakeContentView extends StatelessWidget {
             child: Column(
               children: [
                 if (i > 0) const _Sprig(),
-                SectionView(section: sections[i], senderName: from),
+                SectionView(
+                  section: sections[i],
+                  senderName: from,
+                  sealColor: k.style.seal.color,
+                ),
               ],
             ),
           ),
@@ -66,7 +70,7 @@ class _Header extends StatelessWidget {
     final from = k.senderName.trim();
     return Column(
       children: [
-        const LeafSeal(size: 44),
+        LeafSeal(size: 44, color: k.style.seal.color),
         const SizedBox(height: AppSpacing.md),
         Text(
           k.occasion.label,

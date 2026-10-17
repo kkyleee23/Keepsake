@@ -1,5 +1,8 @@
 import 'enums.dart';
 import 'keepsake_section.dart';
+import 'keepsake_style.dart';
+
+export 'keepsake_style.dart';
 
 /// Where and when a published Keepsake unlocks.
 class DeliverySettings {
@@ -104,6 +107,7 @@ class Keepsake {
     this.expiresAt,
     this.shareToken,
     this.receivedAt,
+    this.style = KeepsakeStyle.standard,
   });
 
   final String id;
@@ -135,6 +139,9 @@ class Keepsake {
   /// When this keepsake was opened as a recipient. Null for ones you created.
   final DateTime? receivedAt;
 
+  /// How it's wrapped: envelope paper and seal colour.
+  final KeepsakeStyle style;
+
   bool get isDraft => status == KeepsakeStatus.draft;
   bool get isReceived => receivedAt != null;
   bool get isArchived => status == KeepsakeStatus.archived;
@@ -164,6 +171,7 @@ class Keepsake {
     DateTime? expiresAt,
     String? shareToken,
     DateTime? receivedAt,
+    KeepsakeStyle? style,
   }) {
     return Keepsake(
       id: id,
@@ -184,6 +192,7 @@ class Keepsake {
       expiresAt: expiresAt ?? this.expiresAt,
       shareToken: shareToken ?? this.shareToken,
       receivedAt: receivedAt ?? this.receivedAt,
+      style: style ?? this.style,
     );
   }
 
@@ -206,6 +215,7 @@ class Keepsake {
         'expiresAt': expiresAt?.toIso8601String(),
         'shareToken': shareToken,
         'receivedAt': receivedAt?.toIso8601String(),
+        'style': style.toJson(),
       };
 
   factory Keepsake.fromJson(Map<String, dynamic> json) {
@@ -239,6 +249,7 @@ class Keepsake {
       receivedAt: json['receivedAt'] == null
           ? null
           : DateTime.parse(json['receivedAt'] as String),
+      style: KeepsakeStyle.fromJson(json['style']),
     );
   }
 }

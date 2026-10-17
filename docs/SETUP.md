@@ -11,13 +11,19 @@ in order. Each one says how to check it worked.
 | 0002_responses.sql (replies) | To do |
 | 0003_payload_limit.sql (size cap, conflict fix) | To do |
 | 0004_security.sql (PIN lockout, locked-down writes, account deletion) | To do |
+| 0005_wrapping.sql (envelope paper and seal colour on the cover) | To do |
 | Confirm email turned off for testing | Done |
 | Anonymous sign-ins turned off | To do |
 | Web hosting for share links (step 4) | Later |
 
 ## What changed in each session
 
-- **Latest:** Real paper textures for letters, the envelope and the book
+- **Latest:** Wrapping (envelope paper and seal colour) and letter
+  handwriting. Run **`0005_wrapping.sql`** after `0004` so recipients see
+  the chosen envelope before opening; until then the gift still publishes,
+  with the standard cream envelope on the cover. Paper everywhere (no
+  setup).
+- **Before that:** Real paper textures for letters, the envelope and the book
   (no setup). Letter ideas and stationery (no setup). New mascot poses
   (no setup). Security: run
   **`0004_security.sql`** after `0003`. It limits PIN guessing (5 wrong
@@ -43,6 +49,7 @@ paste the whole file, and click **Run**. Do each file once, in this order.
 | `supabase/migrations/0002_responses.sql` | Replies from recipients (only you can read them), rate limit | Run it |
 | `supabase/migrations/0003_payload_limit.sql` | 5 MB size cap per keepsake (photos live inside it), and a fix so publishing with someone else's link reports a conflict instead of a fake success | Run it |
 | `supabase/migrations/0004_security.sql` | PIN guess limit, writes only through publish, size limits on the table, account deletion | Run it |
+| `supabase/migrations/0005_wrapping.sql` | Stores the envelope paper and seal colour, shown on the cover before opening | Run it |
 
 Running a file twice is safe.
 

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
+import '../../data/models/keepsake_style.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/gift_art.dart';
@@ -26,6 +27,7 @@ class GiftCover extends StatefulWidget {
     this.coverNote,
     this.senderName,
     this.playOpening = true,
+    this.style = KeepsakeStyle.standard,
   });
 
   final VoidCallback onOpen;
@@ -38,6 +40,9 @@ class GiftCover extends StatefulWidget {
   /// False when something else must happen first (for example a PIN), so the
   /// envelope doesn't open before the content is actually unlocked.
   final bool playOpening;
+
+  /// The creator's wrapping: envelope paper and seal colour.
+  final KeepsakeStyle style;
 
   @override
   State<GiftCover> createState() => _GiftCoverState();
@@ -133,10 +138,12 @@ class _GiftCoverState extends State<GiftCover>
                       Positioned(
                         bottom: AppSpacing.md,
                         child: EnvelopeArt(
-                          width: w,
-                          open: _open.value,
-                          rise: _rise.value,
-                        ),
+                            width: w,
+                            open: _open.value,
+                            rise: _rise.value,
+                            paper: LetterPaper.fromId(widget.style.envelope),
+                            sealColor: widget.style.seal.color,
+                          ),
                       ),
                       // The mascot sits on the envelope's corner, then hops
                       // away as it opens.

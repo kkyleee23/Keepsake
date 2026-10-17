@@ -180,6 +180,7 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           coverNote: c.coverNote,
           senderName: c.senderName,
           playOpening: !c.requiresPin,
+          style: c.style,
           onOpen: _onOpenPressed,
         );
       case _Phase.sealed:

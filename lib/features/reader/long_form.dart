@@ -13,10 +13,18 @@ final _reading = AppTypography.bodyLarge.copyWith(height: 1.75);
 /// When [initial] is set, the very first letter is raised and set in the
 /// heading font, like the opening of a chapter.
 class Paragraphs extends StatelessWidget {
-  const Paragraphs({super.key, required this.text, this.initial = false});
+  const Paragraphs({
+    super.key,
+    required this.text,
+    this.initial = false,
+    this.style,
+  });
 
   final String text;
   final bool initial;
+
+  /// Reading style; the default is the app's long-form body style.
+  final TextStyle? style;
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +52,9 @@ class Paragraphs extends StatelessWidget {
                         TextSpan(text: paras[i].characters.skip(1).string),
                       ],
                     ),
-                    style: _reading,
+                    style: style ?? _reading,
                   )
-                : Text(paras[i], style: _reading),
+                : Text(paras[i], style: style ?? _reading),
           ),
       ],
     );
@@ -56,9 +64,12 @@ class Paragraphs extends StatelessWidget {
 /// A letter's body. Short letters show in full; long ones show the opening
 /// with a soft fade and a "Keep reading" that unfolds the rest.
 class LetterBody extends StatefulWidget {
-  const LetterBody({super.key, required this.text, this.fill});
+  const LetterBody({super.key, required this.text, this.fill, this.style});
 
   final String text;
+
+  /// Reading style for the letter's font choice.
+  final TextStyle? style;
 
   /// The paper colour behind the text, for the folded edge.
   final Color? fill;
@@ -76,7 +87,7 @@ class _LetterBodyState extends State<LetterBody> {
   @override
   Widget build(BuildContext context) {
     final long = Reading.words(widget.text) > LetterBody.foldAfterWords;
-    if (!long) return Paragraphs(text: widget.text);
+    if (!long) return Paragraphs(text: widget.text, style: widget.style);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,7 +97,7 @@ class _LetterBodyState extends State<LetterBody> {
           curve: Curves.easeInOutCubic,
           alignment: Alignment.topCenter,
           child: _open
-              ? Paragraphs(text: widget.text)
+              ? Paragraphs(text: widget.text, style: widget.style)
               : SizedBox(
                   height: 320,
                   child: Stack(
@@ -110,7 +121,7 @@ class _LetterBodyState extends State<LetterBody> {
                             child: OverflowBox(
                               alignment: Alignment.topCenter,
                               maxHeight: double.infinity,
-                              child: Paragraphs(text: widget.text),
+                              child: Paragraphs(text: widget.text, style: widget.style),
                             ),
                           ),
                         ),

@@ -16,6 +16,7 @@ import '../sections/open_when_editor_screen.dart';
 import '../sections/section_display.dart';
 import '../sections/section_editor_screen.dart';
 import '../sections/book_editor_screen.dart';
+import 'wrapping_sheet.dart';
 import '../sections/photo_editor_screen.dart';
 import '../sections/timeline_editor_screen.dart';
 import '../sections/writing_screen.dart';
@@ -65,7 +66,9 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   }
 
   Future<void> _load() async {
-    final k = await ref.read(keepsakeRepositoryProvider).getById(widget.keepsakeId);
+    final k = await ref
+        .read(keepsakeRepositoryProvider)
+        .getById(widget.keepsakeId);
     if (!mounted) return;
     setState(() {
       _draft = k;
@@ -87,27 +90,31 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
   Future<void> _addSection(SectionType type) async {
     final draft = _draft!;
     final section = KeepsakeFactory.newSection(type, draft.sections.length);
-    await _persist(draft.copyWith(
-      sections: [...draft.orderedSections, section],
-      updatedAt: DateTime.now(),
-    ));
+    await _persist(
+      draft.copyWith(
+        sections: [...draft.orderedSections, section],
+        updatedAt: DateTime.now(),
+      ),
+    );
     await _openSection(section);
   }
 
   Future<void> _openSection(KeepsakeSection section) async {
     final content = await Navigator.of(context).push<Map<String, dynamic>>(
-      MaterialPageRoute(
-        builder: (_) => PaperPage(child: _editorFor(section)),
-      ),
+      MaterialPageRoute(builder: (_) => PaperPage(child: _editorFor(section))),
     );
     if (content == null) return;
     final draft = _draft!;
     final updated = draft.orderedSections
-        .map((s) => s.id == section.id
-            ? s.copyWith(content: content, updatedAt: DateTime.now())
-            : s)
+        .map(
+          (s) => s.id == section.id
+              ? s.copyWith(content: content, updatedAt: DateTime.now())
+              : s,
+        )
         .toList();
-    await _persist(draft.copyWith(sections: updated, updatedAt: DateTime.now()));
+    await _persist(
+      draft.copyWith(sections: updated, updatedAt: DateTime.now()),
+    );
   }
 
   Future<void> _deleteSection(KeepsakeSection section) async {
@@ -126,7 +133,8 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
     final moved = list.removeAt(oldIndex);
     list.insert(newIndex, moved);
     await _persist(
-        draft.copyWith(sections: _renumbered(list), updatedAt: DateTime.now()));
+      draft.copyWith(sections: _renumbered(list), updatedAt: DateTime.now()),
+    );
   }
 
   Future<void> _rename() async {
@@ -171,8 +179,12 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(AppSpacing.gutter,
-                  AppSpacing.lg, AppSpacing.gutter, AppSpacing.xs),
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.gutter,
+                AppSpacing.lg,
+                AppSpacing.gutter,
+                AppSpacing.xs,
+              ),
               child: Text('Add something', style: AppTypography.heading),
             ),
             for (final type in _addable)
@@ -233,6 +245,18 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           ),
           children: [
             _CoverCard(keepsake: draft, onRename: _rename),
+            const SizedBox(height: AppSpacing.sm),
+            WrappingRow(
+              style: draft.style,
+              onTap: () async {
+                final picked = await showWrappingSheet(context, draft.style);
+                if (picked != null && mounted) {
+                  await _persist(
+                    _draft!.copyWith(style: picked, updatedAt: DateTime.now()),
+                  );
+                }
+              },
+            ),
             const SizedBox(height: AppSpacing.lg),
             if (sections.isEmpty)
               _FirstSectionPrompt(onAdd: _openAddSheet)
@@ -291,6 +315,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           body: text('body'),
           signoff: text('signoff'),
           paper: text('paper'),
+          font: text('font'),
           occasion: _draft!.occasion,
         );
       case SectionType.essay:
@@ -388,11 +413,12 @@ class _CoverCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text('For ${keepsake.recipientName}', style: AppTypography.body),
           ],
-          if (keepsake.coverNote != null &&
-              keepsake.coverNote!.isNotEmpty) ...[
+          if (keepsake.coverNote != null && keepsake.coverNote!.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xs),
-            Text(keepsake.coverNote!,
-                style: AppTypography.body.copyWith(fontStyle: FontStyle.italic)),
+            Text(
+              keepsake.coverNote!,
+              style: AppTypography.body.copyWith(fontStyle: FontStyle.italic),
+            ),
           ],
         ],
       ),
@@ -439,8 +465,10 @@ class _SectionCard extends StatelessWidget {
                   index: index,
                   child: const Padding(
                     padding: EdgeInsets.only(right: AppSpacing.sm),
-                    child: Icon(Icons.drag_indicator,
-                        color: AppColors.inkFaint),
+                    child: Icon(
+                      Icons.drag_indicator,
+                      color: AppColors.inkFaint,
+                    ),
                   ),
                 ),
                 Expanded(
@@ -464,8 +492,10 @@ class _SectionCard extends StatelessWidget {
                 ),
                 IconButton(
                   onPressed: onDelete,
-                  icon: const Icon(Icons.delete_outline,
-                      color: AppColors.inkFaint),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.inkFaint,
+                  ),
                   tooltip: 'Remove',
                 ),
               ],

@@ -24,12 +24,20 @@ import '../reader/long_form.dart';
 /// Used by both Preview and the recipient experience, so the creator always
 /// sees exactly what will be received.
 class SectionView extends StatelessWidget {
-  const SectionView({super.key, required this.section, this.senderName});
+  const SectionView({
+    super.key,
+    required this.section,
+    this.senderName,
+    this.sealColor = AppColors.accent,
+  });
 
   final KeepsakeSection section;
 
   /// Used to sign letters ("From Kyle").
   final String? senderName;
+
+  /// The keepsake's wax seal colour, used where letters are sealed.
+  final Color sealColor;
 
   String? _s(String key) {
     final v = (section.content[key] as String?)?.trim();
@@ -46,6 +54,8 @@ class SectionView extends StatelessWidget {
           signoff: _s('signoff'),
           from: senderName,
           paper: LetterPaper.fromId(_s('paper')),
+          font: LetterFont.fromId(_s('font')),
+          sealColor: sealColor,
         );
       case SectionType.book:
         final pages = [
@@ -151,13 +161,17 @@ class _Letter extends StatelessWidget {
     this.signoff,
     this.from,
     this.paper = LetterPaper.cream,
+    this.sealColor = AppColors.accent,
+    this.font = LetterFont.clean,
   });
 
+  final LetterFont font;
   final String? title;
   final String? body;
   final String? signoff;
   final String? from;
   final LetterPaper paper;
+  final Color sealColor;
 
   @override
   Widget build(BuildContext context) {
@@ -177,11 +191,11 @@ class _Letter extends StatelessWidget {
           if (title != null) ...[
             Padding(
               padding: const EdgeInsets.only(right: AppSpacing.lg),
-              child: Text(title!, style: AppTypography.title),
+              child: Text(title!, style: font.title),
             ),
             const SizedBox(height: AppSpacing.sm),
           ],
-          if (body != null) LetterBody(text: body!, fill: paper.color),
+          if (body != null) LetterBody(text: body!, fill: paper.color, style: font.body),
           const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerRight,
@@ -207,7 +221,7 @@ class _Letter extends StatelessWidget {
                         ),
                       ),
                     const SizedBox(width: AppSpacing.xs),
-                    const LeafSeal(size: 26),
+                    LeafSeal(size: 26, color: sealColor),
                   ],
                 ),
               ],

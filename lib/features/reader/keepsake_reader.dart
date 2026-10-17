@@ -35,6 +35,7 @@ class _KeepsakeReaderState extends State<KeepsakeReader> {
               title: widget.keepsake.title,
               coverNote: widget.keepsake.coverNote,
               senderName: widget.keepsake.senderName,
+              style: widget.keepsake.style,
               onOpen: () => setState(() => _opened = true),
             ),
     );

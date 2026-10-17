@@ -19,6 +19,7 @@ class CoverResult {
     this.recipientName,
     this.senderName,
     this.coverNote,
+    this.style = KeepsakeStyle.standard,
   });
 
   /// One of: available, sealed, expired, not_found, error.
@@ -30,6 +31,9 @@ class CoverResult {
   final String? recipientName;
   final String? senderName;
   final String? coverNote;
+
+  /// Envelope paper and seal colour, shown before opening.
+  final KeepsakeStyle style;
 }
 
 /// Result of attempting to open the content.
@@ -86,7 +90,7 @@ class KeepsakeBackend {
         .toJson();
     (payload['privacy'] as Map)['pin'] = null;
 
-    final res = await _client.rpc('publish_keepsake', params: {
+    final params = <String, dynamic>{
       'p_token': token,
       'p_payload': payload,
       'p_occasion': keepsake.occasion.id,
@@ -99,7 +103,16 @@ class KeepsakeBackend {
       'p_expires_at': keepsake.privacy.expiresAt?.toUtc().toIso8601String(),
       'p_unlisted': keepsake.privacy.unlisted,
       'p_pin': (pin != null && pin.isNotEmpty) ? pin : null,
-    });
+    };
+    dynamic res;
+    try {
+      res = await _client.rpc('publish_keepsake',
+          params: {...params, 'p_style': keepsake.style.toJson()});
+    } on PostgrestException {
+      // The wrapping needs migration 0005. Without it, publish anyway with
+      // the standard look rather than failing.
+      res = await _client.rpc('publish_keepsake', params: params);
+    }
 
     final map = Map<String, dynamic>.from(res as Map);
     final status = map['status'] as String?;
@@ -150,6 +163,7 @@ class KeepsakeBackend {
         recipientName: m['recipient_name'] as String?,
         senderName: m['sender_name'] as String?,
         coverNote: m['cover_note'] as String?,
+        style: KeepsakeStyle.fromJson(m['style']),
       );
     } catch (_) {
       return const CoverResult(status: 'error');

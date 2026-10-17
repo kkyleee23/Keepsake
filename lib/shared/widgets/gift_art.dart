@@ -72,28 +72,42 @@ class _LeafPainter extends CustomPainter {
 
 /// The wax seal: an evergreen disc with a white leaf. Closes every envelope.
 class LeafSeal extends StatelessWidget {
-  const LeafSeal({super.key, this.size = 40});
+  const LeafSeal({super.key, this.size = 40, this.color = AppColors.accent});
 
   final double size;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(size: Size.square(size), painter: _SealPainter());
+    return CustomPaint(size: Size.square(size), painter: _SealPainter(color));
   }
 }
 
 class _SealPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) =>
-      paintSeal(canvas, size.center(Offset.zero), size.shortestSide / 2);
+  _SealPainter(this.color);
+  final Color color;
 
   @override
-  bool shouldRepaint(_SealPainter old) => false;
+  void paint(Canvas canvas, Size size) => paintSeal(
+    canvas,
+    size.center(Offset.zero),
+    size.shortestSide / 2,
+    color: color,
+  );
+
+  @override
+  bool shouldRepaint(_SealPainter old) => old.color != color;
 }
 
 /// Draws the seal centered at [c] with radius [r]. A slightly wavy rim reads
 /// as pressed wax without any shading.
-void paintSeal(Canvas canvas, Offset c, double r, {double opacity = 1}) {
+void paintSeal(
+  Canvas canvas,
+  Offset c,
+  double r, {
+  double opacity = 1,
+  Color color = AppColors.accent,
+}) {
   if (opacity <= 0) return;
   final rim = Path();
   const bumps = 14;
@@ -104,10 +118,7 @@ void paintSeal(Canvas canvas, Offset c, double r, {double opacity = 1}) {
     i == 0 ? rim.moveTo(o.dx, o.dy) : rim.lineTo(o.dx, o.dy);
   }
   rim.close();
-  canvas.drawPath(
-    rim,
-    Paint()..color = AppColors.accent.withValues(alpha: opacity),
-  );
+  canvas.drawPath(rim, Paint()..color = color.withValues(alpha: opacity));
   canvas.drawCircle(
     c,
     r * 0.74,
@@ -136,12 +147,18 @@ class EnvelopeArt extends StatelessWidget {
     this.open = 0,
     this.rise = 0,
     this.showSeal = true,
+    this.paper = LetterPaper.cream,
+    this.sealColor = AppColors.accent,
   });
 
   final double width;
   final double open;
   final double rise;
   final bool showSeal;
+
+  /// The envelope's paper (cream, kraft, seed, linen).
+  final LetterPaper paper;
+  final Color sealColor;
 
   static const double aspect = 0.66; // height / width
 
@@ -157,25 +174,51 @@ class EnvelopeArt extends StatelessWidget {
       width: width,
       height: h * EnvelopeArt.headroom,
       child: CustomPaint(
-        painter: _EnvelopePainter(open: open, rise: rise, seal: showSeal),
+        painter: _EnvelopePainter(
+          open: open,
+          rise: rise,
+          seal: showSeal,
+          paper: paper,
+          sealColor: sealColor,
+        ),
       ),
     );
   }
 }
 
 class _EnvelopePainter extends CustomPainter {
-  _EnvelopePainter({required this.open, required this.rise, required this.seal})
-    : super(repaint: PaperTextures.instance);
-
-  /// Envelope paper: the cream texture tinted to [c], or flat [c] until the
-  /// texture is ready.
-  static Paint _paper(Color c) =>
-      PaperTextures.instance.paint(PaperTextures.cream, tint: c) ??
-      (Paint()..color = c);
+  _EnvelopePainter({
+    required this.open,
+    required this.rise,
+    required this.seal,
+    required this.paper,
+    required this.sealColor,
+  }) : super(repaint: PaperTextures.instance);
 
   final double open;
   final double rise;
   final bool seal;
+  final LetterPaper paper;
+  final Color sealColor;
+
+  /// Cream envelopes are the cream texture tinted to the envelope tones;
+  /// other papers use their own texture, a shade darker on the inside.
+  Paint _paper(Color c, {bool inside = false}) {
+    if (paper == LetterPaper.cream || paper == LetterPaper.dotted) {
+      return PaperTextures.instance.paint(PaperTextures.cream, tint: c) ??
+          (Paint()..color = c);
+    }
+    return PaperTextures.instance.paint(
+          paper.texture,
+          tint: inside ? const Color(0xFFE4DED2) : null,
+        ) ??
+        (Paint()..color = paper.color);
+  }
+
+  /// The letter inside is always cream.
+  static Paint _letter() =>
+      PaperTextures.instance.paint(PaperTextures.cream) ??
+      (Paint()..color = AppColors.giftPaper);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -187,14 +230,14 @@ class _EnvelopePainter extends CustomPainter {
     final stroke = math.max(1.0, w * 0.006);
 
     final edge = Paint()
-      ..color = AppColors.giftEdge
+      ..color = paper == LetterPaper.cream ? AppColors.giftEdge : paper.edge
       ..style = PaintingStyle.stroke
       ..strokeWidth = stroke
       ..strokeJoin = StrokeJoin.round;
 
     // Back panel.
     final back = RRect.fromRectAndRadius(body, radius);
-    canvas.drawRRect(back, _paper(AppColors.envelopeShade));
+    canvas.drawRRect(back, _paper(AppColors.envelopeShade, inside: true));
     canvas.drawRRect(back, edge);
 
     final flapDepth = h * 0.56;
@@ -218,7 +261,10 @@ class _EnvelopePainter extends CustomPainter {
         ..close();
       canvas.drawPath(
         flap,
-        _paper(flapScale >= 0 ? AppColors.envelope : AppColors.envelopeShade),
+        _paper(
+          flapScale >= 0 ? AppColors.envelope : AppColors.envelopeShade,
+          inside: flapScale < 0,
+        ),
       );
       canvas.drawPath(flap, edge);
     }
@@ -235,7 +281,7 @@ class _EnvelopePainter extends CustomPainter {
       );
       canvas.save();
       canvas.clipRect(Rect.fromLTWH(0, 0, w, top + h * 0.98));
-      canvas.drawRRect(letter, _paper(AppColors.giftPaper));
+      canvas.drawRRect(letter, _letter());
       canvas.drawRRect(letter, edge);
       // A few quiet "written" lines and a tiny heart on the letter.
       final line = Paint()
@@ -282,7 +328,13 @@ class _EnvelopePainter extends CustomPainter {
     // Seal on the flap tip; it lifts away as the flap opens.
     if (seal) {
       final tip = Offset(w * 0.5, top + flapDepth * flapScale - h * 0.02);
-      paintSeal(canvas, tip, h * 0.13, opacity: (1 - open * 2.5).clamp(0, 1));
+      paintSeal(
+        canvas,
+        tip,
+        h * 0.13,
+        opacity: (1 - open * 2.5).clamp(0, 1),
+        color: sealColor,
+      );
     }
   }
 
@@ -311,7 +363,11 @@ class _EnvelopePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_EnvelopePainter old) =>
-      old.open != open || old.rise != rise || old.seal != seal;
+      old.open != open ||
+      old.rise != rise ||
+      old.seal != seal ||
+      old.paper != paper ||
+      old.sealColor != sealColor;
 }
 
 /// Letter paper: a warm sheet with a folded top-right corner.
@@ -456,6 +512,71 @@ enum LetterPaper {
     (p) => p.id == id,
     orElse: () => LetterPaper.cream,
   );
+}
+
+/// How a letter is set: clean, in handwriting, or in a classic serif.
+enum LetterFont {
+  clean('clean', 'Clean'),
+  hand('hand', 'Handwritten'),
+  classic('classic', 'Classic');
+
+  const LetterFont(this.id, this.label);
+
+  final String id;
+  final String label;
+
+  static LetterFont fromId(String? id) => LetterFont.values.firstWhere(
+        (f) => f.id == id,
+        orElse: () => LetterFont.clean,
+      );
+
+  /// The reading style for the letter's body.
+  TextStyle get body => switch (this) {
+        LetterFont.clean => const TextStyle(
+            fontFamily: 'Inter',
+            fontSize: 16,
+            height: 1.75,
+            color: AppColors.ink,
+          ),
+        LetterFont.hand => const TextStyle(
+            fontFamily: 'Caveat',
+            fontSize: 23,
+            height: 1.4,
+            color: AppColors.ink,
+            fontVariations: [FontVariation('wght', 500)],
+          ),
+        LetterFont.classic => const TextStyle(
+            fontFamily: 'Playfair',
+            fontSize: 17,
+            height: 1.75,
+            color: AppColors.ink,
+          ),
+      };
+
+  /// The style for the letter's title.
+  TextStyle get title => switch (this) {
+        LetterFont.clean => const TextStyle(
+            fontFamily: 'Montserrat',
+            fontSize: 22,
+            fontWeight: FontWeight.w600,
+            height: 1.25,
+            color: AppColors.ink,
+          ),
+        LetterFont.hand => const TextStyle(
+            fontFamily: 'Caveat',
+            fontSize: 32,
+            height: 1.15,
+            color: AppColors.ink,
+            fontVariations: [FontVariation('wght', 700)],
+          ),
+        LetterFont.classic => const TextStyle(
+            fontFamily: 'Playfair',
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            height: 1.25,
+            color: AppColors.ink,
+          ),
+      };
 }
 
 /// A soft dot grid, like a bullet-journal page.
