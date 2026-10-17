@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'; trusted-types 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keepsake Privacy</title>
+<meta name="description" content="What Keepsake stores, who can see it, how long it stays, and how to delete it.">
+<meta name="theme-color" content="#F1F1EB">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="preload" href="fonts/montserrat-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/montserrat-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="./" aria-label="Keepsake home">
+      <img src="favicon.svg" alt="" width="28" height="28">
+      <span>Keepsake</span>
+    </a>
+    <a class="btn btn-small" href="app/">Open Keepsake</a>
+  </div>
+</header>
+
+<main class="doc wrap">
+  <h1>Privacy</h1>
+  <p class="lede">Keepsake is for things you’d only say to one person, so we keep as little as we can and tell you exactly what that is.</p>
+  <p class="stamp">Last updated October 17, 2026</p>
+
+  <h2>What stays on your phone</h2>
+  <p>Everything you’re still making. Drafts, the letters you’re halfway through, the photos you’ve picked: none of it leaves your phone until you share it.</p>
+
+  <h2>What we store, and why</h2>
+  <ul>
+    <li><strong>Your account.</strong> Your email address, the name you choose to show, and your password (stored only as a one-way hash by our sign-in provider). We need these so you can sign in and see what you’ve shared.</li>
+    <li><strong>Keepsakes you share.</strong> When you tap Publish, the keepsake goes to our server so the person you send it to can open it: what’s inside, who it’s for and from, the cover note, the envelope and stickers, and any open date or expiry you set.</li>
+    <li><strong>Your PIN, as a hash.</strong> If you add a PIN, the server keeps a one-way hash of it, never the PIN itself, plus a count of wrong guesses so it can lock out anyone guessing.</li>
+    <li><strong>Replies.</strong> If someone writes back, we keep their reaction, their note and the name they type, so you can read them.</li>
+    <li><strong>Links that ended.</strong> When a link is stopped or deleted, we keep a one-way hash of it so nobody can ever reuse that link. The hash can’t be turned back into the link.</li>
+  </ul>
+
+  <h2>What we don’t collect</h2>
+  <ul>
+    <li>No ads, no analytics, no tracking scripts, here or in the app.</li>
+    <li>No location. Photos are shrunk and their location and camera details removed on your phone before they’re sent.</li>
+    <li>No contacts, no browsing history, nothing from other apps.</li>
+    <li>This website loads nothing from other companies: no outside fonts, scripts or embeds.</li>
+  </ul>
+
+  <h2>Who can see a keepsake</h2>
+  <p>Only people who have its link, and the PIN if you set one. Links are 22 random characters and aren’t listed anywhere, and search engines are asked not to index them. Before an open date, the server won’t hand the keepsake over to anyone. Replies can only be read by you.</p>
+  <p>Our data is stored with Supabase, which runs the database and encrypts it on disk. Like with most apps, the people who run the service could technically read what’s stored on the server. We only use it to deliver your keepsakes, and we don’t sell or share it.</p>
+
+  <h2>How long it stays</h2>
+  <p>A shared keepsake stays on the server until you stop sharing it, delete it, or delete your account. If you set an expiry, the link stops working on that date.</p>
+
+  <h2>Deleting things</h2>
+  <ul>
+    <li><strong>Stop Sharing</strong> turns a link off right away and deletes the copy on our server. Your keepsake stays on your phone.</li>
+    <li><strong>Deleting a keepsake</strong> removes it from your phone and from our server, with its replies.</li>
+    <li><strong>Profile &gt; Delete My Account</strong> removes your sign-in and everything you shared, with all replies, and wipes this phone’s copy.</li>
+  </ul>
+
+  <p class="back"><a href="./">Back to the start</a></p>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="logo logo-quiet"><img src="favicon.svg" alt="" width="20" height="20"> Keepsake</span>
+    <nav aria-label="Footer">
+      <a href="./#questions">Questions</a>
+      <a href="app/">Open the app</a>
+    </nav>
+    <span class="small">© 2026</span>
+  </div>
+</footer>
+</body>
+</html>

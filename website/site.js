@@ -41,6 +41,46 @@
     }
   }
 
+  // Someone sent you one: accept the whole link or just the code, and only
+  // ever open it here, on this site.
+  var form = document.getElementById('open-form');
+  if (form) {
+    var input = document.getElementById('code');
+    var error = document.getElementById('code-error');
+    var CODE = /^[A-Za-z0-9_-]{16,64}$/;
+
+    function codeFrom(raw) {
+      var text = raw.trim();
+      var at = text.lastIndexOf('/receive/');
+      if (at !== -1) text = text.slice(at + 9);
+      text = text.split(/[?#\/\s]/)[0];
+      return CODE.test(text) ? text : null;
+    }
+
+    function showError(message) {
+      error.textContent = message;
+      error.hidden = !message;
+      input.setAttribute('aria-invalid', message ? 'true' : 'false');
+    }
+
+    input.addEventListener('input', function () { showError(''); });
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (!input.value.trim()) {
+        showError('Paste the link or code first.');
+        input.focus();
+        return;
+      }
+      var code = codeFrom(input.value);
+      if (!code) {
+        showError('That doesn\u2019t look like a Keepsake link or code. Check you copied all of it.');
+        input.focus();
+        return;
+      }
+      window.location.assign('app/receive/' + encodeURIComponent(code));
+    });
+  }
+
   tags.forEach(function (tag, i) {
     tag.tabIndex = tag.getAttribute('aria-checked') === 'true' ? 0 : -1;
     tag.addEventListener('click', function () { pick(tag); });

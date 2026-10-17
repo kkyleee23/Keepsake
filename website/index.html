@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests; require-trusted-types-for 'script'; trusted-types 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Keepsake</title>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -28,6 +29,7 @@
     </a>
     <nav class="links" aria-label="On this page">
       <a href="#how">How it goes</a>
+      <a href="#questions">Questions</a>
       <a href="#privacy">Privacy</a>
     </nav>
     <a class="btn btn-small" href="app/">Open Keepsake</a>
@@ -125,6 +127,26 @@
     </div>
   </section>
 
+  <section class="open-code wrap" id="open" aria-labelledby="open-title">
+    <div class="open-card">
+      <div class="open-text">
+        <h2 id="open-title">Someone sent you one?</h2>
+        <p>Paste the link or the code they gave you. It opens right here in your browser.</p>
+      </div>
+      <form class="open-form" id="open-form" novalidate>
+        <label for="code">Link or code</label>
+        <div class="open-row">
+          <input id="code" name="code" type="text" inputmode="url" autocomplete="off"
+                 autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="300"
+                 placeholder="e.g. https://…/receive/Xk3…" aria-describedby="code-help code-error">
+          <button class="btn" type="submit">Open It</button>
+        </div>
+        <p class="help" id="code-help">The code is the 22 letters and numbers at the end of the link.</p>
+        <p class="error" id="code-error" role="alert" hidden></p>
+      </form>
+    </div>
+  </section>
+
   <section class="privacy" id="privacy" aria-labelledby="privacy-title">
     <div class="wrap">
       <h2 id="privacy-title">Private by default</h2>
@@ -155,6 +177,37 @@
           <dd>No ads, no analytics, no third-party scripts. Not on this page, not in the app.</dd>
         </div>
       </dl>
+      <p class="more"><a href="privacy.html">Read the full privacy notice</a></p>
+    </div>
+  </section>
+
+  <section class="faq wrap" id="questions" aria-labelledby="faq-title">
+    <h2 id="faq-title">Questions people ask</h2>
+    <div class="faq-list">
+      <details>
+        <summary>Does the person I send it to need the app?</summary>
+        <p>No. The link opens in any browser on any phone or computer. If they do have the app and an account, they can keep it in their library.</p>
+      </details>
+      <details>
+        <summary>Can I change it after I send it?</summary>
+        <p>Yes. Edit it, then tap Update and Share Again. The same link shows the new version, so you don’t have to send anything new.</p>
+      </details>
+      <details>
+        <summary>I sent it to the wrong person. What now?</summary>
+        <p>Open it in your keepsakes and tap Stop Sharing. The link stops working at once and the copy on our server is deleted. Your keepsake goes back to your drafts, and you can share it again with a new link.</p>
+      </details>
+      <details>
+        <summary>Can they write back?</summary>
+        <p>Yes, with a reaction or a short note of up to 1,000 characters. Only you can read what they send.</p>
+      </details>
+      <details>
+        <summary>How much can one keepsake hold?</summary>
+        <p>Up to 6 photos, a book of up to 40 pages, and letters or essays of about 8,000 words each. Mix them however you like.</p>
+      </details>
+      <details>
+        <summary>What happens if I delete my account?</summary>
+        <p>Everything you made is deleted from our server: your keepsakes, the replies to them and your sign-in. Their links stop working and can never be reused.</p>
+      </details>
     </div>
   </section>
 
@@ -173,7 +226,8 @@
   <div class="wrap foot-in">
     <span class="logo logo-quiet"><img src="favicon.svg" alt="" width="20" height="20"> Keepsake</span>
     <nav aria-label="Footer">
-      <a href="#privacy">Privacy</a>
+      <a href="privacy.html">Privacy notice</a>
+      <a href="#questions">Questions</a>
       <a href="app/">Open the app</a>
     </nav>
     <span class="small">© 2026</span>

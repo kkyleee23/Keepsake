@@ -19,7 +19,15 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** The website (`website/`) and hosting. A landing page made
+- **Latest:** Website round two (no setup). A box where someone can paste a
+  link or code they were sent (it only ever opens links on your site), a
+  questions section, a plain-English privacy page (`privacy.html`, read it
+  and add a contact address before launch), and a 404 page. Security: every
+  page carries its own content policy, scripts can't write HTML into the
+  page (Trusted Types), and `tool/check_site.js` checks all of it in a real
+  browser: no blocked loads, no requests to other sites, no sideways scroll
+  at four widths, and the code box refusing anything off-site.
+- **Before that:** The website (`website/`) and hosting. A landing page made
   from real screenshots and a real recording of a keepsake opening, with a
   live version of the gift-tag picker. `tool/build_site.sh` packs the
   website and the web app into one folder with strict security headers (see
@@ -147,7 +155,10 @@ where share links open). Security headers come with it.
    can turn **Confirm email** back on.
 
 **Check:** open `https://<your-site>/` (the website), then a share link
-from the app. It should show the envelope.
+from the app. It should show the envelope. To check the website on your own
+computer first: `python3 tool/serve_dist.py dist 8790`, then
+`node tool/check_site.js http://localhost:8790` (needs Playwright:
+`npm i -g playwright`).
 
 What the headers do: the website may only load its own files (no
 third-party scripts, fonts or trackers); the app may only talk to itself
