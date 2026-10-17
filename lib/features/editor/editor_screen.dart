@@ -319,8 +319,7 @@ class _CoverCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(keepsake.occasion.label.toUpperCase(),
-              style: AppTypography.caption),
+          Text(keepsake.occasion.label, style: AppTypography.eyebrow),
           const SizedBox(height: AppSpacing.xs),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,

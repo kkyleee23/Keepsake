@@ -238,7 +238,7 @@ class _SealedViewState extends State<_SealedView> {
           const Spacer(),
           const Mascot(size: 140, pose: MascotPose.sleepy),
           const SizedBox(height: AppSpacing.lg),
-          Text('SEALED', style: AppTypography.caption, textAlign: TextAlign.center),
+          Text('Sealed', style: AppTypography.eyebrow, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.md),
           Text(
             (widget.cover?.recipientName ?? '').isEmpty
@@ -249,7 +249,7 @@ class _SealedViewState extends State<_SealedView> {
           ),
           if (opensAt != null) ...[
             const SizedBox(height: AppSpacing.xl),
-            Text('Opens', style: AppTypography.caption),
+            Text('Opens', style: AppTypography.eyebrow),
             const SizedBox(height: AppSpacing.xs),
             Text(DateFormat.yMMMMd().format(opensAt),
                 style: AppTypography.heading, textAlign: TextAlign.center),

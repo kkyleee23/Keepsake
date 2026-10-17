@@ -64,8 +64,8 @@ class _Header extends StatelessWidget {
         const LeafSeal(size: 44),
         const SizedBox(height: AppSpacing.md),
         Text(
-          k.occasion.label.toUpperCase(),
-          style: AppTypography.eyebrow.copyWith(color: AppColors.sage),
+          k.occasion.label,
+          style: AppTypography.eyebrow,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.xs),

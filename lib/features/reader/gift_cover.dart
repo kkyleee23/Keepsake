@@ -97,8 +97,8 @@ class _GiftCoverState extends State<GiftCover>
           const Spacer(),
           if (occasion != null) ...[
             Text(
-              occasion.toUpperCase(),
-              style: AppTypography.eyebrow.copyWith(color: AppColors.sage),
+              occasion,
+              style: AppTypography.eyebrow,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xs),

@@ -13,6 +13,7 @@ import 'app_colors.dart';
 abstract final class AppTypography {
   static const String headingFamily = 'Montserrat';
   static const String sans = 'Inter';
+  static const String tag = 'Caveat';
 
   /// The one focal headline per screen.
   static const TextStyle display = TextStyle(
@@ -83,14 +84,14 @@ abstract final class AppTypography {
     color: AppColors.inkFaint,
   );
 
-  /// Small uppercase eyebrow (e.g. the "KEEPSAKE" kicker, occasion labels).
+  /// Small handwritten tag above a heading: the occasion, a date, "Open
+  /// when". Written like a label on a gift, not shouted in caps.
   static const TextStyle eyebrow = TextStyle(
-    fontFamily: sans,
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-    height: 1.2,
-    letterSpacing: 1.6,
-    color: AppColors.inkFaint,
+    fontFamily: tag,
+    fontSize: 21,
+    height: 1.15,
+    fontVariations: [FontVariation('wght', 600)],
+    color: AppColors.sage,
   );
 
   /// Maps our scale onto Material's [TextTheme] so framework widgets inherit it.

@@ -82,6 +82,11 @@ flutter:
           weight: 700
         - asset: fonts/montserrat/montserrat_extrabold.ttf
           weight: 800
+    # Gift tags: Caveat, a handwritten face for small labels (occasion, dates,
+    # "Open when"). Variable font; weight is set with FontVariation.
+    - family: Caveat
+      fonts:
+        - asset: fonts/caveat/caveat_variable.ttf
     # Body / UI: Inter for everything else.
     - family: Inter
       fonts:

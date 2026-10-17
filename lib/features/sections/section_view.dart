@@ -187,8 +187,8 @@ class _Memory extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    (date ?? 'A memory').toUpperCase(),
-                    style: AppTypography.eyebrow.copyWith(color: AppColors.sage),
+                    date ?? 'A memory',
+                    style: AppTypography.eyebrow,
                   ),
                   if (title != null) ...[
                     const SizedBox(height: AppSpacing.xs),
@@ -356,7 +356,9 @@ class _OpenWhen extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionTitle(title ?? 'Open when'),
+        // Each envelope already says "Open when", so only a custom title shows.
+        if (title != null && title!.toLowerCase() != 'open when')
+          _SectionTitle(title!),
         for (final m in cards)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -444,9 +446,8 @@ class _OpenWhenEnvelopeState extends State<_OpenWhenEnvelope>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'OPEN WHEN',
-                                style: AppTypography.eyebrow
-                                    .copyWith(color: AppColors.sage),
+                                'Open when',
+                                style: AppTypography.eyebrow,
                               ),
                               const SizedBox(height: AppSpacing.xxs),
                               Text(widget.label, style: AppTypography.label),
@@ -574,9 +575,9 @@ class _VineEntry extends StatelessWidget {
                 children: [
                   if (date != null)
                     Text(
-                      DateFormat.yMMMMd().format(date).toUpperCase(),
+                      DateFormat.yMMMMd().format(date),
                       style:
-                          AppTypography.eyebrow.copyWith(color: AppColors.sage),
+                          AppTypography.eyebrow,
                     ),
                   if (title.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.xxs),
