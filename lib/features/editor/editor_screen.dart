@@ -287,11 +287,14 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           title: text('title'),
           body: text('body'),
           signoff: text('signoff'),
+          paper: text('paper'),
+          occasion: _draft!.occasion,
         );
       case SectionType.essay:
         return WritingScreen(
           kind: WritingKind.essay,
           heading: 'Essay',
+          occasion: _draft!.occasion,
           title: text('title'),
           subtitle: text('subtitle'),
           body: text('body'),

@@ -313,6 +313,49 @@ class _EnvelopePainter extends CustomPainter {
 }
 
 /// Letter paper: a warm sheet with a folded top-right corner.
+/// The stationery a letter can be written on.
+enum LetterPaper {
+  cream('cream', 'Cream', AppColors.giftPaper, AppColors.giftEdge, false),
+  dotted('dotted', 'Dotted', AppColors.giftPaper, AppColors.giftEdge, true),
+  sage('sage', 'Sage', Color(0xFFEDF1E5), Color(0xFFD3DCC6), false),
+  kraft('kraft', 'Kraft', Color(0xFFEADDC6), Color(0xFFD5C2A2), false);
+
+  const LetterPaper(this.id, this.label, this.color, this.edge, this.dots);
+
+  final String id;
+  final String label;
+  final Color color;
+  final Color edge;
+  final bool dots;
+
+  static LetterPaper fromId(String? id) => LetterPaper.values.firstWhere(
+        (p) => p.id == id,
+        orElse: () => LetterPaper.cream,
+      );
+}
+
+/// A soft dot grid, like a bullet-journal page.
+class DotGridPainter extends CustomPainter {
+  const DotGridPainter({this.color = AppColors.giftEdge, this.spacing = 20});
+
+  final Color color;
+  final double spacing;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final p = Paint()..color = color;
+    for (var y = spacing; y < size.height; y += spacing) {
+      for (var x = spacing; x < size.width; x += spacing) {
+        canvas.drawCircle(Offset(x, y), 1.1, p);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(DotGridPainter old) =>
+      old.color != color || old.spacing != spacing;
+}
+
 class PaperSheet extends StatelessWidget {
   const PaperSheet({
     super.key,
@@ -320,27 +363,56 @@ class PaperSheet extends StatelessWidget {
     this.padding = const EdgeInsets.all(AppSpacing.lg),
     this.fold = 22,
     this.color = AppColors.giftPaper,
+    this.edge = AppColors.giftEdge,
+    this.dots = false,
   });
+
+  /// A sheet in one of the letter papers.
+  factory PaperSheet.of(
+    LetterPaper paper, {
+    Key? key,
+    required Widget child,
+    EdgeInsets padding = const EdgeInsets.all(AppSpacing.lg),
+    double fold = 22,
+  }) =>
+      PaperSheet(
+        key: key,
+        padding: padding,
+        fold: fold,
+        color: paper.color,
+        edge: paper.edge,
+        dots: paper.dots,
+        child: child,
+      );
 
   final Widget child;
   final EdgeInsets padding;
   final double fold;
   final Color color;
+  final Color edge;
+  final bool dots;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
-      painter: _PaperPainter(fold: fold, color: color),
+      painter: _PaperPainter(fold: fold, color: color, edge: edge, dots: dots),
       child: Padding(padding: padding, child: child),
     );
   }
 }
 
 class _PaperPainter extends CustomPainter {
-  _PaperPainter({required this.fold, required this.color});
+  _PaperPainter({
+    required this.fold,
+    required this.color,
+    required Color edge,
+    required this.dots,
+  }) : edgeColor = edge;
 
   final double fold;
   final Color color;
+  final Color edgeColor;
+  final bool dots;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -365,11 +437,18 @@ class _PaperPainter extends CustomPainter {
       ..quadraticBezierTo(0, 0, r, 0)
       ..close();
     final edge = Paint()
-      ..color = AppColors.giftEdge
+      ..color = edgeColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1
       ..strokeJoin = StrokeJoin.round;
     canvas.drawPath(sheet, Paint()..color = color);
+    if (dots) {
+      canvas.save();
+      canvas.clipPath(sheet);
+      DotGridPainter(color: edgeColor.withValues(alpha: 0.9))
+          .paint(canvas, size);
+      canvas.restore();
+    }
     canvas.drawPath(sheet, edge);
     if (f <= 0) return;
     // The folded-over corner.
@@ -379,13 +458,19 @@ class _PaperPainter extends CustomPainter {
       ..quadraticBezierTo(w - f, f, w - f * 0.78, f)
       ..lineTo(w, f)
       ..close();
-    canvas.drawPath(corner, Paint()..color = AppColors.envelopeShade);
+    canvas.drawPath(
+      corner,
+      Paint()..color = Color.lerp(color, edgeColor, 0.55)!,
+    );
     canvas.drawPath(corner, edge);
   }
 
   @override
   bool shouldRepaint(_PaperPainter old) =>
-      old.fold != fold || old.color != color;
+      old.fold != fold ||
+      old.color != color ||
+      old.edgeColor != edgeColor ||
+      old.dots != dots;
 }
 
 /// A strip of washi tape, as if holding a photo or note in place.

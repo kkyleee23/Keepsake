@@ -17,7 +17,8 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** New mascot poses (no setup). Security: run
+- **Latest:** Letter ideas and stationery (no setup). New mascot poses
+  (no setup). Security: run
   **`0004_security.sql`** after `0003`. It limits PIN guessing (5 wrong
   tries locks for 15 minutes, then longer), makes publish the only way to
   write keepsakes, adds hard size limits on the table, and adds real account

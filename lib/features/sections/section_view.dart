@@ -45,6 +45,7 @@ class SectionView extends StatelessWidget {
           body: _s('body'),
           signoff: _s('signoff'),
           from: senderName,
+          paper: LetterPaper.fromId(_s('paper')),
         );
       case SectionType.book:
         final pages = [
@@ -144,18 +145,26 @@ class _SectionTitle extends StatelessWidget {
 /// A letter on warm paper with a folded corner, signed at the bottom with
 /// the writer's sign-off ("With love,") in handwriting and their name.
 class _Letter extends StatelessWidget {
-  const _Letter({this.title, this.body, this.signoff, this.from});
+  const _Letter({
+    this.title,
+    this.body,
+    this.signoff,
+    this.from,
+    this.paper = LetterPaper.cream,
+  });
 
   final String? title;
   final String? body;
   final String? signoff;
   final String? from;
+  final LetterPaper paper;
 
   @override
   Widget build(BuildContext context) {
     if (title == null && body == null) return const SizedBox.shrink();
     final name = from?.trim() ?? '';
-    return PaperSheet(
+    return PaperSheet.of(
+      paper,
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.lg,
         AppSpacing.lg,
@@ -172,7 +181,7 @@ class _Letter extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
           ],
-          if (body != null) LetterBody(text: body!),
+          if (body != null) LetterBody(text: body!, fill: paper.color),
           const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerRight,
