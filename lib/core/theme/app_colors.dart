@@ -34,6 +34,17 @@ abstract final class AppColors {
   static const Color error = Color(0xFFBC5A46);
   static const Color warning = Color(0xFFB07A1E);
 
+  // Gift surfaces: only inside an opened keepsake (letter paper, envelope,
+  // tape, leaf). Taken from the brand sheet so the gift feels hand-made but
+  // still belongs to the app.
+  static const Color giftPaper = Color(0xFFFBF7EF); // letter sheet
+  static const Color envelope = Color(0xFFF1E9DA); // envelope body
+  static const Color envelopeShade = Color(0xFFE7DCC8); // pocket and flap inside
+  static const Color giftEdge = Color(0xFFDCCFB8); // paper edges and folds
+  static const Color sage = Color(0xFF6B7F63); // leaves, vine
+  static const Color sageSoft = Color(0xFFC8D4B5); // washi tape, leaf fills
+  static const Color heart = Color(0xFFA0524D); // tiny hearts only
+
   // Scrim for sealed / modal overlays
   static const Color scrim = Color(0x66191B16);
 }

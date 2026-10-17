@@ -6,7 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
@@ -14,6 +13,8 @@ import '../../data/providers.dart';
 import '../../data/remote/auth_service.dart';
 import '../../data/remote/keepsake_backend.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
+import '../../data/models/enums.dart';
+import '../reader/gift_cover.dart';
 import '../reader/keepsake_content_view.dart';
 import 'reply_card.dart';
 import '../../shared/widgets/brand.dart';
@@ -161,7 +162,16 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
                 ),
         );
       case _Phase.cover:
-        return _RecipientCover(cover: _cover!, onOpen: _onOpenPressed);
+        final c = _cover!;
+        return GiftCover(
+          occasion: c.occasion == null ? null : Occasion.fromId(c.occasion!).label,
+          recipientName: c.recipientName,
+          title: c.title,
+          coverNote: c.coverNote,
+          senderName: c.senderName,
+          playOpening: !c.requiresPin,
+          onOpen: _onOpenPressed,
+        );
       case _Phase.sealed:
         return _SealedView(opensAt: _cover?.opensAt, cover: _cover);
       case _Phase.pin:
@@ -172,52 +182,6 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
       case _Phase.error:
         return _ErrorView(status: _errorStatus);
     }
-  }
-}
-
-class _RecipientCover extends StatelessWidget {
-  const _RecipientCover({required this.cover, required this.onOpen});
-
-  final CoverResult cover;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    return FillScroll(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Spacer(),
-          const Mascot(size: 140, pose: MascotPose.received, animate: true),
-          const SizedBox(height: AppSpacing.lg),
-          if ((cover.occasion ?? '').isNotEmpty)
-            Text(cover.occasion!.toUpperCase(),
-                style: AppTypography.caption, textAlign: TextAlign.center),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            (cover.recipientName ?? '').isEmpty
-                ? 'Something for you'
-                : 'For ${cover.recipientName}',
-            style: AppTypography.display,
-            textAlign: TextAlign.center,
-          ),
-          if ((cover.coverNote ?? '').isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.md),
-            Text(cover.coverNote!,
-                style: AppTypography.bodyLarge.copyWith(color: AppColors.inkSoft),
-                textAlign: TextAlign.center),
-          ],
-          const Spacer(),
-          if ((cover.senderName ?? '').isNotEmpty) ...[
-            Text('Made for you by ${cover.senderName}',
-                style: AppTypography.caption, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.md),
-          ],
-          PrimaryButton(label: 'Open', onPressed: onOpen),
-          const SizedBox(height: AppSpacing.xl),
-        ],
-      ),
-    );
   }
 }
 
