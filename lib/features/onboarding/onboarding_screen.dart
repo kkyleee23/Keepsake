@@ -100,7 +100,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 AppSpacing.xl,
               ),
               child: PrimaryButton(
-                label: last ? 'Get started' : 'Continue',
+                label: last ? 'Get Started' : 'Continue',
                 onPressed: _next,
               ),
             ),
@@ -163,7 +163,7 @@ class _Dots extends StatelessWidget {
             width: i == active ? 22 : 8,
             height: 8,
             decoration: BoxDecoration(
-              color: i == active ? AppColors.accent : AppColors.hairline,
+              color: i == active ? AppColors.accent : AppColors.inkFaint.withValues(alpha: 0.45),
               borderRadius: BorderRadius.circular(4),
             ),
           ),

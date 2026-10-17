@@ -61,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
 
           SectionHeader(
             title: 'Continue where you left off',
-            actionLabel: drafts.length > 2 ? 'See all' : null,
+            actionLabel: drafts.length > 2 ? 'See All' : null,
             onAction: drafts.length > 2 ? () => context.go('/keepsakes') : null,
           ),
           if (drafts.isEmpty)

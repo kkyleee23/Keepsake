@@ -249,7 +249,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
               OutlinedButton.icon(
                 onPressed: _openAddSheet,
                 icon: const Icon(Icons.add, size: 20),
-                label: const Text('Add something'),
+                label: const Text('Add Something'),
               ),
             if (draft.hasContent) ...[
               const SizedBox(height: AppSpacing.xl),

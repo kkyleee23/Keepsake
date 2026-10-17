@@ -117,7 +117,7 @@ class _TimelineEditorScreenState extends State<TimelineEditorScreen> {
             TextButton.icon(
               onPressed: () => setState(() => _entries.add(_Entry())),
               icon: const Icon(Icons.add, size: 20),
-              label: const Text('Add a moment'),
+              label: const Text('Add a Moment'),
             ),
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(label: 'Save', onPressed: _save),

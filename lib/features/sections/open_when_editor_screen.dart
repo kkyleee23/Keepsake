@@ -103,7 +103,7 @@ class _OpenWhenEditorScreenState extends State<OpenWhenEditorScreen> {
             TextButton.icon(
               onPressed: () => setState(() => _items.add(_Item())),
               icon: const Icon(Icons.add, size: 20),
-              label: const Text('Add one'),
+              label: const Text('Add One'),
             ),
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(label: 'Save', onPressed: _save),
