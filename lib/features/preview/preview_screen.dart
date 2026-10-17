@@ -65,7 +65,7 @@ class _PreviewScreenState extends ConsumerState<PreviewScreen> {
         icon: Icons.error_outline,
         title: "Can't preview this keepsake",
         message: 'It may have been deleted.',
-        actionLabel: 'Go back',
+        actionLabel: 'Go Back',
         onAction: () => context.pop(),
       );
     }

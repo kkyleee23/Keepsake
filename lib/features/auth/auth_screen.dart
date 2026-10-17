@@ -119,7 +119,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                 ),
                 TextButton(
                   onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-                  child: const Text('Send link'),
+                  child: const Text('Send Link'),
                 ),
               ],
             ),
@@ -215,7 +215,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
             const SizedBox(height: AppSpacing.xl),
             PrimaryButton(
-              label: _signUp ? 'Create account' : 'Sign in',
+              label: _signUp ? 'Create Account' : 'Sign In',
               loading: _busy,
               onPressed: _submit,
             ),

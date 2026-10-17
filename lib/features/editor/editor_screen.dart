@@ -193,7 +193,7 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           icon: Icons.error_outline,
           title: "Can't find this keepsake",
           message: 'It may have been deleted.',
-          actionLabel: 'Go home',
+          actionLabel: 'Go Home',
           onAction: () => context.go('/home'),
         ),
       );
@@ -453,7 +453,7 @@ class _FirstSectionPrompt extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           PrimaryButton(
-            label: 'Add something',
+            label: 'Add Something',
             icon: Icons.add,
             onPressed: onAdd,
             expand: false,

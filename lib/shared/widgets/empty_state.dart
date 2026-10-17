@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_spacing.dart';
@@ -28,35 +30,50 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
+    // Centered when there is room; scrolls instead of overflowing on short
+    // screens, inside a tab with filters above it, or with a large text scale.
+    return LayoutBuilder(
+      builder: (context, constraints) => SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (illustration != null) ...[
-              illustration!,
-              const SizedBox(height: AppSpacing.lg),
-            ] else if (icon != null) ...[
-              Icon(icon, size: 40, color: AppTypography.caption.color),
-              const SizedBox(height: AppSpacing.md),
-            ],
-            Text(title, style: AppTypography.heading, textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              message,
-              style: AppTypography.body,
-              textAlign: TextAlign.center,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: constraints.hasBoundedHeight
+                ? math.max(0.0, constraints.maxHeight - AppSpacing.xl * 2)
+                : 0,
+          ),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (illustration != null) ...[
+                  illustration!,
+                  const SizedBox(height: AppSpacing.lg),
+                ] else if (icon != null) ...[
+                  Icon(icon, size: 40, color: AppTypography.caption.color),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+                Text(
+                  title,
+                  style: AppTypography.heading,
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  message,
+                  style: AppTypography.body,
+                  textAlign: TextAlign.center,
+                ),
+                if (actionLabel != null && onAction != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  PrimaryButton(
+                    label: actionLabel!,
+                    onPressed: onAction,
+                    expand: false,
+                  ),
+                ],
+              ],
             ),
-            if (actionLabel != null && onAction != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              PrimaryButton(
-                label: actionLabel!,
-                onPressed: onAction,
-                expand: false,
-              ),
-            ],
-          ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/theme/app_colors.dart';
+import '../shared/widgets/nav_icons.dart';
 
 /// The creator-side shell: four familiar top-level destinations with one clear
 /// active state (design system 1.6). Recipient-facing routes live outside this
@@ -11,6 +12,13 @@ class HomeShell extends StatelessWidget {
 
   final StatefulNavigationShell navigationShell;
 
+  static const _destinations = [
+    (NavGlyph.home, 'Home'),
+    (NavGlyph.create, 'Create'),
+    (NavGlyph.keepsakes, 'Keepsakes'),
+    (NavGlyph.profile, 'Profile'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,33 +27,20 @@ class HomeShell extends StatelessWidget {
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AppColors.hairline)),
         ),
-        child: BottomNavigationBar(
-          currentIndex: navigationShell.currentIndex,
-          onTap: (index) => navigationShell.goBranch(
+        child: NavigationBar(
+          selectedIndex: navigationShell.currentIndex,
+          onDestinationSelected: (index) => navigationShell.goBranch(
             index,
             initialLocation: index == navigationShell.currentIndex,
           ),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline),
-              activeIcon: Icon(Icons.add_circle),
-              label: 'Create',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bookmark_border),
-              activeIcon: Icon(Icons.bookmark),
-              label: 'Keepsakes',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
-              activeIcon: Icon(Icons.person),
-              label: 'Profile',
-            ),
+          destinations: [
+            for (final (glyph, label) in _destinations)
+              NavigationDestination(
+                icon: NavIcon(glyph),
+                selectedIcon: NavIcon(glyph, filled: true),
+                label: label,
+                tooltip: '',
+              ),
           ],
         ),
       ),

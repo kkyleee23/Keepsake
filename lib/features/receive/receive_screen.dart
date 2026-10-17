@@ -368,7 +368,7 @@ class _ErrorView extends StatelessWidget {
       illustration: Mascot(size: 140, pose: pose),
       title: title,
       message: message,
-      actionLabel: 'Go home',
+      actionLabel: 'Go Home',
       onAction: () => context.go('/home'),
     );
   }

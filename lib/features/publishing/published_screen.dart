@@ -60,7 +60,7 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
           icon: Icons.error_outline,
           title: 'Not published',
           message: 'This keepsake doesn’t have a link yet.',
-          actionLabel: 'Go home',
+          actionLabel: 'Go Home',
           onAction: () => context.go('/home'),
         ),
       );
@@ -92,7 +92,11 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text('Ready to give', style: AppTypography.display),
+            Text(
+              'Ready to give',
+              style: AppTypography.display,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               k.recipientName.isEmpty
@@ -100,6 +104,7 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
                   : 'Share this with ${k.recipientName}, '
                       'or let them scan the code.',
               style: AppTypography.bodyLarge.copyWith(color: AppColors.inkSoft),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: AppSpacing.xl),
 

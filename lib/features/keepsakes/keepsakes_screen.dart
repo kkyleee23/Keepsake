@@ -292,15 +292,15 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: selected ? AppColors.accent : AppColors.surface,
-      borderRadius: BorderRadius.circular(999),
+      borderRadius: AppRadius.button,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: AppRadius.button,
         child: Container(
           padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md, vertical: AppSpacing.xs),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: AppRadius.button,
             border: Border.all(
               color: selected ? AppColors.accent : AppColors.hairline,
             ),

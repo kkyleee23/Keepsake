@@ -39,7 +39,53 @@ abstract final class AppTheme {
         foregroundColor: AppColors.ink,
         elevation: 0,
         centerTitle: false,
+        scrolledUnderElevation: 0,
         titleTextStyle: AppTypography.heading,
+      ),
+
+      // Overlays share one surface, one radius, and no tint or shadow.
+      dialogTheme: const DialogThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.sheet),
+        titleTextStyle: AppTypography.heading,
+        contentTextStyle: AppTypography.body,
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: AppColors.ink,
+        contentTextStyle: AppTypography.body.copyWith(color: AppColors.surface),
+        actionTextColor: AppColors.surface,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(borderRadius: AppRadius.button),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected)
+              ? AppColors.onAccent
+              : AppColors.inkFaint,
+        ),
+        trackColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected)
+              ? AppColors.accent
+              : AppColors.surfaceAlt,
+        ),
+        trackOutlineColor: WidgetStateProperty.resolveWith(
+          (s) => s.contains(WidgetState.selected)
+              ? AppColors.accent
+              : AppColors.hairline,
+        ),
       ),
 
       dividerTheme: const DividerThemeData(
@@ -143,6 +189,38 @@ abstract final class AppTheme {
         unselectedLabelStyle: AppTypography.caption,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
+      ),
+
+      // Bottom navigation: custom vector icons, a quiet accent pill behind the
+      // active one, and labels in the caption style (design system 1.6).
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: AppColors.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        height: 68,
+        indicatorColor: AppColors.accent.withValues(alpha: 0.12),
+        indicatorShape: const RoundedRectangleBorder(
+          borderRadius: AppRadius.button,
+        ),
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (s) => IconThemeData(
+            size: 24,
+            color: s.contains(WidgetState.selected)
+                ? AppColors.accent
+                : AppColors.inkSoft,
+          ),
+        ),
+        labelTextStyle: WidgetStateProperty.resolveWith(
+          (s) => AppTypography.caption.copyWith(
+            color: s.contains(WidgetState.selected)
+                ? AppColors.accent
+                : AppColors.inkSoft,
+            fontWeight: s.contains(WidgetState.selected)
+                ? FontWeight.w600
+                : FontWeight.w500,
+          ),
+        ),
       ),
 
       iconTheme: const IconThemeData(color: AppColors.ink, size: 24),

@@ -68,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Sign out'),
+            child: const Text('Sign Out'),
           ),
         ],
       ),
@@ -96,7 +96,7 @@ class ProfileScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete everything'),
+            child: const Text('Delete Everything'),
           ),
         ],
       ),
@@ -166,7 +166,7 @@ class ProfileScreen extends ConsumerWidget {
             TextButton.icon(
               onPressed: () => _confirmSignOut(context, ref),
               icon: const Icon(Icons.logout, size: 20),
-              label: const Text('Sign out'),
+              label: const Text('Sign Out'),
             ),
             TextButton.icon(
               onPressed: () => _confirmWipe(context, ref),
