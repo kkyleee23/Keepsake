@@ -6,10 +6,7 @@
 // notch and home bar, the same iPhone with very large text, a tablet, and a
 // phone in landscape.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:keepsake/app/app.dart';
@@ -44,6 +41,8 @@ import 'package:keepsake/shared/widgets/primary_button.dart';
 import 'package:keepsake/shared/widgets/stickers.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'support/test_fonts.dart';
+
 class Device {
   const Device(this.name, this.size, this.dpr,
       {this.top = 0, this.bottom = 0, this.side = 0, this.text = 1});
@@ -61,30 +60,6 @@ const devices = [
   Device('phone-landscape', Size(844, 390), 3, top: 0, bottom: 21, side: 47),
 ];
 
-Future<void> _fonts() async {
-  Future<void> load(String fam, List<String> paths) async {
-    final l = FontLoader(fam);
-    for (final p in paths) {
-      l.addFont(Future.value(ByteData.view(File(p).readAsBytesSync().buffer)));
-    }
-    await l.load();
-  }
-
-  await load('Inter', ['regular', 'medium', 'semibold', 'bold']
-      .map((w) => 'fonts/inter/inter_$w.ttf')
-      .toList());
-  await load('Montserrat', ['regular', 'semibold', 'bold', 'extrabold']
-      .map((w) => 'fonts/montserrat/montserrat_$w.ttf')
-      .toList());
-  await load('Caveat', ['fonts/caveat/caveat_variable.ttf']);
-  await load('Playfair', ['regular', 'semibold', 'bold']
-      .map((w) => 'fonts/playfair-display/playfair_display_$w.ttf')
-      .toList());
-  // Real icon glyphs in the review images, when the SDK ships the font.
-  final icons = '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter'}'
-      '/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf';
-  if (File(icons).existsSync()) await load('MaterialIcons', [icons]);
-}
 
 final _now = DateTime(2026, 10, 17, 9, 30);
 KeepsakeSection _sec(int i, SectionType t, Map<String, dynamic> c) =>
@@ -349,7 +324,7 @@ Future<void> _settle(WidgetTester t) async {
 const _shots = bool.fromEnvironment('SHOTS');
 
 void main() {
-  setUpAll(_fonts);
+  setUpAll(loadTestFonts);
 
   for (final d in devices) {
     for (final e in screens.entries) {

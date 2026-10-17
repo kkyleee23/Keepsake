@@ -1,0 +1,24 @@
+# Security headers for Netlify or Cloudflare Pages (both read this file).
+# tool/build_site.sh fills in __SUPABASE_HOST__ from dart_defines.json.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
+
+# The website: its own files and nothing else.
+/
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+/index.html
+  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; font-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+
+# The app: its own files, your Supabase project, and Google's font files
+# (Flutter fetches a fallback font there when a character isn't in the
+# app's fonts). Share links live here, so search engines are kept out.
+/app/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://__SUPABASE_HOST__ wss://__SUPABASE_HOST__ https://fonts.gstatic.com; worker-src 'self' blob:; base-uri 'self'; form-action 'none'; frame-ancestors 'none'
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-cache

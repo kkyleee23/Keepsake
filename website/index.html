@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Keepsake</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Write a letter, fill a little book or add a few photos for one person. Seal it in an envelope, send a private link, and they open it when the time is right.">
+<meta name="theme-color" content="#F1F1EB">
+<meta name="referrer" content="no-referrer">
+<meta property="og:title" content="Keepsake">
+<meta property="og:description" content="Make something for one person to keep.">
+<meta property="og:image" content="img/cover.webp">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preload" href="fonts/montserrat-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/montserrat-regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap bar-in">
+    <a class="logo" href="#top" aria-label="Keepsake, back to top">
+      <img src="favicon.svg" alt="" width="28" height="28">
+      <span>Keepsake</span>
+    </a>
+    <nav class="links" aria-label="On this page">
+      <a href="#how">How it goes</a>
+      <a href="#privacy">Privacy</a>
+    </nav>
+    <a class="btn btn-small" href="app/">Open Keepsake</a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero wrap">
+    <div class="hero-text">
+      <h1>Make something for one person to keep.</h1>
+      <p class="lede">Write them a letter, fill a little book, add a few photos. Seal it in an envelope, send a private link, and they open it when the moment is right.</p>
+      <div class="cta-row">
+        <a class="btn" href="app/">Start a Keepsake</a>
+        <p class="note">The person you send it to doesn’t need an account or the app.</p>
+      </div>
+    </div>
+    <figure class="hero-phone">
+      <div class="phone-wrap">
+        <div class="phone">
+          <video id="opening" poster="media/opening-poster.webp"
+                 width="585" height="1266" autoplay muted loop playsinline preload="metadata"
+                 aria-label="A keepsake opening: the kraft envelope with stickers, the seal breaking, the letter sliding out.">
+            <source src="media/opening.webm" type="video/webm">
+            <source src="media/opening.mp4" type="video/mp4">
+          </video>
+        </div>
+        <button class="pup" type="button" aria-label="Say hello to the pup">
+          <img src="img/pup-wave.webp" alt="" width="360" height="463">
+        </button>
+      </div>
+      <figcaption>Recorded in the app: what Mia sees when she opens hers.</figcaption>
+    </figure>
+  </section>
+
+  <section class="how" id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <h2 id="how-title">How it goes</h2>
+      <p class="section-lede">Four steps. Nothing for them to set up.</p>
+    </div>
+    <ol class="steps wrap" tabindex="0" aria-label="Steps, scroll sideways on small screens">
+      <li class="step">
+        <img src="img/create.webp" alt="The Create screen: occasions as paper gift tags, Birthday picked, and a first line that reads Happy birthday, this year I hope." width="780" height="1688" loading="lazy">
+        <h3><span class="num">1</span> Pick what it’s for</h3>
+        <p>A birthday, an apology, a hello from far away, or no reason at all. Each one gives you a first line to change or throw away.</p>
+      </li>
+      <li class="step">
+        <img src="img/writer.webp" alt="Writing a letter in handwriting on kraft paper, starting Dear Mia." width="780" height="1688" loading="lazy">
+        <h3><span class="num">2</span> Write it your way</h3>
+        <p>A short note or a long letter. Choose the paper (cream, kraft, linen, seed) and whether it looks typed or handwritten.</p>
+      </li>
+      <li class="step">
+        <img src="img/wrap.webp" alt="Wrapping the envelope: kraft paper, a terracotta wax seal, and stickers of a stamp, a heart and a pressed sprig." width="780" height="1688" loading="lazy">
+        <h3><span class="num">3</span> Wrap it up</h3>
+        <p>Pick the envelope and the wax seal, then stick on a stamp, a pressed sprig or the pup. Drag them wherever you like.</p>
+      </li>
+      <li class="step">
+        <img src="img/letter.webp" alt="The opened gift: a handwritten letter to Mia on kraft paper, signed Love, always, Sam." width="780" height="1688" loading="lazy">
+        <h3><span class="num">4</span> Send the link</h3>
+        <p>By message, email or a QR code. They see your envelope first, then the seal breaks and the letter slides out.</p>
+      </li>
+    </ol>
+  </section>
+
+  <section class="tags-demo wrap" aria-labelledby="tags-title">
+    <div class="tags-text">
+      <h2 id="tags-title">Stuck on the first line?</h2>
+      <p>Pick a tag. Keepsake suggests a way to start, and you take it from there. These are the real suggestions from the app.</p>
+    </div>
+    <div class="tags-play">
+      <div class="tag-pile" role="radiogroup" aria-label="Occasion">
+        <button class="tag" type="button" role="radio" aria-checked="true" data-o="Birthday" data-line="Happy birthday. This year, I hope">Birthday</button>
+        <button class="tag" type="button" role="radio" aria-checked="false" data-o="Long Distance" data-line="Even from here, I can picture you">Long Distance</button>
+        <button class="tag" type="button" role="radio" aria-checked="false" data-o="Apology" data-line="I have been thinking about what happened, and">Apology</button>
+        <button class="tag" type="button" role="radio" aria-checked="false" data-o="Thank You" data-line="I did not say it enough at the time, but">Thank You</button>
+        <button class="tag" type="button" role="radio" aria-checked="false" data-o="Friendship" data-line="I knew we would be friends when">Friendship</button>
+        <button class="tag" type="button" role="radio" aria-checked="false" data-o="Just Because" data-line="I was thinking about you today when">Just Because</button>
+      </div>
+      <div class="first-line" aria-live="polite">
+        <p class="fl-occasion" id="fl-occasion">Birthday</p>
+        <p class="fl-text" id="fl-text">Happy birthday. This year, I hope…</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="opened wrap" aria-labelledby="opened-title">
+    <div class="opened-text">
+      <h2 id="opened-title">What they get</h2>
+      <p>Everything you put in, laid out like paper on a table: a letter in your handwriting, a little book that turns its pages, photos with white borders, a list of reasons, notes to open later.</p>
+      <p>They can send back a reaction or a few words. Only you can read them, and the app shows you when new ones come in.</p>
+    </div>
+    <div class="opened-shots">
+      <img src="img/reasons.webp" alt="Further down the gift: a list called Things I like about you, and a note to open later." width="780" height="1688" loading="lazy">
+      <img src="img/book.webp" alt="A little book called The Year in Small Things, by Sam, for Mia, who reads the last page first." width="780" height="1688" loading="lazy">
+    </div>
+  </section>
+
+  <section class="privacy" id="privacy" aria-labelledby="privacy-title">
+    <div class="wrap">
+      <h2 id="privacy-title">Private by default</h2>
+      <p class="section-lede">Keepsake is for things you’d only say to one person. Here is what that means in practice.</p>
+      <dl class="facts">
+        <div class="fact">
+          <dt>22 random characters</dt>
+          <dd>That’s every link. There’s no list of keepsakes to browse and nothing to guess.</dd>
+        </div>
+        <div class="fact">
+          <dt>5 wrong PINs</dt>
+          <dd>Add a PIN, and five wrong guesses lock it for 15 minutes, then longer each time, up to a day.</dd>
+        </div>
+        <div class="fact">
+          <dt>Stop sharing anytime</dt>
+          <dd>The link stops working on the spot and the copy on our server is deleted. That link can never be used again, by anyone.</dd>
+        </div>
+        <div class="fact">
+          <dt>Sealed until the day</dt>
+          <dd>Pick a date and the server won’t hand it over before then, to anyone, however they ask.</dd>
+        </div>
+        <div class="fact">
+          <dt>No location in photos</dt>
+          <dd>Photos are shrunk and their location and camera details removed on your phone, before they’re sent.</dd>
+        </div>
+        <div class="fact">
+          <dt>0 trackers</dt>
+          <dd>No ads, no analytics, no third-party scripts. Not on this page, not in the app.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="closing wrap" aria-labelledby="closing-title">
+    <img class="closing-pup" src="img/pup-hug.webp" alt="" width="360" height="408">
+    <div>
+      <h2 id="closing-title">Who would you write to?</h2>
+      <p>Start one now. It saves as you go, so you can come back to it tomorrow.</p>
+      <a class="btn" href="app/">Start a Keepsake</a>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <span class="logo logo-quiet"><img src="favicon.svg" alt="" width="20" height="20"> Keepsake</span>
+    <nav aria-label="Footer">
+      <a href="#privacy">Privacy</a>
+      <a href="app/">Open the app</a>
+    </nav>
+    <span class="small">© 2026</span>
+  </div>
+</footer>
+
+<script src="site.js" defer></script>
+</body>
+</html>

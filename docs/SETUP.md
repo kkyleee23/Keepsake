@@ -15,11 +15,20 @@ in order. Each one says how to check it worked.
 | 0006_stop_sharing.sql (Stop Sharing, dead links stay dead, stickers) | To do |
 | Confirm email turned off for testing | Done |
 | Anonymous sign-ins turned off | To do |
-| Web hosting for share links (step 4) | Later |
+| Website and share links online (step 4) | Later |
 
 ## What changed in each session
 
-- **Latest:** New replies show on your keepsake cards ("2 new replies"),
+- **Latest:** The website (`website/`) and hosting. A landing page made
+  from real screenshots and a real recording of a keepsake opening, with a
+  live version of the gift-tag picker. `tool/build_site.sh` packs the
+  website and the web app into one folder with strict security headers (see
+  step 4). Share links now use clean addresses (`/app/receive/<code>`);
+  before, the web app ignored the path and showed the home screen.
+  Tested in a browser with the headers on. Also: clearer messages when a
+  link can't be opened (offline gets a Try Again button), and a test that
+  proves photo location data is removed.
+- **Before that:** New replies show on your keepsake cards ("2 new replies"),
   counted from when you last opened that keepsake. Light haptics when the
   seal breaks, a reply is sent and tabs change. No setup.
 - **Before that:** Stickers on the envelope (in `0006`, so no extra file).
@@ -115,25 +124,36 @@ and book pages are all stored inside the keepsake, so there is no Storage
 bucket to create. Limits: 6 photos and 40 book pages per keepsake, about
 8,000 words per letter, essay or page.
 
-## 4. Later: a home for share links
+## 4. Later: put the website and share links online
 
-Share links look like `https://keepsake.app/receive/<code>`. You don't own
-that domain, so in a browser those links go nowhere yet. Until this step is
-done, recipients can still open a keepsake inside the app: **Profile > Open
-with a code**, then paste the link or code.
+Share links look like `https://<your-site>/app/receive/<code>`. Until this
+step is done, recipients can still open a keepsake inside the app:
+**Profile > Open with a code**, then paste the link or code.
 
-To make links open in any browser:
+One folder holds both the website (at `/`) and the web app (at `/app/`,
+where share links open). Security headers come with it.
 
-1. Build the web app: `flutter build web --dart-define-from-file=dart_defines.json`
-2. Upload the `build/web` folder to a free static host (Netlify, Vercel or
-   Cloudflare Pages all work). Set the host to send every path to
-   `index.html` so `/receive/...` links load the app.
-3. Put your new address in `dart_defines.json` as `KEEPSAKE_LINK_BASE`
-   (for example `https://keepsake-yourname.netlify.app`) and rebuild.
-4. In Supabase, **Authentication > URL Configuration**: set **Site URL** to
-   that same address, and add it under **Redirect URLs**. Now email
-   confirmation and password reset links land on a real page, and you can
-   turn **Confirm email** back on.
+1. Pick a free host: **Netlify** or **Cloudflare Pages**. Both read the
+   `_headers` and `_redirects` files the build includes.
+2. In `dart_defines.json`, set `KEEPSAKE_LINK_BASE` to your site's address
+   plus `/app`, for example `https://keepsake-yourname.netlify.app/app`.
+   (You can find the address after the first upload, then rebuild.)
+3. Run `tool/build_site.sh`. It builds everything into `dist/`.
+4. Upload the `dist` folder (Netlify: drag it onto **Sites**; Cloudflare
+   Pages: **Create > Pages > Upload assets**).
+5. In Supabase, **Authentication > URL Configuration**: set **Site URL** to
+   `https://<your-site>/app/` and add the same under **Redirect URLs**. Now
+   email confirmation and password reset links land on a real page, and you
+   can turn **Confirm email** back on.
+
+**Check:** open `https://<your-site>/` (the website), then a share link
+from the app. It should show the envelope.
+
+What the headers do: the website may only load its own files (no
+third-party scripts, fonts or trackers); the app may only talk to itself
+and your Supabase project; neither can be put inside another site's frame;
+links never send your address to other sites; search engines are told not
+to index `/app/`, where share links live.
 
 ## Keys, for reference
 

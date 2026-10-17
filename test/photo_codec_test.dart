@@ -22,4 +22,24 @@ void main() {
     expect(PhotoCodec.encodeSync(Uint8List.fromList([1, 2, 3, 4])), isNull);
     expect(PhotoCodec.decode('not base64!'), isNull);
   });
+
+  test('location and camera data are removed', () {
+    final photo = img.Image(width: 800, height: 600);
+    img.fill(photo, color: img.ColorRgb8(200, 180, 150));
+    photo.exif.gpsIfd['GPSLatitudeRef'] = img.IfdValueAscii('N');
+    photo.exif.gpsIfd['GPSLatitude'] = img.IfdValueRational(51, 1);
+    photo.exif.gpsIfd['GPSLongitude'] = img.IfdValueRational(0, 1);
+    photo.exif.imageIfd['Make'] = img.IfdValueAscii('PhoneMaker');
+    final withGps = Uint8List.fromList(img.encodeJpg(photo));
+    // The original really does carry the location.
+    expect(img.decodeJpg(withGps)!.exif.gpsIfd.isEmpty, isFalse);
+
+    final out = PhotoCodec.decode(PhotoCodec.encodeSync(withGps))!;
+    final back = img.decodeJpg(out)!;
+    expect(back.exif.gpsIfd.isEmpty, isTrue);
+    expect(back.exif.imageIfd.isEmpty, isTrue);
+    // No EXIF block in the file at all.
+    expect(String.fromCharCodes(out).contains('Exif'), isFalse);
+    expect(String.fromCharCodes(out).contains('PhoneMaker'), isFalse);
+  });
 }

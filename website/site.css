@@ -1,0 +1,369 @@
+/* Keepsake: a letter laid on a stone table. Text sits left, the real app sits
+   right, and every section shares one vertical rhythm. One flat background,
+   one accent, one typeface. */
+:root {
+  --bg: #F1F1EB;          /* stone, flat, everywhere */
+  --ink: #191B16;
+  --ink-soft: #54584E;
+  --line: #D6D5C9;
+  --accent: #2E6B4F;      /* evergreen, the only accent */
+  --accent-press: #255640;
+  --on-accent: #FFFFFF;
+  /* Product surfaces (only inside the tag demo, as in the app). */
+  --paper: #FBF7EF;
+  --paper-edge: #DCCFB8;
+
+  --font: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --hand: "Caveat", "Bradley Hand", cursive;
+
+  /* Type scale, ratio 1.25 from a 17px body. */
+  --t-small: 0.85rem;
+  --t-body: 1.0625rem;
+  --t-lede: 1.25rem;
+  --t-h3: 1.125rem;
+  --t-h2: clamp(1.75rem, 1.35rem + 1.6vw, 2.25rem);
+  --t-h1: clamp(2.25rem, 1.5rem + 3.4vw, 3.5rem);
+
+  /* 8-point spacing. */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px;
+  --s6: 32px; --s7: 48px; --s8: 64px;
+  --section: clamp(64px, 9vw, 112px);
+  --max: 1080px;
+  color-scheme: light;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("fonts/montserrat-regular.woff2") format("woff2");
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("fonts/montserrat-semibold.woff2") format("woff2");
+  font-weight: 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Montserrat";
+  src: url("fonts/montserrat-bold.woff2") format("woff2");
+  font-weight: 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: "Caveat";
+  src: url("fonts/caveat.woff2") format("woff2");
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, video { max-width: 100%; height: auto; display: block; }
+
+h1, h2, h3 {
+  margin: 0;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  font-weight: 700;
+}
+h1 { font-size: var(--t-h1); }
+h2 { font-size: var(--t-h2); }
+h3 { font-size: var(--t-h3); letter-spacing: -0.01em; line-height: 1.3; }
+
+p { margin: 0; max-width: 60ch; }
+
+a { color: var(--accent); text-underline-offset: 3px; }
+a:hover { color: var(--accent-press); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--max) + 2 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* Buttons: background changes on hover, a small press on tap. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--s5);
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 160ms ease, transform 160ms ease;
+}
+.btn:hover { background: var(--accent-press); color: var(--on-accent); }
+.btn:active { transform: scale(0.97); }
+.btn-small { min-height: 40px; padding: 0 var(--s4); font-size: 0.95rem; }
+
+/* Header */
+.bar { padding-block: var(--s4); }
+.bar-in { display: flex; align-items: center; gap: var(--s5); }
+.logo {
+  display: inline-flex; align-items: center; gap: var(--s2);
+  color: var(--ink); text-decoration: none; font-weight: 700; font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.logo:hover { color: var(--ink); }
+.links { display: flex; gap: var(--s5); margin-left: auto; }
+.links a { color: var(--ink-soft); text-decoration: none; font-weight: 600; font-size: 0.95rem; }
+.links a:hover { color: var(--ink); text-decoration: underline; }
+.bar .btn-small { margin-left: var(--s2); }
+@media (max-width: 640px) {
+  .links { display: none; }
+  .bar .btn-small { margin-left: auto; }
+}
+
+/* One gap between sections, the same everywhere. */
+.how, .tags-demo, .opened, .privacy, .closing { padding-block-start: var(--section); }
+.hero { padding-block-start: var(--s7); }
+.closing { padding-block-end: var(--section); }
+.section-lede { margin-top: var(--s3); color: var(--ink-soft); font-size: var(--t-lede); line-height: 1.5; }
+
+/* Hero: words left, the real thing right. */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: var(--s7);
+  align-items: center;
+}
+.hero-text { display: grid; gap: var(--s5); align-content: center; }
+.lede { font-size: var(--t-lede); line-height: 1.55; color: var(--ink-soft); max-width: 34ch; }
+.cta-row { display: grid; gap: var(--s3); justify-items: start; margin-top: var(--s2); }
+.note { color: var(--ink-soft); font-size: var(--t-small); }
+
+.hero-phone { position: relative; margin: 0; justify-self: center; display: grid; gap: var(--s3); justify-items: center; }
+.phone-wrap { position: relative; }
+.phone {
+  width: min(300px, 74vw);
+  aspect-ratio: 585 / 1266;
+  border: 8px solid var(--ink);
+  border-radius: 44px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.phone video { width: 100%; height: 100%; object-fit: cover; }
+.hero-phone figcaption { color: var(--ink-soft); font-size: var(--t-small); text-align: center; max-width: 30ch; }
+
+/* The pup hops once when the page loads, and again when you poke it. */
+.pup {
+  position: absolute;
+  left: -84px;
+  bottom: 64px;
+  width: 128px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  animation: hop 720ms cubic-bezier(.3, .7, .4, 1) 600ms 1 both;
+  transform-origin: 50% 100%;
+}
+.pup.again { animation: hop 720ms cubic-bezier(.3, .7, .4, 1) 0ms 1 both; }
+@keyframes hop {
+  0%   { transform: translateY(0) rotate(0); }
+  35%  { transform: translateY(-16px) rotate(-4deg); }
+  70%  { transform: translateY(0) rotate(2deg) scale(1.04, 0.95); }
+  100% { transform: translateY(0) rotate(0) scale(1, 1); }
+}
+
+@media (max-width: 820px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: var(--s7); }
+  .lede { max-width: 40ch; }
+  .pup { left: -26px; width: 80px; bottom: 8px; }
+}
+
+/* How it goes: four real screens. Sideways scroll on phones. */
+.steps {
+  list-style: none;
+  margin: var(--s7) auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--s5);
+}
+.step { display: grid; gap: var(--s3); align-content: start; }
+.step img {
+  width: 100%;
+  height: auto;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  margin-bottom: var(--s2);
+  transition: transform 200ms ease;
+}
+.step p { color: var(--ink-soft); font-size: 0.97rem; line-height: 1.55; }
+.num {
+  display: inline-grid; place-items: center;
+  width: 1.6em; height: 1.6em; margin-right: var(--s1);
+  border-radius: 50%;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 0.85em; letter-spacing: 0;
+  vertical-align: 0.05em;
+}
+@media (hover: hover) and (pointer: fine) {
+  .step:hover img { transform: translateY(-4px); }
+}
+@media (max-width: 900px) {
+  .steps {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: min(72vw, 260px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    /* Snap to the gutter, not the screen edge. */
+    scroll-padding-inline: max(16px, env(safe-area-inset-left, 0px));
+    padding-bottom: var(--s4);
+    scrollbar-width: thin;
+  }
+  .step { scroll-snap-align: start; }
+}
+
+/* Tags: the same paper gift tags as the app. */
+.tags-demo {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--s7);
+  align-items: center;
+}
+.tags-text { display: grid; gap: var(--s4); }
+.tags-text p { color: var(--ink-soft); }
+.tags-play { display: grid; gap: var(--s6); }
+.tag-pile { display: flex; flex-wrap: wrap; gap: var(--s3) var(--s2); }
+
+.tag {
+  --tilt: 0deg;
+  position: relative;
+  isolation: isolate;
+  min-height: 44px;
+  padding: 0 var(--s4) 0 34px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--paper-edge);
+  clip-path: polygon(16px 0, 100% 0, 100% 100%, 16px 100%, 0 55%, 0 45%);
+  color: var(--ink);
+  font: 600 0.95rem/1 var(--font);
+  cursor: pointer;
+  transform: rotate(var(--tilt));
+  transition: transform 520ms cubic-bezier(.34, 1.56, .64, 1), color 160ms ease;
+}
+.tag::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: 6px;
+  background: var(--paper);
+  clip-path: polygon(15.4px 0, 100% 0, 100% 100%, 15.4px 100%, 0 55%, 0 45%);
+  transition: background-color 160ms ease;
+}
+.tag::after {
+  content: "";
+  position: absolute;
+  left: 13px; top: 50%;
+  width: 7px; height: 7px; margin-top: -3.5px;
+  border-radius: 50%;
+  background: var(--bg);
+  box-shadow: 0 0 0 2px var(--paper-edge);
+}
+.tag:nth-child(1) { --tilt: -1.6deg; }
+.tag:nth-child(2) { --tilt: 1.1deg; }
+.tag:nth-child(3) { --tilt: -0.6deg; }
+.tag:nth-child(4) { --tilt: 1.8deg; }
+.tag:nth-child(5) { --tilt: -1.2deg; }
+.tag:nth-child(6) { --tilt: 0.7deg; }
+.tag[aria-checked="true"] { color: var(--on-accent); transform: rotate(0) scale(1.05); background: var(--accent); }
+.tag[aria-checked="true"]::before { background: var(--accent); }
+.tag[aria-checked="true"]::after { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55); }
+/* The clip-path hides an outline, so focus darkens the edge instead. */
+.tag:focus-visible { outline: none; background: var(--ink); text-decoration: underline; text-underline-offset: 4px; }
+.tag:active { transform: rotate(0) scale(0.95); }
+
+.first-line {
+  position: relative;
+  padding: var(--s5) var(--s6);
+  border: 1px solid var(--paper-edge);
+  border-radius: 14px;
+  background: var(--paper);
+  max-width: 34rem;
+}
+.fl-occasion { font: 600 1.35rem/1.2 var(--hand); color: #6B7F63; }
+.fl-text { font: 400 1.6rem/1.35 var(--hand); color: var(--ink); margin-top: var(--s2); max-width: none; }
+.first-line.swap .fl-text, .first-line.swap .fl-occasion { animation: settle 360ms ease both; }
+@keyframes settle { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+@media (max-width: 820px) {
+  .tags-demo { grid-template-columns: minmax(0, 1fr); gap: var(--s6); }
+}
+
+/* What they get */
+.opened {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--s7);
+  align-items: center;
+}
+.opened-text { display: grid; gap: var(--s4); }
+.opened-text p { color: var(--ink-soft); }
+.opened-shots { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s5); align-items: start; }
+.opened-shots img { border-radius: 22px; border: 1px solid var(--line); width: 100%; height: auto; }
+.opened-shots img:last-child { margin-top: var(--s7); }
+@media (max-width: 820px) {
+  .opened { grid-template-columns: minmax(0, 1fr); }
+  .opened-shots { gap: var(--s4); }
+  .opened-shots img:last-child { margin-top: var(--s6); }
+}
+
+/* Privacy facts: plain statements, each one true of the code. */
+.facts {
+  margin: var(--s7) 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--s7);
+}
+.fact { padding-block: var(--s5); border-top: 1px solid var(--line); display: grid; gap: var(--s2); align-content: start; }
+.fact dt { font-weight: 700; font-size: 1.15rem; color: var(--accent); letter-spacing: -0.01em; }
+.fact dd { margin: 0; color: var(--ink-soft); max-width: 46ch; }
+@media (max-width: 760px) { .facts { grid-template-columns: minmax(0, 1fr); } }
+
+/* Closing */
+.closing {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s6);
+  align-items: center;
+}
+.closing > div { display: grid; gap: var(--s4); justify-items: start; }
+.closing p { color: var(--ink-soft); }
+.closing-pup { width: 150px; height: auto; }
+@media (max-width: 560px) {
+  .closing { grid-template-columns: minmax(0, 1fr); }
+  .closing-pup { width: 120px; }
+}
+
+/* Footer */
+.foot { border-top: 1px solid var(--line); padding-block: var(--s5); }
+.foot-in { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s5); color: var(--ink-soft); font-size: var(--t-small); }
+.logo-quiet { font-size: 0.95rem; color: var(--ink-soft); }
+.foot nav { display: flex; gap: var(--s5); }
+.foot a { color: var(--ink-soft); }
+.foot .small { margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

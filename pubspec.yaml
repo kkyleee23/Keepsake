@@ -9,6 +9,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  # Clean web URLs (/receive/<code>, not /#/receive/<code>), so share links
+  # work when the web app is hosted.
+  flutter_web_plugins:
+    sdk: flutter
   cupertino_icons: ^1.0.8
 
   # State management (single solution for the whole app)

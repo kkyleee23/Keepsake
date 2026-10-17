@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -12,6 +13,9 @@ import 'data/providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // On the web, links look like /receive/<code> instead of /#/receive/<code>,
+  // so a share link opens straight to the keepsake. Does nothing elsewhere.
+  usePathUrlStrategy();
   // Paper textures load in the background; surfaces repaint when ready.
   unawaited(PaperTextures.instance.load());
   final prefs = await SharedPreferences.getInstance();

@@ -110,7 +110,7 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           _pinError = at == null
               ? 'Too many tries. Please wait a bit and try again.'
               : 'Too many tries. You can try again after '
-                  '${DateFormat.jm().format(at)}.';
+                    '${DateFormat.jm().format(at)}.';
         });
       case 'sealed':
         setState(() {
@@ -147,9 +147,7 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(child: _body()),
-    );
+    return Scaffold(body: SafeArea(child: _body()));
   }
 
   Widget _body() {
@@ -159,7 +157,8 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
         return const Center(child: CircularProgressIndicator());
       case _Phase.content:
         final k = _content!;
-        final mine = k.creatorId != null &&
+        final mine =
+            k.creatorId != null &&
             k.creatorId == ref.read(authServiceProvider).currentUser?.id;
         return KeepsakeContentView(
           keepsake: k,
@@ -168,14 +167,17 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
               : ReplyCard(
                   token: widget.token,
                   pin: _pin,
-                  senderName:
-                      k.senderName.isNotEmpty ? k.senderName : _cover?.senderName,
+                  senderName: k.senderName.isNotEmpty
+                      ? k.senderName
+                      : _cover?.senderName,
                 ),
         );
       case _Phase.cover:
         final c = _cover!;
         return GiftCover(
-          occasion: c.occasion == null ? null : Occasion.fromId(c.occasion!).label,
+          occasion: c.occasion == null
+              ? null
+              : Occasion.fromId(c.occasion!).label,
           recipientName: c.recipientName,
           title: c.title,
           coverNote: c.coverNote,
@@ -192,7 +194,13 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           onSubmit: (pin) => _open(pin: pin),
         );
       case _Phase.error:
-        return _ErrorView(status: _errorStatus);
+        return _ErrorView(
+          status: _errorStatus,
+          onRetry: () {
+            setState(() => _phase = _Phase.loading);
+            _loadCover();
+          },
+        );
     }
   }
 }
@@ -250,7 +258,11 @@ class _SealedViewState extends State<_SealedView> {
           const Spacer(),
           const Mascot(size: 140, pose: MascotPose.sleepy),
           const SizedBox(height: AppSpacing.lg),
-          Text('Sealed', style: AppTypography.eyebrow, textAlign: TextAlign.center),
+          Text(
+            'Sealed',
+            style: AppTypography.eyebrow,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: AppSpacing.md),
           WholeWords(
             (widget.cover?.recipientName ?? '').isEmpty
@@ -263,13 +275,22 @@ class _SealedViewState extends State<_SealedView> {
             const SizedBox(height: AppSpacing.xl),
             Text('Opens', style: AppTypography.eyebrow),
             const SizedBox(height: AppSpacing.xs),
-            Text(DateFormat.yMMMMd().format(opensAt),
-                style: AppTypography.heading, textAlign: TextAlign.center),
-            Text(DateFormat.jm().format(opensAt),
-                style: AppTypography.body, textAlign: TextAlign.center),
+            Text(
+              DateFormat.yMMMMd().format(opensAt),
+              style: AppTypography.heading,
+              textAlign: TextAlign.center,
+            ),
+            Text(
+              DateFormat.jm().format(opensAt),
+              style: AppTypography.body,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: AppSpacing.md),
-            Text(_remaining(opensAt),
-                style: AppTypography.body, textAlign: TextAlign.center),
+            Text(
+              _remaining(opensAt),
+              style: AppTypography.body,
+              textAlign: TextAlign.center,
+            ),
           ],
           const Spacer(),
         ],
@@ -306,11 +327,17 @@ class _PinGateState extends State<_PinGate> {
         children: [
           const Center(child: Mascot(size: 128, pose: MascotPose.secure)),
           const SizedBox(height: AppSpacing.lg),
-          Text('Enter the PIN', style: AppTypography.displaySmall,
-              textAlign: TextAlign.center),
+          Text(
+            'Enter the PIN',
+            style: AppTypography.displaySmall,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: AppSpacing.xs),
-          Text('This one was made just for you.',
-              style: AppTypography.body, textAlign: TextAlign.center),
+          Text(
+            'This one was made just for you.',
+            style: AppTypography.body,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: AppSpacing.xl),
           TextField(
             controller: _controller,
@@ -341,35 +368,38 @@ class _PinGateState extends State<_PinGate> {
 }
 
 class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.status});
+  const _ErrorView({required this.status, required this.onRetry});
 
   final String status;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final (title, message, pose) = switch (status) {
       'expired' => (
-          'This keepsake has expired',
-          'The link is no longer active.',
-          MascotPose.sad,
-        ),
+        'This keepsake has expired',
+        'The link is no longer active.',
+        MascotPose.sad,
+      ),
       'not_found' => (
-          'Keepsake not found',
-          'This link may be wrong or removed.',
-          MascotPose.sad,
-        ),
+        'We can’t find this keepsake',
+        'The link may be missing a letter, or the sender stopped '
+            'sharing it.',
+        MascotPose.sad,
+      ),
       _ => (
-          'Something went wrong',
-          'Please check the link and try again.',
-          MascotPose.offline,
-        ),
+        'Couldn’t reach Keepsake',
+        'Check your connection, then try again.',
+        MascotPose.offline,
+      ),
     };
+    final offline = status != 'expired' && status != 'not_found';
     return EmptyState(
       illustration: Mascot(size: 140, pose: pose),
       title: title,
       message: message,
-      actionLabel: 'Go Home',
-      onAction: () => context.go('/home'),
+      actionLabel: offline ? 'Try Again' : 'Go Home',
+      onAction: offline ? onRetry : () => context.go('/home'),
     );
   }
 }

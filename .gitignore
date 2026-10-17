@@ -59,3 +59,4 @@ screenshots/
 test/_shots/
 test/_shots_test.dart
 test/_matrix/
+/dist/
