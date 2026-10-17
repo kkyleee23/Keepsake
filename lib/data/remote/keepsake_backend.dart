@@ -65,6 +65,29 @@ class KeepsakeBackend {
     return base64UrlEncode(bytes).replaceAll('=', '');
   }
 
+  /// What goes to the server for [keepsake]: everything the recipient needs
+  /// and nothing else. The PIN never leaves the phone in the payload (it's
+  /// sent once, separately, and stored only as a hash), and earlier links
+  /// stay private.
+  static Map<String, dynamic> uploadPayload(
+    Keepsake keepsake, {
+    required String token,
+    String? creatorId,
+  }) {
+    final payload = keepsake
+        .copyWith(
+          creatorId: creatorId,
+          status: KeepsakeStatus.published,
+          shareToken: token,
+          publishedAt: keepsake.publishedAt ?? DateTime.now(),
+        )
+        .toJson();
+    payload['privacy'] = {...payload['privacy'] as Map, 'pin': null};
+    payload.remove('pastTokens');
+    payload.remove('recipientContact');
+    return payload;
+  }
+
   /// Publishes [keepsake]. Returns the share token. [pin] (if any) is sent once
   /// and hashed on the server - it is never stored on the device.
   Future<String> publish(Keepsake keepsake, {String? pin}) async {
@@ -79,16 +102,8 @@ class KeepsakeBackend {
 
     final token = keepsake.shareToken ?? _newToken();
 
-    // Strip any PIN from the uploaded payload; it lives only as a server hash.
-    final payload = keepsake
-        .copyWith(
-          creatorId: _client.auth.currentUser?.id,
-          status: KeepsakeStatus.published,
-          shareToken: token,
-          publishedAt: keepsake.publishedAt ?? DateTime.now(),
-        )
-        .toJson();
-    (payload['privacy'] as Map)['pin'] = null;
+    final payload = uploadPayload(keepsake,
+        token: token, creatorId: _client.auth.currentUser?.id);
 
     final params = <String, dynamic>{
       'p_token': token,
@@ -134,6 +149,29 @@ class KeepsakeBackend {
       throw StateError('Something went wrong on our side. Try again.');
     }
     return token;
+  }
+
+  /// Turns a link off: it stops working right away and the server deletes
+  /// the content, keeping only the replies already sent. A stopped link is
+  /// never used again (migration 0006). Before 0006 is run, the keepsake is
+  /// removed from the server instead, which also stops the link.
+  Future<void> stopSharing(String token) async {
+    if (!isAvailable) throw StateError('Sharing is not set up yet.');
+    if (_client.auth.currentUser == null) {
+      throw StateError('Please sign in again, then try that.');
+    }
+    try {
+      final res =
+          await _client.rpc('stop_sharing', params: {'p_token': token});
+      final status = Map<String, dynamic>.from(res as Map)['status'];
+      // not_found: already gone, which is what was asked for.
+      if (status == 'ok' || status == 'not_found') return;
+      throw StateError('Something went wrong on our side. Try again.');
+    } on PostgrestException catch (e) {
+      // PGRST202: the function doesn't exist yet (0006 not run).
+      if (e.code != 'PGRST202' && e.code != '42883') rethrow;
+      await revoke(token);
+    }
   }
 
   /// Removes a published keepsake (RLS limits this to the creator's own rows).

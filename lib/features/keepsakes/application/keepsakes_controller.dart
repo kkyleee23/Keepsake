@@ -32,13 +32,27 @@ class KeepsakesController extends AsyncNotifier<List<Keepsake>> {
         updatedAt: DateTime.now(),
       ));
 
-  /// Deletes a keepsake. If it's one you published, it's revoked on the server
-  /// too so the link stops working.
+  /// Deletes a keepsake. If it's one you published, it's removed from the
+  /// server too (every link it ever had), so no link of it keeps working.
   Future<void> deleteKeepsake(Keepsake k) async {
-    if (k.shareToken != null && !k.isReceived) {
-      await ref.read(keepsakeBackendProvider).revoke(k.shareToken!);
+    if (!k.isReceived) {
+      for (final token in k.allTokens) {
+        await ref.read(keepsakeBackendProvider).revoke(token);
+      }
     }
     await remove(k.id);
+  }
+
+  /// Stops a keepsake's link and turns it back into a draft on this device,
+  /// so it can be shared again later with a brand new link.
+  Future<Keepsake> stopSharing(Keepsake k) async {
+    final token = k.shareToken;
+    if (token != null) {
+      await ref.read(keepsakeBackendProvider).stopSharing(token);
+    }
+    final draft = k.unshared();
+    await upsert(draft);
+    return draft;
   }
 
   /// Saves a copy of a keepsake opened as a recipient, so it lives in the

@@ -1,4 +1,8 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// The mascot's expressions, matching the art in assets/brand/states.
 enum MascotPose {
@@ -65,7 +69,8 @@ class Wordmark extends StatelessWidget {
   }
 }
 
-/// The mascot, optionally in a named [pose], with an optional gentle idle bob.
+/// The mascot, optionally in a named [pose]. With [animate] it hops once
+/// when it appears and again when tapped (no endless idle loop).
 class Mascot extends StatefulWidget {
   const Mascot({super.key, this.size = 160, this.pose, this.animate = false});
 
@@ -79,6 +84,7 @@ class Mascot extends StatefulWidget {
 
 class _MascotState extends State<Mascot> with SingleTickerProviderStateMixin {
   AnimationController? _controller;
+  Timer? _hello;
 
   @override
   void initState() {
@@ -86,13 +92,21 @@ class _MascotState extends State<Mascot> with SingleTickerProviderStateMixin {
     if (widget.animate) {
       _controller = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 2600),
-      )..repeat(reverse: true);
+        duration: const Duration(milliseconds: 720),
+      );
+      // A hello hop, a moment after the screen settles.
+      _hello = Timer(const Duration(milliseconds: 260), _hop);
     }
+  }
+
+  void _hop() {
+    if (!mounted || MediaQuery.of(context).disableAnimations) return;
+    _controller?.forward(from: 0);
   }
 
   @override
   void dispose() {
+    _hello?.cancel();
     _controller?.dispose();
     super.dispose();
   }
@@ -110,16 +124,34 @@ class _MascotState extends State<Mascot> with SingleTickerProviderStateMixin {
     );
 
     final controller = _controller;
-    if (controller == null || MediaQuery.of(context).disableAnimations) {
-      return image;
-    }
-    return AnimatedBuilder(
-      animation: controller,
-      child: image,
-      builder: (context, child) {
-        final t = Curves.easeInOut.transform(controller.value);
-        return Transform.translate(offset: Offset(0, -5 * t), child: child);
+    if (controller == null) return image;
+    return GestureDetector(
+      onTap: () {
+        HapticFeedback.lightImpact();
+        _hop();
       },
+      child: AnimatedBuilder(
+        animation: controller,
+        child: image,
+        builder: (context, child) {
+          final t = controller.value;
+          // Up and down once, with a little squash on landing.
+          final lift = math.sin(math.pi * Curves.easeOut.transform(t));
+          final land = t > 0.75 ? math.sin(math.pi * (t - 0.75) / 0.25) : 0.0;
+          return Transform.translate(
+            offset: Offset(0, -widget.size * 0.07 * lift),
+            child: Transform.scale(
+              scaleX: 1 + 0.04 * land,
+              scaleY: 1 - 0.05 * land,
+              alignment: Alignment.bottomCenter,
+              child: Transform.rotate(
+                angle: 0.05 * math.sin(2 * math.pi * t) * (1 - t),
+                child: child,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }

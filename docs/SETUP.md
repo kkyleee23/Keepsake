@@ -12,13 +12,32 @@ in order. Each one says how to check it worked.
 | 0003_payload_limit.sql (size cap, conflict fix) | To do |
 | 0004_security.sql (PIN lockout, locked-down writes, account deletion) | To do |
 | 0005_wrapping.sql (envelope paper and seal colour on the cover) | To do |
+| 0006_stop_sharing.sql (Stop Sharing, dead links stay dead) | To do |
 | Confirm email turned off for testing | Done |
 | Anonymous sign-ins turned off | To do |
 | Web hosting for share links (step 4) | Later |
 
 ## What changed in each session
 
-- **Latest:** Screen-size safety (no setup). Every main screen is now
+- **Latest:** Stop Sharing and a security fix. Run
+  **`0006_stop_sharing.sql`** after `0005`.
+  - On a keepsake's link page, **Stop Sharing** turns the link and QR code
+    off at once and deletes the content from the server. The keepsake goes
+    back to your drafts, and sharing again makes a brand new link. Replies
+    you already got are kept.
+  - Security fix: before 0006, deleting a keepsake freed its link, so
+    someone who knew it could publish something else at the same address.
+    Now every deleted or stopped link is remembered (as a one-way hash) and
+    can never be used again, by anyone. Tested against a local Postgres:
+    another account taking over a link, reviving a stopped link, reusing a
+    deleted link, and reusing a link after account deletion are all refused.
+  - The upload to the server no longer includes old links or the recipient
+    contact field, and never the PIN (there's a test for this).
+  - Until 0006 is run, Stop Sharing still works by removing the keepsake
+    from the server, but replies to that link are lost.
+  - Design: the Create screen's grid of icon tiles became a pile of paper
+    gift tags with a preview of how the letter might start.
+- **Before that:** Screen-size safety (no setup). Every main screen is now
   checked on a small Android phone with 3-button navigation, a notched
   iPhone, an iPhone with very large text, a tablet and a phone in landscape
   (`test/layout_matrix_test.dart`, 85 checks). It fails if anything
@@ -58,14 +77,16 @@ paste the whole file, and click **Run**. Do each file once, in this order.
 | `supabase/migrations/0003_payload_limit.sql` | 5 MB size cap per keepsake (photos live inside it), and a fix so publishing with someone else's link reports a conflict instead of a fake success | Run it |
 | `supabase/migrations/0004_security.sql` | PIN guess limit, writes only through publish, size limits on the table, account deletion | Run it |
 | `supabase/migrations/0005_wrapping.sql` | Stores the envelope paper and seal colour, shown on the cover before opening | Run it |
+| `supabase/migrations/0006_stop_sharing.sql` | Stop Sharing, and stopped or deleted links can never be reused | Run it |
 
 Running a file twice is safe.
 
 **Check:** in **Table Editor** you should see `keepsakes` and
 `keepsake_responses`. In **Database > Functions** you should see
 `publish_keepsake`, `keepsake_cover`, `keepsake_open`, `respond_to_keepsake`,
-`my_keepsake_responses`, `keepsake_pin_check` and `delete_my_account`, and a
-`keepsake_pin_attempts` table.
+`my_keepsake_responses`, `keepsake_pin_check`, `delete_my_account` and
+`stop_sharing`, and the tables `keepsake_pin_attempts` and
+`retired_share_tokens`.
 
 ## 2. Sign-in settings (Authentication)
 

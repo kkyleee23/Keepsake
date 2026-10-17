@@ -9,20 +9,30 @@ import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake_response.dart';
 import '../../data/providers.dart';
 
-/// Replies to one published keepsake, newest first. Only its creator can load
-/// them (enforced by the server).
+/// Replies to a keepsake across every link it has had, newest first. Only
+/// its creator can load them (enforced by the server). Keyed by the links
+/// joined with commas (share tokens never contain one).
 final repliesProvider = FutureProvider.autoDispose
-    .family<List<KeepsakeResponse>?, String>(
-  (ref, token) => ref.read(keepsakeBackendProvider).fetchResponses(token),
-);
+    .family<List<KeepsakeResponse>?, String>((ref, tokens) async {
+      final backend = ref.read(keepsakeBackendProvider);
+      final lists = await Future.wait([
+        for (final t in tokens.split(','))
+          if (t.isNotEmpty) backend.fetchResponses(t),
+      ]);
+      if (lists.isNotEmpty && lists.every((l) => l == null)) return null;
+      return [for (final l in lists) ...?l]
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    });
 
 class RepliesSection extends ConsumerWidget {
-  const RepliesSection({super.key, required this.token});
+  const RepliesSection({super.key, required this.tokens});
 
-  final String token;
+  /// Every link the keepsake has had.
+  final List<String> tokens;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final token = tokens.join(',');
     final replies = ref.watch(repliesProvider(token));
 
     return Column(
@@ -57,7 +67,8 @@ class RepliesSection extends ConsumerWidget {
             }
             if (list.isEmpty) {
               return const _Note(
-                text: 'No replies yet. When they send something back, '
+                text:
+                    'No replies yet. When they send something back, '
                     'it shows up here.',
               );
             }

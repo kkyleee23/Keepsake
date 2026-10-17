@@ -16,6 +16,7 @@ import 'package:keepsake/app/app.dart';
 import 'package:keepsake/core/theme/app_theme.dart';
 import 'package:keepsake/data/models/enums.dart';
 import 'package:keepsake/data/models/keepsake.dart';
+import 'package:keepsake/data/models/keepsake_response.dart';
 import 'package:keepsake/data/models/keepsake_section.dart';
 import 'package:keepsake/data/providers.dart';
 import 'package:keepsake/data/remote/keepsake_backend.dart';
@@ -148,6 +149,10 @@ class _FakeBackend extends KeepsakeBackend {
   @override
   Future<OpenResult> open(String token, {String? pin}) async =>
       OpenResult(status: openStatus, opensAt: cover.opensAt);
+  @override
+  Future<void> stopSharing(String token) async {}
+  @override
+  Future<List<KeepsakeResponse>?> fetchResponses(String token) async => [];
 }
 
 /// The tab screens inside a bottom bar like the real shell.
@@ -180,11 +185,16 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
   'auth': (() => const AuthScreen(), const []),
   'home': (() => _tab(const HomeScreen()), const []),
   'create': (() => _tab(const CreateScreen()), const []),
+  'create-picked': (() => _tab(const CreateScreen()), const []),
   'library': (() => _tab(const KeepsakesScreen()), const []),
   'profile': (() => _tab(const ProfileScreen()), const []),
   'editor': (() => const EditorScreen(keepsakeId: 'd1'), const []),
   'delivery': (() => const DeliveryScreen(keepsakeId: 'd1'), const []),
   'published': (() => const PublishedScreen(keepsakeId: 'p1'), const []),
+  'published-stopped': (
+    () => const PublishedScreen(keepsakeId: 'p1'),
+    [keepsakeBackendProvider.overrideWithValue(_FakeBackend(_cover, 'ok'))]
+  ),
   'receive-cover': (
     () => const ReceiveScreen(token: 'x'),
     [keepsakeBackendProvider.overrideWithValue(_FakeBackend(_cover, 'ok'))]
@@ -242,6 +252,36 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
   ),
 };
 
+/// Screens that need a tap or two first. Each runs after the first frames and
+/// can check what the tap did.
+final Map<String, Future<void> Function(WidgetTester)> actions = {
+  'published-stopped': (t) async {
+    await t.scrollUntilVisible(find.text('Stop Sharing'), 200,
+        scrollable: find.byType(Scrollable).first);
+    await t.ensureVisible(find.text('Stop Sharing'));
+    await _settle(t);
+    await t.tap(find.text('Stop Sharing'));
+    await _settle(t);
+    expect(find.text('Stop sharing this link?'), findsOneWidget);
+    await t.tap(find.text('Stop Sharing').last);
+    await _settle(t);
+    expect(find.text('The link is off'), findsOneWidget);
+  },
+  'create-picked': (t) async {
+    await t.tap(find.text('Birthday'));
+    await _settle(t);
+    final b = t.widget<PrimaryButton>(find.byType(PrimaryButton));
+    expect(b.onPressed, isNotNull, reason: 'picking a tag enables Continue');
+    expect(find.textContaining('Happy birthday'), findsOneWidget);
+  },
+};
+
+Future<void> _settle(WidgetTester t) async {
+  for (var i = 0; i < 10; i++) {
+    await t.pump(const Duration(milliseconds: 80));
+  }
+}
+
 /// `flutter test --dart-define=SHOTS=true --update-goldens` also saves a
 /// screenshot of every screen on every device into test/_matrix/ for review.
 const _shots = bool.fromEnvironment('SHOTS');
@@ -294,6 +334,9 @@ void main() {
         for (var i = 0; i < 12; i++) {
           await t.pump(const Duration(milliseconds: 80));
         }
+
+        final act = actions[e.key];
+        if (act != null) await act(t);
 
         // 1. Nothing overflowed or threw while laying out.
         expect(t.takeException(), isNull);

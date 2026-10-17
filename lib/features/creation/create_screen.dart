@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_radius.dart';
+import '../../core/text/prompts.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/enums.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/motion.dart';
-import '../../shared/widgets/paper.dart';
+import '../../shared/widgets/gift_art.dart';
+import '../../shared/widgets/gift_tag.dart';
 
 /// First step of the creation flow: choose what this is for (or start blank).
 ///
@@ -25,6 +26,26 @@ class CreateScreen extends StatefulWidget {
 
 class _CreateScreenState extends State<CreateScreen> {
   Occasion? _selected;
+  final _scroll = ScrollController();
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  void _pick(Occasion o) {
+    setState(() => _selected = o);
+    // Bring the preview of the first line into view.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      _scroll.animateTo(
+        _scroll.position.maxScrollExtent,
+        duration: Motion.of(context, Motion.medium),
+        curve: Motion.settle,
+      );
+    });
+  }
 
   void _continue() {
     final occasion = _selected;
@@ -38,56 +59,70 @@ class _CreateScreenState extends State<CreateScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.gutter,
-              AppSpacing.xl,
-              AppSpacing.gutter,
-              AppSpacing.md,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'What is this for?',
-                        style: AppTypography.displaySmall,
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Pick an occasion to start from, or begin with a '
-                        'blank one.',
-                        style: AppTypography.bodyLarge.copyWith(
-                          color: AppColors.inkSoft,
+          Expanded(
+            // Not a lazy list: the preview must be laid out so picking a tag
+            // can scroll to it.
+            child: SingleChildScrollView(
+              controller: _scroll,
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.gutter,
+                AppSpacing.xl,
+                AppSpacing.gutter,
+                AppSpacing.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    // Scrolls with the tags, so short screens keep room for them.
+                    padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'What is this for?',
+                                style: AppTypography.displaySmall,
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                'Pick an occasion to start from, or begin with a '
+                                'blank one.',
+                                style: AppTypography.bodyLarge.copyWith(
+                                  color: AppColors.inkSoft,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        const Mascot(size: 104, pose: MascotPose.gift),
+                      ],
+                    ),
+                  ),
+                  // A loose pile of gift tags rather than a grid of tiles:
+                  // each one sized by its word, each hung at its own angle.
+                  Wrap(
+                    spacing: AppSpacing.xs,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      for (final (i, occasion) in Occasion.values.indexed)
+                        GiftTag(
+                          label: occasion == Occasion.custom
+                              ? 'Something Else'
+                              : occasion.label,
+                          tilt: _tilts[i % _tilts.length],
+                          selected: _selected == occasion,
+                          onTap: () => _pick(occasion),
+                        ),
                     ],
                   ),
-                ),
-                const Mascot(size: 104, pose: MascotPose.gift),
-              ],
-            ),
-          ),
-          Expanded(
-            child: GridView.count(
-              crossAxisCount: 2,
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.gutter,
+                  const SizedBox(height: AppSpacing.xl),
+                  _FirstLine(occasion: _selected),
+                ],
               ),
-              childAspectRatio: 2.6,
-              crossAxisSpacing: AppSpacing.sm,
-              mainAxisSpacing: AppSpacing.sm,
-              children: [
-                for (final occasion in Occasion.values)
-                  _OccasionTile(
-                    occasion: occasion,
-                    selected: _selected == occasion,
-                    onTap: () => setState(() => _selected = occasion),
-                  ),
-              ],
             ),
           ),
           Padding(
@@ -103,91 +138,59 @@ class _CreateScreenState extends State<CreateScreen> {
   }
 }
 
-class _OccasionTile extends StatelessWidget {
-  const _OccasionTile({
-    required this.occasion,
-    required this.selected,
-    required this.onTap,
-  });
+/// Small fixed tilts (degrees) so the tags look hung by hand, not printed.
+const _tilts = [-1.6, 1.1, -0.6, 1.8, -1.2, 0.7, -1.9, 1.4, -0.4, 1.0];
 
-  final Occasion occasion;
-  final bool selected;
-  final VoidCallback onTap;
+/// A preview of how a letter for the chosen occasion might begin, on paper.
+class _FirstLine extends StatelessWidget {
+  const _FirstLine({required this.occasion});
 
-  static IconData _icon(Occasion o) => switch (o) {
-    Occasion.birthday => Icons.cake_outlined,
-    Occasion.anniversary => Icons.favorite_border,
-    Occasion.love => Icons.volunteer_activism_outlined,
-    Occasion.longDistance => Icons.flight_takeoff,
-    Occasion.friendship => Icons.diversity_1_outlined,
-    Occasion.family => Icons.cottage_outlined,
-    Occasion.graduation => Icons.school_outlined,
-    Occasion.congratulations => Icons.celebration_outlined,
-    Occasion.thankYou => Icons.redeem_outlined,
-    Occasion.apology => Icons.spa_outlined,
-    Occasion.encouragement => Icons.wb_sunny_outlined,
-    Occasion.justBecause => Icons.local_florist_outlined,
-    Occasion.custom => Icons.edit_outlined,
-  };
+  final Occasion? occasion;
 
   @override
   Widget build(BuildContext context) {
-    final d = Motion.of(context, Motion.short);
-    return Pressable(
-      child: AnimatedContainer(
-        duration: d,
-        decoration: BoxDecoration(
-          borderRadius: AppRadius.card,
-          border: Border.all(
-            color: selected ? AppColors.accent : Colors.transparent,
-            width: 1.5,
-          ),
-        ),
-        child: PaperCard(
-          onTap: onTap,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-          edge: selected ? AppColors.accent : AppColors.hairline,
-          child: Row(
-            children: [
-              AnimatedContainer(
-                duration: d,
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: selected ? AppColors.accent : AppColors.sageSoft,
-                ),
-                child: AnimatedScale(
-                  scale: selected ? 1.1 : 1,
-                  duration: Motion.of(context, Motion.medium),
-                  curve: Motion.pop,
-                  child: Icon(
-                    _icon(occasion),
-                    size: 18,
-                    color: selected ? AppColors.onAccent : AppColors.accent,
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                // One line, never broken mid-word: long names shrink a little.
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    occasion.label,
-                    maxLines: 1,
-                    style: AppTypography.label.copyWith(
-                      fontSize: 15,
-                      color: selected ? AppColors.accent : AppColors.ink,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+    final o = occasion;
+    return AnimatedSwitcher(
+      duration: Motion.of(context, Motion.medium),
+      switchInCurve: Motion.settle,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, a) => FadeTransition(
+        opacity: a,
+        child: SlideTransition(
+          position: Tween(
+            begin: const Offset(0, 0.06),
+            end: Offset.zero,
+          ).animate(a),
+          child: child,
         ),
       ),
+      child: o == null
+          ? Padding(
+              key: const ValueKey('none'),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+              child: Text(
+                'Pick a tag to see how it might start. You can change '
+                'every word later.',
+                style: AppTypography.body.copyWith(color: AppColors.inkFaint),
+              ),
+            )
+          : PaperSheet(
+              key: ValueKey(o),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    o == Occasion.custom ? 'Your own occasion' : o.label,
+                    style: AppTypography.eyebrow,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${Prompts.forOccasion(o).first}...',
+                    style: LetterFont.hand.body.copyWith(color: AppColors.ink),
+                  ),
+                ],
+              ),
+            ),
     );
   }
 }

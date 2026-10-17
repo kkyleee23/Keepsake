@@ -108,6 +108,7 @@ class Keepsake {
     this.shareToken,
     this.receivedAt,
     this.style = KeepsakeStyle.standard,
+    this.pastTokens = const [],
   });
 
   final String id;
@@ -142,6 +143,13 @@ class Keepsake {
   /// How it's wrapped: envelope paper and seal colour.
   final KeepsakeStyle style;
 
+  /// Links this keepsake had before sharing was stopped. Kept so their
+  /// replies still show, and so deleting the keepsake cleans them up too.
+  final List<String> pastTokens;
+
+  /// Every link this keepsake has had, current one first.
+  List<String> get allTokens => [?shareToken, ...pastTokens];
+
   bool get isDraft => status == KeepsakeStatus.draft;
   bool get isReceived => receivedAt != null;
   bool get isArchived => status == KeepsakeStatus.archived;
@@ -172,6 +180,7 @@ class Keepsake {
     String? shareToken,
     DateTime? receivedAt,
     KeepsakeStyle? style,
+    List<String>? pastTokens,
   }) {
     return Keepsake(
       id: id,
@@ -193,8 +202,32 @@ class Keepsake {
       shareToken: shareToken ?? this.shareToken,
       receivedAt: receivedAt ?? this.receivedAt,
       style: style ?? this.style,
+      pastTokens: pastTokens ?? this.pastTokens,
     );
   }
+
+  /// Back to a draft after its link was stopped: no link, no publish date,
+  /// and the old link remembered in [pastTokens].
+  Keepsake unshared() => Keepsake(
+        id: id,
+        creatorId: creatorId,
+        title: title,
+        occasion: occasion,
+        recipientName: recipientName,
+        recipientContact: recipientContact,
+        senderName: senderName,
+        coverNote: coverNote,
+        status: KeepsakeStatus.draft,
+        sections: sections,
+        delivery: delivery,
+        privacy: privacy,
+        createdAt: createdAt,
+        updatedAt: DateTime.now(),
+        expiresAt: expiresAt,
+        receivedAt: receivedAt,
+        style: style,
+        pastTokens: [?shareToken, ...pastTokens],
+      );
 
   Map<String, dynamic> toJson() => {
         'id': id,
@@ -216,6 +249,7 @@ class Keepsake {
         'shareToken': shareToken,
         'receivedAt': receivedAt?.toIso8601String(),
         'style': style.toJson(),
+        'pastTokens': pastTokens,
       };
 
   factory Keepsake.fromJson(Map<String, dynamic> json) {
@@ -250,6 +284,10 @@ class Keepsake {
           ? null
           : DateTime.parse(json['receivedAt'] as String),
       style: KeepsakeStyle.fromJson(json['style']),
+      pastTokens: [
+        for (final t in json['pastTokens'] as List? ?? const [])
+          if (t is String) t,
+      ],
     );
   }
 }

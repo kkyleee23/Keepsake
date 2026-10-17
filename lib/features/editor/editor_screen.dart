@@ -25,6 +25,7 @@ import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/motion.dart';
 import '../../shared/widgets/paper.dart';
+import '../publishing/replies_section.dart';
 
 /// The assembly surface: the creator builds a Keepsake here.
 ///
@@ -292,10 +293,15 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
             if (draft.hasContent) ...[
               const SizedBox(height: AppSpacing.xl),
               PrimaryButton(
-                label: draft.isPublished ? 'Update & re-share' : 'Publish',
+                label: draft.isPublished ? 'Update and Share Again' : 'Publish',
                 icon: Icons.ios_share,
                 onPressed: () => context.push('/delivery/${draft.id}'),
               ),
+            ],
+            // Replies sent to links that were stopped stay readable.
+            if (draft.pastTokens.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xxl),
+              RepliesSection(tokens: draft.pastTokens),
             ],
           ],
         ),
