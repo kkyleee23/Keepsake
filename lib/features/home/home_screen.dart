@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
@@ -18,7 +19,7 @@ class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   void _open(BuildContext context, Keepsake k) {
-    context.push(k.isDraft ? '/editor/${k.id}' : '/preview/${k.id}');
+    context.push(keepsakeRoute(k));
   }
 
   @override

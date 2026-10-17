@@ -15,6 +15,7 @@ import '../../data/remote/auth_service.dart';
 import '../../data/remote/keepsake_backend.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import '../reader/keepsake_content_view.dart';
+import 'reply_card.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
@@ -39,6 +40,10 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
   Keepsake? _content;
   String _errorStatus = 'error';
   String? _pinError;
+
+  /// The PIN that opened this keepsake, kept in memory only so a reply can
+  /// pass the same server check.
+  String? _pin;
 
   KeepsakeBackend get _backend => ref.read(keepsakeBackendProvider);
 
@@ -82,6 +87,7 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
     switch (result.status) {
       case 'ok':
         setState(() {
+          _pin = pin;
           _content = result.keepsake;
           _phase = _Phase.content;
         });
@@ -139,7 +145,20 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
       case _Phase.opening:
         return const Center(child: CircularProgressIndicator());
       case _Phase.content:
-        return KeepsakeContentView(keepsake: _content!);
+        final k = _content!;
+        final mine = k.creatorId != null &&
+            k.creatorId == ref.read(authServiceProvider).currentUser?.id;
+        return KeepsakeContentView(
+          keepsake: k,
+          footer: mine
+              ? null
+              : ReplyCard(
+                  token: widget.token,
+                  pin: _pin,
+                  senderName:
+                      k.senderName.isNotEmpty ? k.senderName : _cover?.senderName,
+                ),
+        );
       case _Phase.cover:
         return _RecipientCover(cover: _cover!, onOpen: _onOpenPressed);
       case _Phase.sealed:

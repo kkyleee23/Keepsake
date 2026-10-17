@@ -130,7 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/published/:id',
         builder: (context, state) =>
-            PublishedScreen(keepsakeId: state.pathParameters['id']!),
+            PublishedScreen(
+          keepsakeId: state.pathParameters['id']!,
+          justPublished: state.uri.queryParameters['new'] == '1',
+        ),
       ),
 
       // Recipient route group, deliberately outside the creator shell, no account.

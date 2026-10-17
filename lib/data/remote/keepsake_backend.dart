@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/config/app_config.dart';
 import '../models/enums.dart';
 import '../models/keepsake.dart';
+import '../models/keepsake_response.dart';
 
 /// Result of asking the server what a recipient may see before opening.
 class CoverResult {
@@ -152,6 +153,47 @@ class KeepsakeBackend {
       return OpenResult(status: status, opensAt: _parseDate(m['opens_at']));
     } catch (_) {
       return const OpenResult(status: 'error');
+    }
+  }
+
+  /// Sends a recipient's reply. Returns the server status: ok, empty,
+  /// rate_limited, too_long, wrong_pin, sealed, expired, not_found, or error.
+  Future<String> respond(
+    String token, {
+    String? pin,
+    Reaction? reaction,
+    String? message,
+    String? name,
+  }) async {
+    if (!isAvailable) return 'error';
+    try {
+      final res = await _client.rpc('respond_to_keepsake', params: {
+        'p_token': token,
+        'p_pin': pin,
+        'p_reaction': reaction?.id,
+        'p_message': message,
+        'p_name': name,
+      });
+      return Map<String, dynamic>.from(res as Map)['status'] as String? ??
+          'error';
+    } catch (_) {
+      return 'error';
+    }
+  }
+
+  /// Replies to one of the signed-in creator's keepsakes, newest first.
+  /// Returns null when they can't be loaded (offline, or not set up yet).
+  Future<List<KeepsakeResponse>?> fetchResponses(String token) async {
+    if (!isAvailable || _client.auth.currentUser == null) return null;
+    try {
+      final res = await _client
+          .rpc('my_keepsake_responses', params: {'p_token': token});
+      return [
+        for (final row in res as List)
+          KeepsakeResponse.fromJson(Map<String, dynamic>.from(row as Map)),
+      ];
+    } catch (_) {
+      return null;
     }
   }
 

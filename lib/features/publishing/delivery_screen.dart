@@ -112,7 +112,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       await ref.read(keepsakesControllerProvider.notifier).upsert(local);
 
       if (!mounted) return;
-      context.pushReplacement('/published/${k.id}');
+      context.pushReplacement('/published/${k.id}?new=1');
     } catch (e) {
       if (!mounted) return;
       setState(() => _publishing = false);

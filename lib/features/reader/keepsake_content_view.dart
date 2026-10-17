@@ -9,13 +9,17 @@ import '../sections/section_view.dart';
 /// The opened content of a keepsake: a quiet opening line, then each section.
 /// Shared by Preview and the live recipient screen so there's one renderer.
 class KeepsakeContentView extends StatelessWidget {
-  const KeepsakeContentView({super.key, required this.keepsake});
+  const KeepsakeContentView({super.key, required this.keepsake, this.footer});
 
   final Keepsake keepsake;
+
+  /// Optional block after the last section (the recipient's reply card).
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
     final sections = keepsake.orderedSections;
+    final extra = footer == null ? 0 : 1;
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(
         AppSpacing.gutter,
@@ -23,7 +27,7 @@ class KeepsakeContentView extends StatelessWidget {
         AppSpacing.gutter,
         AppSpacing.xxxl,
       ),
-      itemCount: sections.length + 1,
+      itemCount: sections.length + 1 + extra,
       separatorBuilder: (_, index) => index == 0
           ? const SizedBox(height: AppSpacing.lg)
           : const Padding(
@@ -39,6 +43,7 @@ class KeepsakeContentView extends StatelessWidget {
             style: AppTypography.displaySmall,
           );
         }
+        if (index > sections.length) return footer!;
         return SectionView(section: sections[index - 1]);
       },
     );

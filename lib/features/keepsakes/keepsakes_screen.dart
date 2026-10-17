@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app/routes.dart';
 import '../../core/config/app_config.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
@@ -12,6 +13,7 @@ import '../../data/models/keepsake.dart';
 import 'application/keepsakes_controller.dart';
 import 'widgets/keepsake_card.dart';
 import '../../shared/widgets/brand.dart';
+import '../../shared/widgets/choice_tag.dart';
 import '../../shared/widgets/empty_state.dart';
 
 enum _Lib {
@@ -50,7 +52,7 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
   String _query = '';
 
   void _open(Keepsake k) {
-    context.push(k.isDraft ? '/editor/${k.id}' : '/preview/${k.id}');
+    context.push(keepsakeRoute(k));
   }
 
   bool _matchesQuery(Keepsake k) {
@@ -102,7 +104,7 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
                 for (final f in _Lib.values)
                   Padding(
                     padding: const EdgeInsets.only(right: AppSpacing.xs),
-                    child: _FilterChip(
+                    child: ChoiceTag(
                       label: f.label,
                       selected: _filter == f,
                       onTap: () => setState(() => _filter = f),
@@ -274,46 +276,5 @@ class _KeepsakesScreenState extends ConsumerState<KeepsakesScreen> {
     if (yes == true) {
       await ref.read(keepsakesControllerProvider.notifier).deleteKeepsake(k);
     }
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: selected ? AppColors.accent : AppColors.surface,
-      borderRadius: AppRadius.button,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: AppRadius.button,
-        child: Container(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-          decoration: BoxDecoration(
-            borderRadius: AppRadius.button,
-            border: Border.all(
-              color: selected ? AppColors.accent : AppColors.hairline,
-            ),
-          ),
-          child: Text(
-            label,
-            style: AppTypography.body.copyWith(
-              color: selected ? AppColors.onAccent : AppColors.inkSoft,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

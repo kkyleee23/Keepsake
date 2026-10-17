@@ -15,12 +15,20 @@ import '../../data/providers.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
 import '../../shared/widgets/primary_button.dart';
+import 'replies_section.dart';
 
 /// Confirmation after publishing: the link and QR to give to the recipient.
 class PublishedScreen extends ConsumerStatefulWidget {
-  const PublishedScreen({super.key, required this.keepsakeId});
+  const PublishedScreen({
+    super.key,
+    required this.keepsakeId,
+    this.justPublished = false,
+  });
 
   final String keepsakeId;
+
+  /// True right after publishing; otherwise this is the keepsake's detail page.
+  final bool justPublished;
 
   @override
   ConsumerState<PublishedScreen> createState() => _PublishedScreenState();
@@ -70,10 +78,13 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => context.go('/keepsakes'),
-        ),
+        leading: widget.justPublished
+            ? IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: 'Close',
+                onPressed: () => context.go('/keepsakes'),
+              )
+            : null,
       ),
       body: SafeArea(
         child: ListView(
@@ -84,16 +95,22 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
             AppSpacing.xxl,
           ),
           children: [
-            const Center(
-              child: Mascot(
-                size: 136,
-                pose: MascotPose.celebrating,
-                animate: true,
+            if (widget.justPublished) ...[
+              const Center(
+                child: Mascot(
+                  size: 136,
+                  pose: MascotPose.celebrating,
+                  animate: true,
+                ),
               ),
-            ),
-            const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
+            ],
             Text(
-              'Ready to give',
+              widget.justPublished
+                  ? 'Ready to give'
+                  : (k.recipientName.isEmpty
+                      ? k.title
+                      : 'For ${k.recipientName}'),
               style: AppTypography.display,
               textAlign: TextAlign.center,
             ),
@@ -148,9 +165,11 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen> {
             ),
             const SizedBox(height: AppSpacing.sm),
             OutlinedButton(
-              onPressed: () => context.go('/keepsakes'),
-              child: const Text('Done'),
+              onPressed: () => context.push('/preview/${k.id}'),
+              child: const Text('See What They See'),
             ),
+            const SizedBox(height: AppSpacing.xxl),
+            RepliesSection(token: token),
           ],
         ),
       ),
