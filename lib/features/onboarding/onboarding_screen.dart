@@ -6,6 +6,7 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/providers.dart';
 import '../../shared/widgets/brand.dart';
+import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/primary_button.dart';
 
 class _Slide {
@@ -118,7 +119,7 @@ class _SlideView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
+    return FillScroll(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

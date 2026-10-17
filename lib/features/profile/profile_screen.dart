@@ -295,11 +295,13 @@ class _SettingsGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
+    // Material (not a coloured box) so row ripples paint on the card.
+    return Material(
+      color: AppColors.surface,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
         borderRadius: AppRadius.card,
-        border: Border.all(color: AppColors.hairline),
+        side: BorderSide(color: AppColors.hairline),
       ),
       child: Column(
         children: [

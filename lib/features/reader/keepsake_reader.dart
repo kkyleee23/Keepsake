@@ -5,6 +5,8 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_typography.dart';
 import '../../data/models/keepsake.dart';
 import 'keepsake_content_view.dart';
+import '../../shared/widgets/brand.dart';
+import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/primary_button.dart';
 
 /// The recipient experience: a restrained sealed cover that opens into the
@@ -48,14 +50,15 @@ class _Cover extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final k = keepsake;
-    return Padding(
+    return FillScroll(
       key: const ValueKey('cover'),
-      padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           const Spacer(),
+          const Mascot(size: 140, pose: MascotPose.received, animate: true),
+          const SizedBox(height: AppSpacing.lg),
           Text(k.occasion.label.toUpperCase(),
               style: AppTypography.caption, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.md),
@@ -78,7 +81,7 @@ class _Cover extends StatelessWidget {
                 style: AppTypography.caption, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.md),
           ],
-          PrimaryButton(label: 'Open', onPressed: onOpen, expand: false),
+          PrimaryButton(label: 'Open', onPressed: onOpen),
           const SizedBox(height: AppSpacing.xl),
         ],
       ),

@@ -18,6 +18,7 @@ import '../reader/keepsake_content_view.dart';
 import 'reply_card.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/empty_state.dart';
+import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/primary_button.dart';
 
 enum _Phase { loading, cover, sealed, pin, opening, content, error }
@@ -182,12 +183,13 @@ class _RecipientCover extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+    return FillScroll(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
+          const Mascot(size: 140, pose: MascotPose.received, animate: true),
+          const SizedBox(height: AppSpacing.lg),
           if ((cover.occasion ?? '').isNotEmpty)
             Text(cover.occasion!.toUpperCase(),
                 style: AppTypography.caption, textAlign: TextAlign.center),
@@ -211,7 +213,7 @@ class _RecipientCover extends StatelessWidget {
                 style: AppTypography.caption, textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.md),
           ],
-          PrimaryButton(label: 'Open', onPressed: onOpen, expand: false),
+          PrimaryButton(label: 'Open', onPressed: onOpen),
           const SizedBox(height: AppSpacing.xl),
         ],
       ),
@@ -265,12 +267,13 @@ class _SealedViewState extends State<_SealedView> {
   @override
   Widget build(BuildContext context) {
     final opensAt = widget.opensAt;
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+    return FillScroll(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
+          const Mascot(size: 140, pose: MascotPose.sleepy),
+          const SizedBox(height: AppSpacing.lg),
           Text('SEALED', style: AppTypography.caption, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.md),
           Text(
@@ -320,12 +323,13 @@ class _PinGateState extends State<_PinGate> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xl),
+    return FillScroll(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          const Center(child: Mascot(size: 120, pose: MascotPose.thinking)),
+          const SizedBox(height: AppSpacing.lg),
           Text('Enter the PIN', style: AppTypography.displaySmall,
               textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.xs),
