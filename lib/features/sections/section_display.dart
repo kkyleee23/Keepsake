@@ -18,6 +18,8 @@ abstract final class SectionDisplay {
       case SectionType.openWhen:
       case SectionType.timeline:
       case SectionType.photo:
+      case SectionType.scratchReveal:
+      case SectionType.noteJar:
         final t = (s.content['title'] as String?)?.trim();
         return (t == null || t.isEmpty) ? s.type.label : t;
       case SectionType.countdown:
@@ -60,6 +62,13 @@ abstract final class SectionDisplay {
       case SectionType.photo:
         final n = (s.content['photos'] as List?)?.length ?? 0;
         return n == 0 ? '' : '$n ${n == 1 ? 'photo' : 'photos'}';
+      case SectionType.scratchReveal:
+        return (s.content['secret'] as String?)?.trim().isNotEmpty == true
+            ? 'A secret under the foil'
+            : '';
+      case SectionType.noteJar:
+        final n = (s.content['notes'] as List?)?.length ?? 0;
+        return n == 0 ? '' : '$n little ${n == 1 ? 'note' : 'notes'}';
       default:
         return '';
     }

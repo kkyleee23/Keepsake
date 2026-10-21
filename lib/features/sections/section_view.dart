@@ -17,6 +17,8 @@ import '../../shared/widgets/gift_art.dart';
 import '../reader/book_view.dart';
 import '../reader/long_form.dart';
 import '../../data/models/signature.dart';
+import '../../data/models/surprises.dart';
+import 'surprises_view.dart';
 import '../../shared/widgets/signature.dart';
 
 /// Read-only rendering of a single section, styled as part of a gift: letters
@@ -125,6 +127,14 @@ class SectionView extends StatelessWidget {
               Map<String, dynamic>.from(e as Map),
           ],
         );
+      case SectionType.scratchReveal:
+        final scratch = ScratchContent.fromJson(section.content);
+        if (scratch.isEmpty) return const SizedBox.shrink();
+        return ScratchCard(content: scratch);
+      case SectionType.noteJar:
+        final jar = NoteJar.fromJson(section.content);
+        if (jar.isEmpty) return const SizedBox.shrink();
+        return NoteJarView(jar: jar);
       case SectionType.countdown:
         return _Countdown(
           label: _s('label'),

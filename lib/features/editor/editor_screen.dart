@@ -18,6 +18,7 @@ import '../sections/section_editor_screen.dart';
 import '../sections/book_editor_screen.dart';
 import 'wrapping_sheet.dart';
 import '../sections/photo_editor_screen.dart';
+import '../sections/surprise_editors.dart';
 import '../sections/timeline_editor_screen.dart';
 import '../sections/writing_screen.dart';
 import '../../shared/widgets/brand.dart';
@@ -49,21 +50,55 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
   Keepsake? _draft;
   bool _loading = true;
 
-  /// Section types that have a working editor today - so the Add sheet never
-  /// offers a dead end.
-  static const _addable = [
-    SectionType.letter,
-    SectionType.essay,
-    SectionType.book,
-    SectionType.photo,
-    SectionType.memory,
-    SectionType.openWhen,
-    SectionType.reasons,
-    SectionType.timeline,
-    SectionType.question,
-    SectionType.countdown,
-    SectionType.customMessage,
+  /// Section types that have a working editor today, in the shelves the Add
+  /// sheet shows them on, so it never offers a dead end.
+  static const _shelves = <(String, List<SectionType>)>[
+    (
+      'Write',
+      [
+        SectionType.letter,
+        SectionType.customMessage,
+        SectionType.essay,
+        SectionType.book,
+        SectionType.question,
+      ],
+    ),
+    (
+      'Remember',
+      [
+        SectionType.photo,
+        SectionType.memory,
+        SectionType.timeline,
+        SectionType.reasons,
+      ],
+    ),
+    (
+      'Surprise',
+      [
+        SectionType.scratchReveal,
+        SectionType.noteJar,
+        SectionType.openWhen,
+        SectionType.countdown,
+      ],
+    ),
   ];
+
+  /// One line under each choice, so people know what they're picking.
+  static const _blurbs = {
+    SectionType.letter: 'On paper, signed by hand if you like',
+    SectionType.customMessage: 'A few words, nothing fancy',
+    SectionType.essay: 'Something longer, with a title',
+    SectionType.book: 'Pages they turn one by one',
+    SectionType.question: 'Ask them something to answer back',
+    SectionType.photo: 'Prints with captions',
+    SectionType.memory: 'One moment, told properly',
+    SectionType.timeline: 'Moments along a vine',
+    SectionType.reasons: 'A numbered list of reasons',
+    SectionType.scratchReveal: 'A secret under foil they scratch off',
+    SectionType.noteJar: 'Little notes they draw out one at a time',
+    SectionType.openWhen: 'Envelopes for later, like a bad day',
+    SectionType.countdown: 'Days until something good',
+  };
 
   @override
   void initState() {
@@ -177,33 +212,56 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
   void _openAddSheet() {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppColors.surface,
       shape: const RoundedRectangleBorder(borderRadius: AppRadius.sheet),
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.gutter,
-                AppSpacing.lg,
-                AppSpacing.gutter,
-                AppSpacing.xs,
+      builder: (ctx) => ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(ctx).height * 0.85,
+        ),
+        child: SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.gutter,
+                  AppSpacing.lg,
+                  AppSpacing.gutter,
+                  0,
+                ),
+                child: Text('Add something', style: AppTypography.heading),
               ),
-              child: Text('Add something', style: AppTypography.heading),
-            ),
-            for (final type in _addable)
-              ListTile(
-                leading: Icon(_iconFor(type), color: AppColors.inkSoft),
-                title: Text(type.label, style: AppTypography.bodyLarge),
-                onTap: () {
-                  Navigator.pop(ctx);
-                  _addSection(type);
-                },
-              ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
+              for (final (name, types) in _shelves) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.gutter,
+                    AppSpacing.md,
+                    AppSpacing.gutter,
+                    AppSpacing.xxs,
+                  ),
+                  child: Text(name, style: AppTypography.eyebrow),
+                ),
+                for (final type in types)
+                  ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.gutter,
+                    ),
+                    leading: Icon(_iconFor(type), color: AppColors.inkSoft),
+                    title: Text(type.label, style: AppTypography.bodyLarge),
+                    subtitle: Text(
+                      _blurbs[type] ?? '',
+                      style: AppTypography.caption,
+                    ),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _addSection(type);
+                    },
+                  ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -346,6 +404,10 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
         return OpenWhenEditorScreen(section: section);
       case SectionType.timeline:
         return TimelineEditorScreen(section: section);
+      case SectionType.scratchReveal:
+        return ScratchEditorScreen(section: section);
+      case SectionType.noteJar:
+        return JarEditorScreen(section: section);
       case SectionType.photo:
         return PhotoEditorScreen(
           section: section,
@@ -382,6 +444,10 @@ class _EditorScreenState extends ConsumerState<EditorScreen>
         return Icons.timer_outlined;
       case SectionType.customMessage:
         return Icons.chat_bubble_outline;
+      case SectionType.scratchReveal:
+        return Icons.auto_awesome_outlined;
+      case SectionType.noteJar:
+        return Icons.local_drink_outlined;
       default:
         return Icons.add;
     }

@@ -35,7 +35,10 @@ import 'package:keepsake/features/reader/long_form.dart';
 import 'package:keepsake/features/receive/receive_screen.dart';
 import 'package:keepsake/features/sections/book_editor_screen.dart';
 import 'package:keepsake/features/sections/photo_editor_screen.dart';
+import 'package:keepsake/features/sections/surprise_editors.dart';
+import 'package:keepsake/features/sections/surprises_view.dart';
 import 'package:keepsake/features/sections/writing_screen.dart';
+import 'package:keepsake/data/models/surprises.dart';
 import 'package:keepsake/shared/widgets/eager_pan.dart';
 import 'package:keepsake/shared/widgets/gift_art.dart';
 import 'package:keepsake/shared/widgets/nav_icons.dart';
@@ -123,6 +126,15 @@ final _sections = [
     'items': [
       {'label': 'you miss me', 'body': 'Call me.'},
     ],
+  }),
+  _sec(4, SectionType.scratchReveal, {
+    'title': 'Guess where we’re going',
+    'hint': 'Scratch to see',
+    'secret': 'Two tickets to Lisbon. We leave in May.',
+  }),
+  _sec(5, SectionType.noteJar, {
+    'title': 'Things I love about you',
+    'notes': ['The way you hum when you cook.', 'Your terrible puns.'],
   }),
   _sec(3, SectionType.countdown, {
     'label': 'Until our trip',
@@ -285,6 +297,54 @@ final Map<String, (Widget Function(), List<Override>)> screens = {
         otherPhotos: 0),
     const []
   ),
+  'scratch-editor': (
+    () => ScratchEditorScreen(
+        section: _sec(0, SectionType.scratchReveal, {
+      'title': 'Guess where we’re going',
+      'hint': '',
+      'secret': 'Two tickets to Lisbon. We leave in May.',
+    })),
+    const []
+  ),
+  'jar-editor': (
+    () => JarEditorScreen(
+        section: _sec(0, SectionType.noteJar, {
+      'title': 'Things I love about you',
+      'notes': ['The way you hum when you cook.', 'Your terrible puns.'],
+    })),
+    const []
+  ),
+  'jar': (
+    () => Scaffold(
+        body: ListView(padding: const EdgeInsets.all(24), children: const [
+          NoteJarView(
+              seed: 1,
+              jar: NoteJar(title: 'Things I love about you', notes: [
+                'The way you hum when you cook.',
+                'Your terrible puns.',
+                'How you always save me the last bite.',
+              ])),
+        ])),
+    const []
+  ),
+  'scratch': (
+    () => Scaffold(
+        body: ListView(padding: const EdgeInsets.all(24), children: [
+          const ScratchCard(
+              content: ScratchContent(
+                  title: 'Guess where we’re going',
+                  hint: 'Scratch to see',
+                  secret: 'Two tickets to Lisbon. We leave in May.')),
+          const SizedBox(height: 32),
+          NoteJarView(
+              seed: 1,
+              jar: NoteJar(notes: [
+                for (var i = 0; i < 24; i++) 'Note',
+              ])),
+        ])),
+    const []
+  ),
+  'editor-add': (() => const EditorScreen(keepsakeId: 'd1'), const []),
   'book-editor': (
     () => BookEditorScreen(
         section: _sec(0, SectionType.book, {'title': '', 'pages': []})),
@@ -348,6 +408,52 @@ final Map<String, Future<void> Function(WidgetTester)> actions = {
     await t.drag(board, const Offset(-30, -12));
     await _settle(t);
     expect(find.text('Peel Off'), findsOneWidget);
+  },
+  'scratch-editor': (t) async {
+    final foil = find.byWidgetPredicate((w) =>
+        w is RawGestureDetector && w.gestures.containsKey(EagerPan));
+    await t.scrollUntilVisible(foil, 200,
+        scrollable: find.byType(Scrollable).first);
+    await _settle(t);
+    final r = t.getRect(foil);
+    // Scratch back and forth across the foil, row by row.
+    final g = await t.startGesture(r.topLeft + const Offset(4, 4));
+    for (var y = r.top + 4; y < r.bottom; y += 16) {
+      await g.moveTo(Offset(r.left + 4, y));
+      await g.moveTo(Offset(r.right - 4, y));
+    }
+    await g.up();
+    await _settle(t);
+    expect(find.text('You found it.'), findsOneWidget);
+  },
+  'jar': (t) async {
+    expect(find.text('0 of 3 read'), findsOneWidget);
+    for (var i = 0; i < 3; i++) {
+      await t.tap(find.text('Things I love about you'));
+      await _settle(t);
+    }
+    expect(find.text('You’ve read them all'), findsOneWidget);
+    expect(find.text('Put Them Back'), findsOneWidget);
+  },
+  'editor-add': (t) async {
+    final add = find.text('Add Something');
+    await t.scrollUntilVisible(add, 200,
+        scrollable: find.byType(Scrollable).first);
+    await t.ensureVisible(add);
+    await _settle(t);
+    await t.tap(add);
+    await _settle(t);
+    expect(find.text('Add something'), findsOneWidget);
+    final sheet = find
+        .descendant(
+            of: find.byType(BottomSheet), matching: find.byType(Scrollable))
+        .first;
+    final scratch = find.descendant(
+        of: find.byType(BottomSheet), matching: find.text('Scratch to Reveal'));
+    await t.scrollUntilVisible(scratch, 120, scrollable: sheet);
+    expect(find.text('Surprise'), findsOneWidget);
+    // The last choice can always be reached, even on a small phone.
+    await t.scrollUntilVisible(find.text('Countdown'), 120, scrollable: sheet);
   },
   'library-replies': (t) async {
     expect(find.text('2 new replies'), findsOneWidget);

@@ -63,6 +63,10 @@ abstract final class KeepsakeFactory {
         return {'label': '', 'date': null};
       case SectionType.photo:
         return {'title': '', 'photos': <Map<String, dynamic>>[]};
+      case SectionType.scratchReveal:
+        return {'title': '', 'hint': '', 'secret': ''};
+      case SectionType.noteJar:
+        return {'title': '', 'notes': <String>[]};
       default:
         return const {};
     }

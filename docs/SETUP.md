@@ -13,13 +13,41 @@ in order. Each one says how to check it worked.
 | 0004_security.sql (PIN lockout, locked-down writes, account deletion) | To do |
 | 0005_wrapping.sql (envelope paper and seal colour on the cover) | To do |
 | 0006_stop_sharing.sql (Stop Sharing, dead links stay dead, stickers) | To do |
+| 0007_receipts_and_limits.sql (opened receipts, postmark, fair-use limits, clean-up) | To do |
+| pg_cron turned on (optional, for the nightly clean-up) | Optional |
 | Confirm email turned off for testing | Done |
 | Anonymous sign-ins turned off | To do |
 | Website and share links online (step 4) | Later |
 
 ## What changed in each session
 
-- **Latest:** More ways to make it yours (no new setup file, but **run
+- **Latest:** Two new surprises and a stronger server. **Run
+  `0007_receipts_and_limits.sql`** after `0006`.
+  - Scratch to Reveal: a secret on a little ticket under gold foil. They
+    scratch it off with a finger; past about half, the rest falls away in
+    gold flecks. A "Tap to Reveal" button is there for anyone who can't
+    scratch, and screen readers don't read the secret until it's revealed.
+  - Jar of Notes: up to 30 folded notes in a glass jar. Tap the jar, it
+    wiggles, one note tumbles out and unfolds. They come out in a random
+    order with no repeats, and the jar empties as they go.
+  - The Add sheet is now grouped (Write, Remember, Surprise) with a line
+    under each choice, and it scrolls on small phones.
+  - Both are read leniently and capped (title, hint and secret lengths,
+    30 notes of 140 characters), so a tampered gift can't break the screen.
+  - Opened receipts (in `0007`): you see when a keepsake was first opened
+    and how many times. You can turn this off per keepsake, and the cover
+    tells the recipient whether it's on.
+  - A postmark on the envelope with the day it was sent.
+  - Fair-use limits per account: 20 shares in 10 minutes, 200 a day, 500
+    shared keepsakes and 100 MB in total. The app explains each one plainly.
+  - `purge_expired_keepsakes()` wipes keepsakes that expired over 30 days
+    ago. If you turn on **pg_cron** (Database > Extensions) before running
+    `0007`, it runs every night by itself. Without it nothing breaks;
+    expired links already stop working on their own.
+  - Database tests: `tool/test_db.sh` runs every migration twice on a local
+    Postgres and then 74 checks (stolen links, PIN lockout, stickers,
+    receipts, limits). All pass.
+- **Before that:** More ways to make it yours (no new setup file, but **run
   `0006` again** if you ran it before; it's safe twice):
   - Occasion tags printed for their occasion (confetti and a candle, gold
     rings, an airmail border, a graduation tassel...) and shelved in three
@@ -117,15 +145,17 @@ paste the whole file, and click **Run**. Do each file once, in this order.
 | `supabase/migrations/0004_security.sql` | PIN guess limit, writes only through publish, size limits on the table, account deletion | Run it |
 | `supabase/migrations/0005_wrapping.sql` | Stores the envelope paper and seal colour, shown on the cover before opening | Run it |
 | `supabase/migrations/0006_stop_sharing.sql` | Stop Sharing, stopped or deleted links can never be reused, and stickers on the envelope | Run it |
+| `supabase/migrations/0007_receipts_and_limits.sql` | Opened receipts, the postmark date, fair-use limits and the nightly clean-up | Run it |
 
 Running a file twice is safe.
 
 **Check:** in **Table Editor** you should see `keepsakes` and
 `keepsake_responses`. In **Database > Functions** you should see
 `publish_keepsake`, `keepsake_cover`, `keepsake_open`, `respond_to_keepsake`,
-`my_keepsake_responses`, `keepsake_pin_check`, `delete_my_account` and
-`stop_sharing`, and the tables `keepsake_pin_attempts` and
-`retired_share_tokens`.
+`my_keepsake_responses`, `keepsake_pin_check`, `delete_my_account`,
+`stop_sharing`, `my_keepsake_status` and `purge_expired_keepsakes`, and the
+tables `keepsake_pin_attempts`, `retired_share_tokens` and
+`publish_events`.
 
 ## 2. Sign-in settings (Authentication)
 
