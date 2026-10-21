@@ -20,6 +20,8 @@ class CoverResult {
     this.senderName,
     this.coverNote,
     this.style = KeepsakeStyle.standard,
+    this.sentOn,
+    this.receipts = false,
   });
 
   /// One of: available, sealed, expired, not_found, error.
@@ -34,6 +36,31 @@ class CoverResult {
 
   /// Envelope paper and seal colour, shown before opening.
   final KeepsakeStyle style;
+
+  /// The day it was first sent, for the postmark (needs migration 0007).
+  final DateTime? sentOn;
+
+  /// Whether the sender will see that it was opened.
+  final bool receipts;
+}
+
+/// What the creator can see about one of their links.
+class LinkStatus {
+  const LinkStatus({
+    required this.receipts,
+    this.firstOpenedAt,
+    this.lastOpenedAt,
+    this.openCount = 0,
+    this.replyCount = 0,
+  });
+
+  final bool receipts;
+  final DateTime? firstOpenedAt;
+  final DateTime? lastOpenedAt;
+  final int openCount;
+  final int replyCount;
+
+  bool get opened => firstOpenedAt != null;
 }
 
 /// Result of attempting to open the content.
@@ -119,14 +146,27 @@ class KeepsakeBackend {
       'p_unlisted': keepsake.privacy.unlisted,
       'p_pin': (pin != null && pin.isNotEmpty) ? pin : null,
     };
+    // Newest first. When the database is older than the app (a migration
+    // not run yet), fall back to what it understands rather than failing:
+    // receipts need 0007, the wrapping needs 0005.
+    final attempts = [
+      {
+        ...params,
+        'p_style': keepsake.style.toJson(),
+        'p_receipts': keepsake.privacy.receipts,
+      },
+      {...params, 'p_style': keepsake.style.toJson()},
+      params,
+    ];
     dynamic res;
-    try {
-      res = await _client.rpc('publish_keepsake',
-          params: {...params, 'p_style': keepsake.style.toJson()});
-    } on PostgrestException {
-      // The wrapping needs migration 0005. Without it, publish anyway with
-      // the standard look rather than failing.
-      res = await _client.rpc('publish_keepsake', params: params);
+    for (var i = 0; i < attempts.length; i++) {
+      try {
+        res = await _client.rpc('publish_keepsake', params: attempts[i]);
+        break;
+      } on PostgrestException catch (e) {
+        final missing = e.code == 'PGRST202' || e.code == '42883';
+        if (!missing || i == attempts.length - 1) rethrow;
+      }
     }
 
     final map = Map<String, dynamic>.from(res as Map);
@@ -140,6 +180,14 @@ class KeepsakeBackend {
     }
     if (status == 'invalid_pin') {
       throw StateError('A PIN is 4 to 12 digits, numbers only.');
+    }
+    if (status == 'rate_limited') {
+      throw StateError(
+          'You’ve shared a lot in a short time. Try again in a few minutes.');
+    }
+    if (status == 'quota') {
+      throw StateError('You’ve used all the space for shared keepsakes. '
+          'Stop sharing an old one to make room.');
     }
     if (status == 'invalid') {
       throw StateError(
@@ -202,6 +250,10 @@ class KeepsakeBackend {
         senderName: m['sender_name'] as String?,
         coverNote: m['cover_note'] as String?,
         style: KeepsakeStyle.fromJson(m['style']),
+        sentOn: m['sent_on'] is String
+            ? DateTime.tryParse(m['sent_on'] as String)
+            : null,
+        receipts: m['receipts'] == true,
       );
     } catch (_) {
       return const CoverResult(status: 'error');
@@ -264,6 +316,32 @@ class KeepsakeBackend {
         for (final row in res as List)
           KeepsakeResponse.fromJson(Map<String, dynamic>.from(row as Map)),
       ];
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Opened receipts and reply counts for the signed-in creator's links.
+  /// Null when they can't be loaded (offline, or migration 0007 not run).
+  Future<Map<String, LinkStatus>?> fetchStatus(List<String> tokens) async {
+    if (!isAvailable || tokens.isEmpty) return null;
+    if (_client.auth.currentUser == null) return null;
+    try {
+      final res = await _client.rpc(
+        'my_keepsake_status',
+        params: {'p_tokens': tokens.take(200).toList()},
+      );
+      return {
+        for (final row in res as List)
+          if (row is Map && row['share_token'] is String)
+            row['share_token'] as String: LinkStatus(
+              receipts: row['receipts'] == true,
+              firstOpenedAt: _parseDate(row['first_opened_at']),
+              lastOpenedAt: _parseDate(row['last_opened_at']),
+              openCount: (row['open_count'] as num?)?.toInt() ?? 0,
+              replyCount: (row['reply_count'] as num?)?.toInt() ?? 0,
+            ),
+      };
     } catch (_) {
       return null;
     }

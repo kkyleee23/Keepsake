@@ -46,6 +46,7 @@ class PrivacySettings {
     this.unlisted = true,
     this.pin,
     this.expiresAt,
+    this.receipts = true,
   });
 
   /// Reachable only via its private link; not discoverable.
@@ -57,19 +58,29 @@ class PrivacySettings {
   /// Optional hard expiry after which the link stops working.
   final DateTime? expiresAt;
 
+  /// Whether the creator sees when it's opened. The recipient is told.
+  final bool receipts;
+
   bool get hasPin => pin != null && pin!.isNotEmpty;
 
-  PrivacySettings copyWith({bool? unlisted, String? pin, DateTime? expiresAt}) =>
+  PrivacySettings copyWith({
+    bool? unlisted,
+    String? pin,
+    DateTime? expiresAt,
+    bool? receipts,
+  }) =>
       PrivacySettings(
         unlisted: unlisted ?? this.unlisted,
         pin: pin ?? this.pin,
         expiresAt: expiresAt ?? this.expiresAt,
+        receipts: receipts ?? this.receipts,
       );
 
   Map<String, dynamic> toJson() => {
         'unlisted': unlisted,
         'pin': pin,
         'expiresAt': expiresAt?.toIso8601String(),
+        'receipts': receipts,
       };
 
   factory PrivacySettings.fromJson(Map<String, dynamic> json) =>
@@ -79,6 +90,7 @@ class PrivacySettings {
         expiresAt: json['expiresAt'] == null
             ? null
             : DateTime.parse(json['expiresAt'] as String),
+        receipts: json['receipts'] is bool ? json['receipts'] as bool : true,
       );
 }
 

@@ -141,6 +141,8 @@ class _Backend extends KeepsakeBackend {
     senderName: 'Sam',
     coverNote: _gift.coverNote,
     style: _style,
+    receipts: true,
+    sentOn: DateTime(2026, 10, 21),
   );
   @override
   Future<OpenResult> open(String token, {String? pin}) async =>

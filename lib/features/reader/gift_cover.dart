@@ -30,6 +30,8 @@ class GiftCover extends StatefulWidget {
     this.senderName,
     this.playOpening = true,
     this.style = KeepsakeStyle.standard,
+    this.sentOn,
+    this.receipts = false,
   });
 
   final VoidCallback onOpen;
@@ -45,6 +47,12 @@ class GiftCover extends StatefulWidget {
 
   /// The creator's wrapping: envelope paper and seal colour.
   final KeepsakeStyle style;
+
+  /// The day it was sent, for the postmark.
+  final DateTime? sentOn;
+
+  /// The sender will see when it's opened; the cover says so.
+  final bool receipts;
 
   @override
   State<GiftCover> createState() => _GiftCoverState();
@@ -149,6 +157,7 @@ class _GiftCoverState extends State<GiftCover>
                           sealColor: widget.style.seal.color,
                           sealMono: widget.style.mono,
                           stickers: widget.style.stickers,
+                          postmark: widget.sentOn,
                         ),
                       ),
                       // The mascot sits on the envelope's corner, then hops
@@ -195,6 +204,15 @@ class _GiftCoverState extends State<GiftCover>
               ],
             ),
             const SizedBox(height: AppSpacing.md),
+          ],
+          // Nobody is watched without knowing.
+          if (widget.receipts) ...[
+            Text(
+              '${from ?? 'The sender'} will see when you’ve opened it.',
+              style: AppTypography.caption,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
           ],
           PrimaryButton(label: 'Open', onPressed: _opening ? null : _onOpen),
         ],

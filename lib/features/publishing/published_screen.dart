@@ -19,6 +19,7 @@ import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/fill_scroll.dart';
 import '../../shared/widgets/motion.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
+import 'link_status.dart';
 import 'replies_section.dart';
 import 'new_replies.dart';
 
@@ -270,7 +271,7 @@ class _PublishedScreenState extends ConsumerState<PublishedScreen>
 }
 
 /// What protects this link, and the switch to turn it off.
-class _LinkControls extends StatelessWidget {
+class _LinkControls extends ConsumerWidget {
   const _LinkControls({
     required this.keepsake,
     required this.busy,
@@ -282,9 +283,15 @@ class _LinkControls extends StatelessWidget {
   final VoidCallback onStop;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final token = keepsake.shareToken;
+    final status = token == null
+        ? null
+        : ref.watch(linkStatusProvider).valueOrNull?[token];
     final expires = keepsake.privacy.expiresAt;
+    final receipt = receiptLine(keepsake, status);
     final lines = [
+      ?receipt,
       keepsake.privacy.hasPin
           ? 'Locked with a PIN. Five wrong tries locks it for a while.'
           : 'No PIN. Anyone with the link can open it.',

@@ -184,6 +184,8 @@ class _ReceiveScreenState extends ConsumerState<ReceiveScreen> {
           senderName: c.senderName,
           playOpening: !c.requiresPin,
           style: c.style,
+          sentOn: c.sentOn,
+          receipts: c.receipts,
           onOpen: _onOpenPressed,
         );
       case _Phase.sealed:

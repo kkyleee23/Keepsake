@@ -9,6 +9,7 @@ import '../../../data/models/enums.dart';
 import '../../../data/models/keepsake.dart';
 import '../../../shared/widgets/motion.dart';
 import '../../../shared/widgets/paper.dart';
+import '../../publishing/link_status.dart';
 import '../../publishing/new_replies.dart';
 
 /// A library/home card for one Keepsake. Communicates the essentials only -
@@ -72,6 +73,7 @@ class KeepsakeCard extends StatelessWidget {
                           DateFormat.yMMMd().format(keepsake.updatedAt),
                           style: AppTypography.caption,
                         ),
+                        OpenedTag(keepsake: keepsake),
                         NewRepliesTag(keepsake: keepsake),
                       ],
                     ),

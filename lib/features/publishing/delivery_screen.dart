@@ -37,6 +37,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
   final _pin = TextEditingController();
   bool _useExpiry = false;
   DateTime? _expiresAt;
+  bool _receipts = true;
 
   @override
   void initState() {
@@ -61,6 +62,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
       _openAt = k?.delivery.openAt;
       _expiresAt = k?.privacy.expiresAt;
       _useExpiry = _expiresAt != null;
+      _receipts = k?.privacy.receipts ?? true;
       _loading = false;
     });
   }
@@ -99,7 +101,13 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
     try {
       final updated = k.copyWith(
         delivery: DeliverySettings(mode: _mode, openAt: _openAt),
-        privacy: k.privacy.copyWith(unlisted: true, expiresAt: _expiresAt),
+        // Built fresh, so turning the expiry off really clears it.
+        privacy: PrivacySettings(
+          unlisted: true,
+          pin: k.privacy.pin,
+          expiresAt: _useExpiry ? _expiresAt : null,
+          receipts: _receipts,
+        ),
       );
       final pin = _usePin ? _pin.text.trim() : null;
       final token = await backend.publish(updated, pin: pin);
@@ -214,7 +222,7 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (_) => setState(() {}),
                 decoration: const InputDecoration(
-                  hintText: '4–6 digits',
+                  hintText: '4 to 6 digits',
                   counterText: '',
                 ),
               ),
@@ -247,6 +255,20 @@ class _DeliveryScreenState extends ConsumerState<DeliveryScreen> {
                   ),
                 ),
               ),
+
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: Text(
+                'Tell me when it’s opened',
+                style: AppTypography.bodyLarge,
+              ),
+              subtitle: Text(
+                'They’ll see a small note saying you’ll know.',
+                style: AppTypography.caption,
+              ),
+              value: _receipts,
+              onChanged: (v) => setState(() => _receipts = v),
+            ),
 
             const SizedBox(height: AppSpacing.xl),
             if (!backendReady)

@@ -156,6 +156,14 @@ class _RepliesBackend extends _FakeBackend {
         KeepsakeResponse(
             id: 'r2', createdAt: DateTime.now(), reaction: Reaction.love),
       ];
+  @override
+  Future<Map<String, LinkStatus>?> fetchStatus(List<String> tokens) async => {
+        for (final t in tokens)
+          t: LinkStatus(
+              receipts: true,
+              firstOpenedAt: DateTime(2026, 10, 21),
+              openCount: 3),
+      };
 }
 
 /// The tab screens inside a bottom bar like the real shell.
@@ -181,6 +189,8 @@ final _cover = CoverResult(
   senderName: 'Kyle',
   coverNote: 'Open this when you have a quiet minute and a cup of tea.',
   requiresPin: true,
+  receipts: true,
+  sentOn: DateTime(2026, 10, 21),
   style: KeepsakeStyle(
     envelope: 'kraft',
     seal: SealColor.terracotta,

@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radius.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../data/models/keepsake_style.dart';
+import 'postmark.dart';
 import 'stickers.dart';
 
 /// Hand-drawn pieces that make an opened keepsake feel like a gift: an
@@ -195,6 +196,7 @@ class EnvelopeArt extends StatelessWidget {
     this.sealColor = AppColors.accent,
     this.sealMono,
     this.stickers = const [],
+    this.postmark,
   });
 
   final double width;
@@ -207,6 +209,9 @@ class EnvelopeArt extends StatelessWidget {
 
   /// Initials on the seal instead of the leaf.
   final String? sealMono;
+
+  /// The day it was sent, inked over the top corner like real mail.
+  final DateTime? postmark;
 
   /// The envelope's paper (cream, kraft, seed, linen).
   final LetterPaper paper;
@@ -235,7 +240,7 @@ class EnvelopeArt extends StatelessWidget {
     return SizedBox(
       width: width,
       height: h * EnvelopeArt.headroom,
-      child: stickers.isEmpty
+      child: stickers.isEmpty && postmark == null
           ? art
           : Stack(
               clipBehavior: Clip.none,
@@ -244,10 +249,21 @@ class EnvelopeArt extends StatelessWidget {
                 Positioned.fill(
                   child: Opacity(
                     opacity: (1 - open * 2.5).clamp(0.0, 1.0),
-                    child: EnvelopeStickers(
-                      stickers: stickers,
-                      width: width,
-                      top: h * (EnvelopeArt.headroom - 1),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        EnvelopeStickers(
+                          stickers: stickers,
+                          width: width,
+                          top: h * (EnvelopeArt.headroom - 1),
+                        ),
+                        if (postmark != null)
+                          Positioned(
+                            right: width * 0.16,
+                            top: h * (EnvelopeArt.headroom - 1) + h * 0.06,
+                            child: Postmark(date: postmark!, size: width * 0.2),
+                          ),
+                      ],
                     ),
                   ),
                 ),
