@@ -35,14 +35,36 @@ create index if not exists keepsakes_creator_idx on public.keepsakes (creator_id
 alter table public.keepsakes enable row level security;
 
 -- Creators manage only their own rows. Recipients get NO direct table access.
-create policy "creator reads own" on public.keepsakes
-  for select using (auth.uid() = creator_id);
-create policy "creator inserts own" on public.keepsakes
-  for insert with check (auth.uid() = creator_id);
-create policy "creator updates own" on public.keepsakes
-  for update using (auth.uid() = creator_id) with check (auth.uid() = creator_id);
-create policy "creator deletes own" on public.keepsakes
-  for delete using (auth.uid() = creator_id);
+-- (Insert and update are taken away again in 0004: writes go through
+-- publish_keepsake only.) Each policy is made only if missing, so running
+-- this file again is safe.
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public'
+                 and tablename = 'keepsakes' and policyname = 'creator reads own') then
+    create policy "creator reads own" on public.keepsakes
+      for select using (auth.uid() = creator_id);
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public'
+                 and tablename = 'keepsakes' and policyname = 'creator deletes own') then
+    create policy "creator deletes own" on public.keepsakes
+      for delete using (auth.uid() = creator_id);
+  end if;
+  -- Only on a brand-new database, before 0004 has run.
+  if not exists (select 1 from pg_proc where proname = 'keepsake_pin_check') then
+    if not exists (select 1 from pg_policies where schemaname = 'public'
+                   and tablename = 'keepsakes' and policyname = 'creator inserts own') then
+      create policy "creator inserts own" on public.keepsakes
+        for insert with check (auth.uid() = creator_id);
+    end if;
+    if not exists (select 1 from pg_policies where schemaname = 'public'
+                   and tablename = 'keepsakes' and policyname = 'creator updates own') then
+      create policy "creator updates own" on public.keepsakes
+        for update using (auth.uid() = creator_id) with check (auth.uid() = creator_id);
+    end if;
+  end if;
+end;
+$$;
 
 -- Publish (or re-publish) a keepsake owned by the caller. PIN is hashed here so
 -- the plaintext never lands in a column.
