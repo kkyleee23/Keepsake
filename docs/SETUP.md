@@ -21,7 +21,18 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** Two new surprises and a stronger server. **Run
+- **Latest:** Handoff and polish (no new file; `0007` gained one small
+  addition, so if you already ran it, run it again).
+  - `docs/HANDOFF.md`: start here on a new machine. How to run it, what's
+    left, the design rules, security and database in one place.
+  - The postmark is tidier (even lines that stop before the ring, the date
+    always fits inside) and can be turned off in Wrapping. The server keeps
+    only that one switch.
+  - Website sample is now Jamie writing to Kyle for a 30th birthday, rewritten to
+    sound like a real letter. Jamie's signature is a proper hand-signed J.
+  - Privacy page now mentions opened receipts, the publish log and the
+    30-day clean-up. `SECURITY.md` and `README.md` brought up to date.
+- **Before that:** Two new surprises and a stronger server. **Run
   `0007_receipts_and_limits.sql`** after `0006`.
   - Scratch to Reveal: a secret on a little ticket under gold foil. They
     scratch it off with a finger; past about half, the rest falls away in

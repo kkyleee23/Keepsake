@@ -11,6 +11,8 @@
 -- 4. Clean-up. purge_expired_keepsakes() wipes the content of keepsakes
 --    that expired more than 30 days ago (their links stay dead), and old
 --    bookkeeping rows. If pg_cron is enabled it runs every night by itself.
+-- 5. Senders can turn the postmark off. The cover style keeps only
+--    "postmark": false, nothing else new.
 --
 -- Run this once in the Supabase SQL editor after 0006_stop_sharing.sql.
 -- Safe to run again.
@@ -34,6 +36,47 @@ create index if not exists publish_events_creator_at
   on public.publish_events (creator_id, at);
 alter table public.publish_events enable row level security;
 revoke all on public.publish_events from anon, authenticated;
+
+-- 5. Same as 0006's clean_cover_style, plus the postmark switch.
+create or replace function public.clean_cover_style(p_style jsonb)
+returns jsonb
+language sql immutable set search_path = public, pg_temp as $$
+  select case when p_style is null or jsonb_typeof(p_style) <> 'object' then null
+  else jsonb_strip_nulls(jsonb_build_object(
+    'envelope', case when p_style->>'envelope' in ('cream', 'kraft', 'sage', 'linen')
+                     then p_style->>'envelope' end,
+    'seal', case when p_style->>'seal' in ('evergreen', 'terracotta', 'honey', 'plum', 'night')
+                 then p_style->>'seal' end,
+    'mono', case when jsonb_typeof(p_style->'mono') = 'string'
+                  and p_style->>'mono' ~ '^[A-Z]{1,2}$'
+                 then p_style->>'mono' end,
+    'postmark', case when p_style->'postmark' = 'false'::jsonb
+                     then false end,
+    'stickers', (
+      select jsonb_agg(jsonb_build_object(
+        'id', e->>'id',
+        'x', round(least(greatest((e->>'x')::numeric, 0), 1), 3),
+        'y', round(least(greatest((e->>'y')::numeric, 0), 1), 3),
+        'r', round(least(greatest((e->>'r')::numeric, -40), 40)),
+        's', round(least(greatest((e->>'s')::numeric, 0.7), 1.5), 3)
+      ) order by n)
+      from (
+        select e, n from jsonb_array_elements(
+          case when jsonb_typeof(p_style->'stickers') = 'array'
+               then p_style->'stickers' else '[]'::jsonb end
+        ) with ordinality as t(e, n)
+        where jsonb_typeof(e) = 'object'
+          and e->>'id' in ('sprig', 'stamp', 'heart', 'daisy', 'moon', 'airmail',
+                           'pup_wave', 'pup_hug', 'pup_cheer', 'pup_gift',
+                           'pup_read', 'pup_sleep')
+          and jsonb_typeof(e->'x') = 'number' and jsonb_typeof(e->'y') = 'number'
+          and jsonb_typeof(e->'r') = 'number' and jsonb_typeof(e->'s') = 'number'
+        order by n
+        limit 6
+      ) kept
+    )
+  )) end;
+$$;
 
 -- Replace the 13-argument publish with one that also takes p_receipts.
 drop function if exists public.publish_keepsake(

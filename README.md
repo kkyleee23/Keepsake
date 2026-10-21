@@ -69,8 +69,10 @@ In place:
 * Library: Created / Received / Drafts / Archived, with search and per-card
   actions (open, copy link, archive, delete).
 
-Next (needs a testing session or a backend step): media (photos, voice),
-recipient responses, notifications, and dark mode.
+Since then: photos, long letters, essays and books, replies, Stop Sharing,
+envelope wrapping (paper, seal, initials, stickers, postmark), signing by
+hand, opened receipts, Scratch to Reveal, Jar of Notes, and the website.
+The full list and what's left is in `docs/HANDOFF.md`.
 
 ## Running it
 
@@ -95,24 +97,24 @@ at a different project, edit `dart_defines.json`.
 
 ## Sharing / backend setup (Supabase)
 
-1. Create a project at supabase.com and open the **SQL Editor**.
-2. Run `supabase/migrations/0001_init.sql` (creates the table, Row-Level
-   Security, and the server-side access functions).
-3. In **Authentication → Providers**, enable **Anonymous sign-in** (creators get
-   an identity without an account; recipients never sign in).
-4. Copy the project URL and the `anon` key into the `--dart-define`s above.
-5. Set `KEEPSAKE_LINK_BASE` to wherever the app is reachable. On a static host,
-   add an SPA fallback so `/receive/<token>` serves `index.html`.
+Follow `docs/SETUP.md`. It lists every SQL file to run, the sign-in
+settings, and how to host the website and share links. Start with
+`docs/HANDOFF.md` if you're picking the project up on a new machine.
 
 ## Project layout
 
 ```
 lib/
   app/        app shell, router
-  core/       theme tokens (colors, type, spacing, radius)
-  data/       models
-  features/   home, creation, keepsakes, profile
-  shared/     reusable widgets
+  core/       theme tokens (colors, type, spacing, radius), prompts
+  data/       models, local storage, Supabase calls, photo shrinking
+  features/   one folder per area (creation, editor, sections, publishing,
+              receive, reader, keepsakes, home, profile, auth, onboarding)
+  shared/     reusable widgets (paper, envelope, tags, stickers, motion)
+supabase/     migrations (run in order) and database tests
+website/      the landing page, privacy page and 404
+tool/         build, test and site scripts
+docs/         SETUP.md (what to set up) and HANDOFF.md (start here)
 ```
 
 Fonts live in `fonts/`; color and UI references in `colors/`, `images/`, and

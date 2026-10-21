@@ -31,3 +31,11 @@ select test.eq('The cover shows only the clean style',
   (keepsake_cover('linkCOVERCOVERCOVER01')->'style')::text,
   '{"mono": "S", "envelope": "kraft", "stickers": [{"r": 10, "s": 1.100, "x": 0.500, "y": 0.500, "id": "daisy"}]}');
 reset role;
+
+-- The postmark switch: only "false" is kept, anything else is dropped.
+select test.eq('Postmark off is kept',
+  clean_cover_style('{"postmark": false}')::text, '{"postmark": false}');
+select test.eq('Postmark on is the default, so it is not stored',
+  clean_cover_style('{"postmark": true}')::text, '{}');
+select test.eq('A postmark that is not a boolean is dropped',
+  clean_cover_style('{"postmark": "false"}')::text, '{}');

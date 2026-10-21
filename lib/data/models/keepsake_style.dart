@@ -134,6 +134,7 @@ class KeepsakeStyle {
     this.seal = SealColor.evergreen,
     this.stickers = const [],
     this.mono,
+    this.postmark = true,
   });
 
   /// A paper id (cream, kraft, sage, linen); see LetterPaper.
@@ -143,6 +144,9 @@ class KeepsakeStyle {
 
   /// One or two capital letters pressed into the seal instead of the leaf.
   final String? mono;
+
+  /// Whether the cover shows a postmark with the day it was sent.
+  final bool postmark;
 
   /// The most stickers one envelope can hold (the server keeps no more).
   static const int maxStickers = 6;
@@ -162,7 +166,8 @@ class KeepsakeStyle {
       envelope == 'cream' &&
       seal == SealColor.evergreen &&
       stickers.isEmpty &&
-      mono == null;
+      mono == null &&
+      postmark;
 
   /// Pass [mono] as '' to clear the letters; null keeps them.
   KeepsakeStyle copyWith({
@@ -170,11 +175,13 @@ class KeepsakeStyle {
     SealColor? seal,
     List<PlacedSticker>? stickers,
     String? mono,
+    bool? postmark,
   }) => KeepsakeStyle(
     envelope: envelope ?? this.envelope,
     seal: seal ?? this.seal,
     stickers: stickers ?? this.stickers,
     mono: mono == null ? this.mono : cleanMono(mono),
+    postmark: postmark ?? this.postmark,
   );
 
   Map<String, dynamic> toJson() => {
@@ -182,6 +189,8 @@ class KeepsakeStyle {
     'seal': seal.id,
     if (stickers.isNotEmpty) 'stickers': [for (final s in stickers) s.toJson()],
     'mono': ?mono,
+    // Only stored when turned off, so older covers keep their postmark.
+    if (!postmark) 'postmark': false,
   };
 
   /// Lenient on purpose: anything unknown falls back to the standard look,
@@ -205,6 +214,7 @@ class KeepsakeStyle {
           ?PlacedSticker.fromJson(raw),
       ],
       mono: cleanMono(json['mono']),
+      postmark: json['postmark'] != false,
     );
   }
 
@@ -214,9 +224,10 @@ class KeepsakeStyle {
       other.envelope == envelope &&
       other.seal == seal &&
       other.mono == mono &&
+      other.postmark == postmark &&
       listEquals(other.stickers, stickers);
 
   @override
   int get hashCode =>
-      Object.hash(envelope, seal, mono, Object.hashAll(stickers));
+      Object.hash(envelope, seal, mono, postmark, Object.hashAll(stickers));
 }

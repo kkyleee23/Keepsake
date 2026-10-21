@@ -29,22 +29,57 @@ How Keepsake protects private content, and what still needs doing.
   key. The **secret** key is never in the repo or the app. Share tokens are
   128-bit, generated with a secure RNG.
 
+**Links.**
+- Stop Sharing deletes the content from the server at once. A link that was
+  stopped or deleted is remembered as a one-way hash and can never be
+  published again, by anyone (`retired_share_tokens`, migration 0006).
+- PIN guesses are counted on the server and lock the keepsake for a while
+  after too many wrong tries.
+
+**Writes only through checked functions.**
+- The app can't insert or update keepsake rows directly. Everything goes
+  through `publish_keepsake`, which checks lengths, the token's shape, the
+  PIN's shape, the 5 MB size cap and the envelope style (only known papers,
+  seals, initials and stickers survive, with every number clamped).
+- Fair use per account (0007): 20 publishes in 10 minutes, 200 a day, 500
+  shared keepsakes, 100 MB in total.
+
+**Opened receipts are disclosed.** The cover tells the recipient when the
+sender will see that it was opened. Only the creator can read the receipt
+(`my_keepsake_status`, which runs with the caller's own permissions).
+
+**Untrusted content is read leniently.** Every section the recipient's app
+reads (letters, signatures, photos, scratch cards, note jars...) is
+type-checked and length-capped when loaded, so a tampered keepsake can't
+crash the app or flood the screen. Photos lose their location and camera
+data on the phone before upload.
+
+**Website.** Strict security headers (`website/_headers`) plus a content
+policy and Trusted Types on every page. No third-party scripts, fonts or
+trackers. `tool/check_site.js` checks this in a real browser.
+
+**Tests.** `tool/test_db.sh` runs every migration twice on a local Postgres
+and then 77 checks that try to break the rules above (stealing a link,
+writing directly, guessing PINs, hostile styles, limits).
+
 ## Do these in the Supabase dashboard
 
-1. **Turn OFF anonymous sign-ins** (Authentication → Providers). Now that
-   creators use real accounts, this closes the door on anyone using the public
-   key to create rows anonymously.
-2. **Keep "Confirm email" ON** so sign-ups prove they own the address. (The app
-   handles the "confirm your email, then sign in" state.)
-3. **Enable CAPTCHA** for auth (Supabase recommends this) to limit abuse and
-   fake sign-ups.
-4. **Turn on leaked-password protection** (Authentication → Policies) so common
-   breached passwords are rejected.
+1. **Run migrations 0002 to 0007** in order (see `docs/SETUP.md`).
+2. **Turn OFF anonymous sign-ins** (Authentication > Providers). The app
+   doesn't use them.
+3. **Turn on leaked-password protection** (Authentication > Policies) so
+   common breached passwords are rejected.
+4. **Confirm email**: turn it back on once the website is hosted (SETUP
+   step 4), so confirmation links land on a real page.
+5. **Don't turn on CAPTCHA yet.** The app doesn't send a CAPTCHA token, so
+   sign-up would stop working. It's on the list below.
 
 ## Still to do
 
-- Rate-limit publishing per account.
-- When media (photos, voice) lands, store it in a private Supabase Storage
-  bucket behind RLS and serve it with short-lived signed URLs, never public ones.
-- A proper "delete my account and data" flow.
-- Audit logging for opens, and optional view limits per keepsake.
+- CAPTCHA on sign-up (hCaptcha or Turnstile in the app, then turn it on in
+  Supabase).
+- When voice or video lands, keep it in a private Storage bucket behind row
+  security and serve it with short-lived signed URLs, never public ones.
+- Email notifications (a reply arrived, it was opened) would need a server
+  function; nothing sends email today except Supabase sign-in mail.
+- Optional per-keepsake view limits.

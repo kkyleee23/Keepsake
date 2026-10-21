@@ -157,7 +157,9 @@ class _GiftCoverState extends State<GiftCover>
                           sealColor: widget.style.seal.color,
                           sealMono: widget.style.mono,
                           stickers: widget.style.stickers,
-                          postmark: widget.sentOn,
+                          postmark: widget.style.postmark
+                              ? widget.sentOn
+                              : null,
                         ),
                       ),
                       // The mascot sits on the envelope's corner, then hops

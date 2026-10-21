@@ -29,7 +29,7 @@
 <main class="doc wrap">
   <h1>Privacy</h1>
   <p class="lede">Keepsake is for things you’d only say to one person, so we keep as little as we can and tell you exactly what that is.</p>
-  <p class="stamp">Last updated October 17, 2026</p>
+  <p class="stamp">Last updated October 21, 2026</p>
 
   <h2>What stays on your phone</h2>
   <p>Everything you’re still making. Drafts, the letters you’re halfway through, the photos you’ve picked: none of it leaves your phone until you share it.</p>
@@ -40,6 +40,8 @@
     <li><strong>Keepsakes you share.</strong> When you tap Publish, the keepsake goes to our server so the person you send it to can open it: what’s inside, who it’s for and from, the cover note, the envelope and stickers, and any open date or expiry you set.</li>
     <li><strong>Your PIN, as a hash.</strong> If you add a PIN, the server keeps a one-way hash of it, never the PIN itself, plus a count of wrong guesses so it can lock out anyone guessing.</li>
     <li><strong>Replies.</strong> If someone writes back, we keep their reaction, their note and the name they type, so you can read them.</li>
+    <li><strong>When it was opened.</strong> Unless you turn this off for a keepsake, the server notes the first and last time it was opened and how many times, and shows that only to you. The cover tells the person opening it whether this is on.</li>
+    <li><strong>When you shared.</strong> The times you tapped Publish over the last two days, so one account can’t flood the service. Older ones are deleted.</li>
     <li><strong>Links that ended.</strong> When a link is stopped or deleted, we keep a one-way hash of it so nobody can ever reuse that link. The hash can’t be turned back into the link.</li>
   </ul>
 
@@ -56,7 +58,7 @@
   <p>Our data is stored with Supabase, which runs the database and encrypts it on disk. Like with most apps, the people who run the service could technically read what’s stored on the server. We only use it to deliver your keepsakes, and we don’t sell or share it.</p>
 
   <h2>How long it stays</h2>
-  <p>A shared keepsake stays on the server until you stop sharing it, delete it, or delete your account. If you set an expiry, the link stops working on that date.</p>
+  <p>A shared keepsake stays on the server until you stop sharing it, delete it, or delete your account. If you set an expiry, the link stops working on that date, and 30 days later its content is deleted from the server.</p>
 
   <h2>Deleting things</h2>
   <ul>

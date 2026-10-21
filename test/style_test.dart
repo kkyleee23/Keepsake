@@ -20,8 +20,10 @@ void main() {
 
   test('old keepsakes without a style get the standard wrapping', () {
     expect(KeepsakeStyle.fromJson(null), KeepsakeStyle.standard);
-    expect(KeepsakeStyle.fromJson({'envelope': 'glitter', 'seal': 'gold'}),
-        KeepsakeStyle.standard);
+    expect(
+      KeepsakeStyle.fromJson({'envelope': 'glitter', 'seal': 'gold'}),
+      KeepsakeStyle.standard,
+    );
   });
 
   test('letter fonts fall back to clean', () {
@@ -105,6 +107,23 @@ void main() {
       expect(style.copyWith(mono: '').mono, isNull);
       expect(style.copyWith(seal: SealColor.plum).mono, 'SM');
       expect(style.copyWith(mono: 'a').mono, 'A');
+    });
+  });
+
+  group('Postmark', () {
+    test('on by default and not stored unless turned off', () {
+      expect(KeepsakeStyle.standard.postmark, isTrue);
+      expect(KeepsakeStyle.standard.toJson().containsKey('postmark'), isFalse);
+      final off = KeepsakeStyle.standard.copyWith(postmark: false);
+      expect(off.isStandard, isFalse);
+      expect(off.toJson()['postmark'], false);
+      expect(KeepsakeStyle.fromJson(off.toJson()).postmark, isFalse);
+    });
+
+    test('anything but false keeps it on', () {
+      expect(KeepsakeStyle.fromJson({'postmark': 'false'}).postmark, isTrue);
+      expect(KeepsakeStyle.fromJson({'postmark': 0}).postmark, isTrue);
+      expect(KeepsakeStyle.fromJson(const {}).postmark, isTrue);
     });
   });
 }

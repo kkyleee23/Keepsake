@@ -370,6 +370,18 @@ class _WrappingSheetState extends State<_WrappingSheet> {
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.sm),
+            SwitchListTile.adaptive(
+              contentPadding: EdgeInsets.zero,
+              title: Text('Postmark', style: AppTypography.label),
+              subtitle: Text(
+                'The day you send it, stamped in the corner.',
+                style: AppTypography.caption,
+              ),
+              value: _style.postmark,
+              onChanged: (v) =>
+                  setState(() => _style = _style.copyWith(postmark: v)),
+            ),
             const SizedBox(height: AppSpacing.lg),
             PrimaryButton(
               label: 'Use This Wrapping',
@@ -424,11 +436,17 @@ class _StickerBoard extends StatelessWidget {
               child: AnimatedSwitcher(
                 duration: Motion.of(context, Motion.medium),
                 child: EnvelopeArt(
-                  key: ValueKey((style.envelope, style.seal, style.mono)),
+                  key: ValueKey((
+                    style.envelope,
+                    style.seal,
+                    style.mono,
+                    style.postmark,
+                  )),
                   width: width,
                   paper: LetterPaper.fromId(style.envelope),
                   sealColor: style.seal.color,
                   sealMono: style.mono,
+                  postmark: style.postmark ? DateTime.now() : null,
                 ),
               ),
             ),

@@ -43,20 +43,25 @@ const _pad = EdgeInsets.only(top: 47, bottom: 34);
 final _now = DateTime(2026, 10, 17, 9, 30);
 
 const _letter =
-    'Happy birthday. I wanted to write down a few things I never '
-    'manage to say out loud, so here they are.\n\n'
-    'Thank you for the slow Sundays, for the bad movies we keep watching on '
-    'purpose, and for answering the phone at 2am that one time without '
-    'asking why.\n\n'
-    'This year I hope you get the window seat, the last slice, and every '
-    'green light on the way home.';
+    'Happy 30th! I started writing this in a card and ran out of room '
+    'before I got to the good part, so you get the long version.\n\n'
+    'I keep thinking about the night the car broke down two hours from '
+    'home and we ate a whole box of gas station donuts on the hood while we '
+    'waited for the tow truck. Nothing went right that day and it’s still '
+    'one of my favorites.\n\n'
+    'You’re the first person I call when something happens, good or bad. '
+    'You always pick up, even that time I locked myself out in a towel. '
+    'You laughed, but you came.\n\n'
+    'I don’t say it enough, so I’m putting it somewhere you can keep: I’m '
+    'really glad it’s you.\n\n'
+    'Now go eat cake. I hid a slice for you behind the milk.';
 
 const _style = KeepsakeStyle(
   envelope: 'kraft',
   seal: SealColor.terracotta,
-  mono: 'S',
+  mono: 'J',
   stickers: [
-    PlacedSticker(kind: StickerKind.stamp, x: 0.85, y: 0.2, turn: 6),
+    PlacedSticker(kind: StickerKind.stamp, x: 0.9, y: 0.24, turn: 6),
     PlacedSticker(kind: StickerKind.sprig, x: 0.14, y: 0.76, turn: -12),
     PlacedSticker(
       kind: StickerKind.heart,
@@ -68,17 +73,33 @@ const _style = KeepsakeStyle(
   ],
 );
 
-/// A quick cursive scribble, like signing a card.
+/// Points along a quadratic curve from [a] through control [c] to [b].
+List<double> _curve(List<double> a, List<double> c, List<double> b, int n) => [
+  for (var i = 0; i <= n; i++)
+    for (final k in [0, 1])
+      math.pow(1 - i / n, 2) * a[k] +
+          2 * (1 - i / n) * (i / n) * c[k] +
+          math.pow(i / n, 2) * b[k],
+];
+
+/// Jamie's signature: a tall J with a hooked tail, a quick run of loops for
+/// "amie", the dot of the i, and an underline.
 final _signature = [
   [
-    for (var i = 0; i <= 60; i++) ...[
-      0.1 + i * 0.012,
-      0.5 -
-          0.28 * math.sin(i / 60 * math.pi * 4.5) * (1 - i / 90) -
-          (i < 12 ? (12 - i) * 0.015 : 0),
+    ..._curve([0.06, 0.4], [0.12, 0.06], [0.34, 0.1], 12),
+    ..._curve([0.34, 0.1], [0.26, 0.5], [0.24, 0.86], 14),
+    ..._curve([0.24, 0.86], [0.18, 1.0], [0.1, 0.74], 10),
+  ],
+  [
+    for (var i = 0; i <= 90; i++) ...[
+      0.3 +
+          0.0095 * (i / 90 * math.pi * 7) -
+          0.022 * math.sin(i / 90 * math.pi * 7),
+      0.62 - 0.1 * math.cos(i / 90 * math.pi * 7) * (1 - i / 150),
     ],
   ],
-  [0.12, 0.84, 0.45, 0.8, 0.86, 0.82],
+  [0.5, 0.3, 0.505, 0.29],
+  [0.06, 0.94, 0.45, 0.9, 0.9, 0.92],
 ];
 
 KeepsakeSection _sec(int i, SectionType t, Map<String, dynamic> c) =>
@@ -93,21 +114,21 @@ KeepsakeSection _sec(int i, SectionType t, Map<String, dynamic> c) =>
 
 final _gift = Keepsake(
   id: 'mia',
-  title: "For Jamie's 30th",
+  title: "For Kyle's 30th",
   occasion: Occasion.birthday,
-  recipientName: 'Jamie',
-  senderName: 'Sam',
+  recipientName: 'Kyle',
+  senderName: 'Jamie',
   status: KeepsakeStatus.published,
   shareToken: 'sampleTOKEN000000000a',
-  coverNote: 'Open this with your coffee, before anyone else texts you.',
+  coverNote: 'Open this before your phone blows up. I wanted to be first.',
   createdAt: _now,
   updatedAt: _now,
   style: _style,
   sections: [
     _sec(0, SectionType.letter, {
-      'title': 'Dear Jamie',
+      'title': 'Dear Kyle,',
       'body': _letter,
-      'signoff': 'Love, always',
+      'signoff': 'See you Saturday,',
       'paper': 'kraft',
       'font': 'hand',
       'signature': _signature,
@@ -115,16 +136,26 @@ final _gift = Keepsake(
     _sec(2, SectionType.openWhen, {
       'title': 'Open when',
       'items': [
-        {'label': 'you miss home', 'body': 'Call me. I will put the kettle on.'},
-        {'label': 'it rains all weekend', 'body': 'The good blanket is yours.'},
+        {
+          'label': 'you can’t sleep',
+          'body':
+              'Text me. I’m probably up too, rewatching something I’ve seen '
+              'twelve times.',
+        },
+        {
+          'label': 'work was awful',
+          'body': 'Order the good takeout tonight. Send me the receipt.',
+        },
       ],
     }),
     _sec(1, SectionType.reasons, {
-      'title': 'Things I like about you',
+      'title': 'Stuff I’ve noticed about you',
       'items': [
-        'You laugh before the joke is finished.',
-        'You remember everyone’s coffee order.',
-        'You always say yes to one more walk.',
+        'You still text me when you get home.',
+        'You know my coffee order better than I do.',
+        'You start laughing at your own jokes halfway through, and it gets '
+            'me every time.',
+        'That plant I gave you is somehow still alive.',
       ],
     }),
   ],
@@ -137,8 +168,8 @@ class _Backend extends KeepsakeBackend {
   Future<CoverResult> fetchCover(String token) async => CoverResult(
     status: 'available',
     occasion: 'birthday',
-    recipientName: 'Jamie',
-    senderName: 'Sam',
+    recipientName: 'Kyle',
+    senderName: 'Jamie',
     coverNote: _gift.coverNote,
     style: _style,
     receipts: true,
@@ -246,9 +277,9 @@ void main() {
       WritingScreen(
         kind: WritingKind.letter,
         heading: 'Letter',
-        title: 'Dear Jamie',
+        title: 'Dear Kyle,',
         body: _letter,
-        signoff: 'Love, always',
+        signoff: 'See you Saturday,',
         paper: 'kraft',
         font: 'hand',
         signature: _signature,
@@ -277,7 +308,7 @@ void main() {
 
   testWidgets('reasons', skip: !_site, (t) async {
     await _setUp(t, Scaffold(body: KeepsakeContentView(keepsake: _gift)));
-    await t.drag(find.byType(Scrollable).first, const Offset(0, -620));
+    await t.drag(find.byType(Scrollable).first, const Offset(0, -1240));
     await _frames(t, 16);
     await _save(t, 'reasons');
   });
@@ -286,15 +317,15 @@ void main() {
     await _setUp(
       t,
       const BookReaderScreen(
-        title: 'The Year in Small Things',
-        author: 'Sam',
-        dedication: 'For Jamie, who reads the last page first.',
+        title: 'Things That Happened This Year',
+        author: 'Jamie',
+        dedication: 'For Kyle, who always reads the last page first. Don’t.',
         pages: [
           BookPage(
             title: 'January',
             body:
-                'You made soup for the whole street when the snow came, '
-                'and then pretended it was an accident that you made so much.',
+                'The power was out for two days. You showed up with a camping '
+                'stove and the worst soup I’ve ever had. I ate three bowls.',
           ),
         ],
       ),
