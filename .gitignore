@@ -60,3 +60,10 @@ test/_shots/
 test/_shots_test.dart
 test/_matrix/
 /dist/
+
+# Kept local, not published: database schema, internal docs and build scripts.
+# The app's src is what the public repo is for.
+supabase/
+docs/
+tool/
+CLAUDE.md

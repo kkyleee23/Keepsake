@@ -72,7 +72,6 @@ In place:
 Since then: photos, long letters, essays and books, replies, Stop Sharing,
 envelope wrapping (paper, seal, initials, stickers, postmark), signing by
 hand, opened receipts, Scratch to Reveal, Jar of Notes, and the website.
-The full list and what's left is in `docs/HANDOFF.md`.
 
 ## Running it
 
@@ -97,9 +96,10 @@ at a different project, edit `dart_defines.json`.
 
 ## Sharing / backend setup (Supabase)
 
-Follow `docs/SETUP.md`. It lists every SQL file to run, the sign-in
-settings, and how to host the website and share links. Start with
-`docs/HANDOFF.md` if you're picking the project up on a new machine.
+Publishing and opening keepsakes run on a Supabase project. To use your
+own, put its URL and publishable key in `dart_defines.json` and launch
+with the run configuration above. The database schema, setup notes and
+build scripts are kept outside this repository.
 
 ## Project layout
 
@@ -111,10 +111,7 @@ lib/
   features/   one folder per area (creation, editor, sections, publishing,
               receive, reader, keepsakes, home, profile, auth, onboarding)
   shared/     reusable widgets (paper, envelope, tags, stickers, motion)
-supabase/     migrations (run in order) and database tests
 website/      the landing page, privacy page and 404
-tool/         build, test and site scripts
-docs/         SETUP.md (what to set up) and HANDOFF.md (start here)
 ```
 
 Fonts live in `fonts/`; color and UI references in `colors/`, `images/`, and

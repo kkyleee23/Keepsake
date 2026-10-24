@@ -56,21 +56,21 @@ data on the phone before upload.
 
 **Website.** Strict security headers (`website/_headers`) plus a content
 policy and Trusted Types on every page. No third-party scripts, fonts or
-trackers. `tool/check_site.js` checks this in a real browser.
+trackers. This is checked in a real browser before each release.
 
-**Tests.** `tool/test_db.sh` runs every migration twice on a local Postgres
-and then 77 checks that try to break the rules above (stealing a link,
-writing directly, guessing PINs, hostile styles, limits).
+**Tests.** A database test script runs every migration twice on a local
+Postgres and then 77 checks that try to break the rules above (stealing a
+link, writing directly, guessing PINs, hostile styles, limits).
 
 ## Do these in the Supabase dashboard
 
-1. **Run migrations 0002 to 0007** in order (see `docs/SETUP.md`).
+1. **Run the database migrations** in order before first use.
 2. **Turn OFF anonymous sign-ins** (Authentication > Providers). The app
    doesn't use them.
 3. **Turn on leaked-password protection** (Authentication > Policies) so
    common breached passwords are rejected.
-4. **Confirm email**: turn it back on once the website is hosted (SETUP
-   step 4), so confirmation links land on a real page.
+4. **Confirm email**: turn it back on once the website is hosted, so
+   confirmation links land on a real page.
 5. **Don't turn on CAPTCHA yet.** The app doesn't send a CAPTCHA token, so
    sign-up would stop working. It's on the list below.
 
