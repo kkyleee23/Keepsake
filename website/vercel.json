@@ -104,9 +104,26 @@
           "value": "no-cache"
         }
       ]
+    },
+    {
+      "source": "/(.*)\\.apk",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.android.package-archive"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
+      ]
     }
   ],
   "rewrites": [
+    {
+      "source": "/download",
+      "destination": "/download.html"
+    },
     {
       "source": "/privacy",
       "destination": "/privacy.html"
