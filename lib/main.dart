@@ -34,8 +34,20 @@ Future<void> main() async {
         // ignore: deprecated_member_use
         anonKey: isPublishable ? null : key,
       );
-    } catch (_) {
-      // Leave publishing disabled rather than blocking startup.
+    } catch (e, stack) {
+      // Still start: the app works on its own, with sharing switched off.
+      // Say so in the log, because the alternative is an app that quietly
+      // cannot publish and gives no reason anywhere.
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: e,
+          stack: stack,
+          library: 'keepsake',
+          context: ErrorDescription(
+            'starting Supabase, so sharing is switched off for this run',
+          ),
+        ),
+      );
     }
   }
 

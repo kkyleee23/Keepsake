@@ -1,3 +1,15 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+// Real signing details, when this machine has them. android/key.properties is
+// never committed, so a checkout without it still builds: it falls back to the
+// debug key, which is fine for trying the app but not for publishing.
+val keystoreFile = rootProject.file("key.properties")
+val keystore = Properties().apply {
+    if (keystoreFile.exists()) FileInputStream(keystoreFile).use { load(it) }
+}
+val hasKeystore = keystoreFile.exists()
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -30,11 +42,32 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("release") {
+            if (hasKeystore) {
+                storeFile = file(keystore.getProperty("storeFile"))
+                storePassword = keystore.getProperty("storePassword")
+                keyAlias = keystore.getProperty("keyAlias")
+                keyPassword = keystore.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Signed properly when android/key.properties is here. Without it
+            // the debug key is used so the build still runs, and the message
+            // below says what that means.
+            signingConfig = if (hasKeystore) {
+                signingConfigs.getByName("release")
+            } else {
+                logger.warn(
+                    "Keepsake: no android/key.properties, so this release is " +
+                        "signed with the debug key. Fine for installing by hand, " +
+                        "not for Google Play. See docs/SETUP.md.",
+                )
+                signingConfigs.getByName("debug")
+            }
         }
     }
 }

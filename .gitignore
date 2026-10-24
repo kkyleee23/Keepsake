@@ -67,3 +67,9 @@ supabase/
 docs/
 tool/
 CLAUDE.md
+
+# Signing. The keystore and its passwords never go in the repo:
+# lose them and the app can never be updated under the same listing.
+android/key.properties
+*.jks
+*.keystore

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -82,6 +83,10 @@ class OpenResult {
 /// Every method degrades gracefully when Supabase isn't configured so the app
 /// still runs locally.
 class KeepsakeBackend {
+  /// Nothing waits forever. On a poor connection the call is given up on so
+  /// the screen can say something, instead of sitting there with a spinner.
+  static const Duration _wait = Duration(seconds: 15);
+
   bool get isAvailable => AppConfig.isSupabaseConfigured;
 
   SupabaseClient get _client => Supabase.instance.client;
@@ -129,8 +134,11 @@ class KeepsakeBackend {
 
     final token = keepsake.shareToken ?? _newToken();
 
-    final payload = uploadPayload(keepsake,
-        token: token, creatorId: _client.auth.currentUser?.id);
+    final payload = uploadPayload(
+      keepsake,
+      token: token,
+      creatorId: _client.auth.currentUser?.id,
+    );
 
     final params = <String, dynamic>{
       'p_token': token,
@@ -161,11 +169,17 @@ class KeepsakeBackend {
     dynamic res;
     for (var i = 0; i < attempts.length; i++) {
       try {
-        res = await _client.rpc('publish_keepsake', params: attempts[i]);
+        res = await _client
+            .rpc('publish_keepsake', params: attempts[i])
+            .timeout(_wait);
         break;
       } on PostgrestException catch (e) {
         final missing = e.code == 'PGRST202' || e.code == '42883';
         if (!missing || i == attempts.length - 1) rethrow;
+      } on TimeoutException {
+        throw StateError(
+          'That took too long to send. Check your connection and try again.',
+        );
       }
     }
 
@@ -173,7 +187,8 @@ class KeepsakeBackend {
     final status = map['status'] as String?;
     if (status == 'too_large') {
       throw StateError(
-          'This keepsake is too large to send. Try removing a photo or two.');
+        'This keepsake is too large to send. Try removing a photo or two.',
+      );
     }
     if (status == 'unauthenticated') {
       throw StateError('Please sign in again, then publish.');
@@ -183,15 +198,19 @@ class KeepsakeBackend {
     }
     if (status == 'rate_limited') {
       throw StateError(
-          'You’ve shared a lot in a short time. Try again in a few minutes.');
+        'You’ve shared a lot in a short time. Try again in a few minutes.',
+      );
     }
     if (status == 'quota') {
-      throw StateError('You’ve used all the space for shared keepsakes. '
-          'Stop sharing an old one to make room.');
+      throw StateError(
+        'You’ve used all the space for shared keepsakes. '
+        'Stop sharing an old one to make room.',
+      );
     }
     if (status == 'invalid') {
       throw StateError(
-          'Something in this keepsake is too long. Try a shorter title or note.');
+        'Something in this keepsake is too long. Try a shorter title or note.',
+      );
     }
     if (status != 'ok') {
       throw StateError('Something went wrong on our side. Try again.');
@@ -209,8 +228,9 @@ class KeepsakeBackend {
       throw StateError('Please sign in again, then try that.');
     }
     try {
-      final res =
-          await _client.rpc('stop_sharing', params: {'p_token': token});
+      final res = await _client
+          .rpc('stop_sharing', params: {'p_token': token})
+          .timeout(_wait);
       final status = Map<String, dynamic>.from(res as Map)['status'];
       // not_found: already gone, which is what was asked for.
       if (status == 'ok' || status == 'not_found') return;
@@ -219,26 +239,40 @@ class KeepsakeBackend {
       // PGRST202: the function doesn't exist yet (0006 not run).
       if (e.code != 'PGRST202' && e.code != '42883') rethrow;
       await revoke(token);
+    } on TimeoutException {
+      throw StateError(
+        'That took too long. Check your connection and try again.',
+      );
     }
   }
 
   /// Removes a published keepsake (RLS limits this to the creator's own rows).
   Future<void> revoke(String token) async {
     if (!isAvailable || _client.auth.currentUser == null) return;
-    await _client.from('keepsakes').delete().eq('share_token', token);
+    await _client
+        .from('keepsakes')
+        .delete()
+        .eq('share_token', token)
+        .timeout(_wait);
   }
 
   /// Deletes every published keepsake owned by the signed-in creator.
   Future<void> deleteAllMine() async {
     final uid = _client.auth.currentUser?.id;
     if (!isAvailable || uid == null) return;
-    await _client.from('keepsakes').delete().eq('creator_id', uid);
+    await _client
+        .from('keepsakes')
+        .delete()
+        .eq('creator_id', uid)
+        .timeout(_wait);
   }
 
   Future<CoverResult> fetchCover(String token) async {
     if (!isAvailable) return const CoverResult(status: 'error');
     try {
-      final res = await _client.rpc('keepsake_cover', params: {'p_token': token});
+      final res = await _client
+          .rpc('keepsake_cover', params: {'p_token': token})
+          .timeout(_wait);
       final m = Map<String, dynamic>.from(res as Map);
       return CoverResult(
         status: m['status'] as String? ?? 'error',
@@ -264,7 +298,8 @@ class KeepsakeBackend {
     if (!isAvailable) return const OpenResult(status: 'error');
     try {
       final res = await _client
-          .rpc('keepsake_open', params: {'p_token': token, 'p_pin': pin});
+          .rpc('keepsake_open', params: {'p_token': token, 'p_pin': pin})
+          .timeout(_wait);
       final m = Map<String, dynamic>.from(res as Map);
       final status = m['status'] as String? ?? 'error';
       if (status == 'ok') {
@@ -291,13 +326,18 @@ class KeepsakeBackend {
   }) async {
     if (!isAvailable) return 'error';
     try {
-      final res = await _client.rpc('respond_to_keepsake', params: {
-        'p_token': token,
-        'p_pin': pin,
-        'p_reaction': reaction?.id,
-        'p_message': message,
-        'p_name': name,
-      });
+      final res = await _client
+          .rpc(
+            'respond_to_keepsake',
+            params: {
+              'p_token': token,
+              'p_pin': pin,
+              'p_reaction': reaction?.id,
+              'p_message': message,
+              'p_name': name,
+            },
+          )
+          .timeout(_wait);
       return Map<String, dynamic>.from(res as Map)['status'] as String? ??
           'error';
     } catch (_) {
@@ -311,7 +351,8 @@ class KeepsakeBackend {
     if (!isAvailable || _client.auth.currentUser == null) return null;
     try {
       final res = await _client
-          .rpc('my_keepsake_responses', params: {'p_token': token});
+          .rpc('my_keepsake_responses', params: {'p_token': token})
+          .timeout(_wait);
       return [
         for (final row in res as List)
           KeepsakeResponse.fromJson(Map<String, dynamic>.from(row as Map)),
@@ -327,10 +368,12 @@ class KeepsakeBackend {
     if (!isAvailable || tokens.isEmpty) return null;
     if (_client.auth.currentUser == null) return null;
     try {
-      final res = await _client.rpc(
-        'my_keepsake_status',
-        params: {'p_tokens': tokens.take(200).toList()},
-      );
+      final res = await _client
+          .rpc(
+            'my_keepsake_status',
+            params: {'p_tokens': tokens.take(200).toList()},
+          )
+          .timeout(_wait);
       return {
         for (final row in res as List)
           if (row is Map && row['share_token'] is String)
