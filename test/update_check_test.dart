@@ -117,6 +117,37 @@ void main() {
     });
   });
 
+  group('one APK per kind of phone', () {
+    test('the release number is taken out of the built-up code', () {
+      // Flutter builds the same release as 3, and as 1003 / 2003 / 4003 for
+      // armeabi-v7a, arm64-v8a and x86_64.
+      expect(releaseNumberOf(3), 3);
+      expect(releaseNumberOf(1003), 3);
+      expect(releaseNumberOf(2003), 3);
+      expect(releaseNumberOf(4003), 3);
+      expect(releaseNumberOf(0), 0);
+      expect(releaseNumberOf(999), 999);
+    });
+
+    test('a per-phone build is still told about a newer release', () {
+      // Before this was handled, 2003 looked newer than 4 and the person was
+      // told they were up to date for good.
+      final u = readUpdate(
+        body(versionCode: 4),
+        installed: releaseNumberOf(2003),
+      );
+      expect(u.urgency, UpdateUrgency.optional);
+    });
+
+    test('a per-phone build can still be made to update', () {
+      final u = readUpdate(
+        body(versionCode: 9, minVersionCode: 9),
+        installed: releaseNumberOf(4003),
+      );
+      expect(u.mustUpdate, isTrue);
+    });
+  });
+
   test('the site address has no path on it', () {
     expect(AppConfig.siteOrigin, isNot(endsWith('/app')));
     expect(AppConfig.downloadUrl, endsWith('/download'));

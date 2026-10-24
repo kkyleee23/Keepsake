@@ -44,6 +44,15 @@ class UpdateInfo {
   bool get mustUpdate => urgency == UpdateUrgency.required_;
 }
 
+/// When Flutter builds one APK per kind of phone it adds a thousand times the
+/// phone kind to the version code, so the same release arrives as 3 on the
+/// build that fits every phone and as 1003, 2003 or 4003 on the others. Only
+/// the last part says which release it is. Without this, anyone who installed
+/// a per-phone build would compare 2003 against 4 and be told they are up to
+/// date for good, and could never be asked to update.
+int releaseNumberOf(int versionCode) =>
+    versionCode >= 1000 ? versionCode % 1000 : versionCode;
+
 /// Reads whatever the site returned, leniently: anything missing, the wrong
 /// type or too long is dropped rather than trusted, and the address has to
 /// be on our own site before it is used.
@@ -98,7 +107,7 @@ Future<UpdateInfo> checkForUpdate({http.Client? client}) async {
   final web = client ?? http.Client();
   try {
     final info = await PackageInfo.fromPlatform();
-    final installed = int.tryParse(info.buildNumber) ?? 0;
+    final installed = releaseNumberOf(int.tryParse(info.buildNumber) ?? 0);
     if (installed <= 0) return UpdateInfo.none;
 
     final res = await web
