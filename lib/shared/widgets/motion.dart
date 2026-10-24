@@ -192,16 +192,21 @@ class FadingTabs extends StatelessWidget {
         for (var i = 0; i < children.length; i++)
           IgnorePointer(
             ignoring: i != index,
-            child: TickerMode(
-              enabled: i == index,
-              child: AnimatedOpacity(
-                opacity: i == index ? 1 : 0,
+            // The fade and scale sit outside TickerMode on purpose. Inside it,
+            // the tab being left loses its ticker the moment it stops being
+            // the current one, so its fade out never runs: it stays fully
+            // opaque and keeps covering the tab underneath it. Only the page
+            // itself has its tickers stopped while it is off screen.
+            child: AnimatedOpacity(
+              opacity: i == index ? 1 : 0,
+              duration: d,
+              curve: Motion.settle,
+              child: AnimatedScale(
+                scale: i == index ? 1 : 0.985,
                 duration: d,
                 curve: Motion.settle,
-                child: AnimatedScale(
-                  scale: i == index ? 1 : 0.985,
-                  duration: d,
-                  curve: Motion.settle,
+                child: TickerMode(
+                  enabled: i == index,
                   child: ExcludeSemantics(
                     excluding: i != index,
                     child: children[i],

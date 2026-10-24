@@ -490,16 +490,25 @@ class PaperTextures extends ChangeNotifier {
   Future<void> load() => _loading ??= _load();
 
   Future<void> _load() async {
-    for (final asset in [cream, kraft, seed, linen, cloth, stone]) {
-      try {
-        final data = await rootBundle.load(asset);
-        final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-        _images[asset] = (await codec.getNextFrame()).image;
-      } catch (_) {
-        // A missing texture just means the flat colour is used.
-      }
+    // All six at once, not one after another: they no longer queue behind
+    // each other while the first screen is being built.
+    await Future.wait([
+      for (final asset in [cream, kraft, seed, linen, cloth, stone])
+        _loadOne(asset),
+    ]);
+  }
+
+  Future<void> _loadOne(String asset) async {
+    try {
+      final data = await rootBundle.load(asset);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      _images[asset] = (await codec.getNextFrame()).image;
+      // Tell the surfaces as soon as this one is ready, so paper appears as
+      // it arrives instead of everything waiting for the slowest texture.
+      notifyListeners();
+    } catch (_) {
+      // A missing texture just means the flat colour is used.
     }
-    notifyListeners();
   }
 
   /// A paint that tiles [asset], optionally tinted by multiplying [tint].
