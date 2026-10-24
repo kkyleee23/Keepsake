@@ -26,7 +26,7 @@ abstract final class AppConfig {
   /// Base used to build a shareable link: `<base>/receive/<token>`.
   static const String shareLinkBase = String.fromEnvironment(
     'KEEPSAKE_LINK_BASE',
-    defaultValue: 'https://keepsake-ebon.vercel.app/app',
+    defaultValue: 'https://keepsake-ph.vercel.app/app',
   );
 
   static bool get isSupabaseConfigured =>
