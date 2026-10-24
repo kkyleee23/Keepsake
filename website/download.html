@@ -31,11 +31,11 @@
 
   <section class="dl-top">
     <div class="dl-words">
-      <p class="eyebrow">Android</p>
-      <h1>Keep it in your pocket.</h1>
-      <p class="lede">The same Keepsake, installed on your phone. One file, one tap. If you would rather not install anything, it still works in your browser.</p>
+      <p class="eyebrow" data-reveal>Android</p>
+      <h1 data-reveal>Keep it in your pocket.</h1>
+      <p class="lede" data-reveal>The same Keepsake, installed on your phone. One file, one tap. If you would rather not install anything, it still works in your browser.</p>
 
-      <div class="dl-pick">
+      <div class="dl-pick" data-reveal>
         <a class="btn btn-big" href="keepsake.apk" download>Download Keepsake</a>
         <p class="dl-meta">
           <span class="pill">Version __VERSION_NAME__</span>
@@ -45,7 +45,7 @@
         <p class="note">Works on every Android phone, so you do not have to know which one you have.</p>
       </div>
 
-      <div class="store-row">
+      <div class="store-row" data-reveal>
         <span class="store is-soon">
           <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
             <path fill="currentColor" d="M3.6 2.3c-.3.3-.5.7-.5 1.3v16.8c0 .6.2 1 .5 1.3l.1.1 9.4-9.4v-.2L3.7 2.2l-.1.1Z"/>
@@ -65,13 +65,13 @@
       <p class="note"><a href="app/">Or open it in your browser</a>, with nothing to install.</p>
     </div>
 
-    <figure class="dl-art">
-      <img src="img/pup-wave.webp" alt="" width="360" height="463">
+    <figure class="dl-art" data-parallax="0.05">
+      <img class="drift" src="img/pup-wave.webp" alt="" width="360" height="463">
       <figcaption class="hand">See you on your phone</figcaption>
     </figure>
   </section>
 
-  <section class="dl-steps" aria-labelledby="steps-title">
+  <section class="dl-steps" aria-labelledby="steps-title" data-reveal>
     <h2 id="steps-title">Installing it</h2>
     <ol class="dl-steps-list">
       <li><span class="step-n">1</span><div><strong>Tap Download Keepsake.</strong> Your phone saves the file.</div></li>
@@ -83,31 +83,49 @@
     <p class="note">If it says the app cannot be installed, remove any older Keepsake from your phone first, then open the file again. Anything you had saved on the phone is kept in the app's own storage only, so start fresh if you were only trying it out.</p>
   </section>
 
-  <section class="dl-other" aria-labelledby="other-title">
+  <section class="dl-other" aria-labelledby="other-title" data-reveal>
     <h2 id="other-title">Other versions</h2>
     <p>The download above fits every phone, which is why it is the larger one. These are each built for one kind of phone, so they are smaller. Pick one only if you know which you need.</p>
     <ul class="dl-list">
-      <li>
+      <li class="lift">
         <a href="keepsake-arm64.apk" download>Keepsake for arm64</a>
         <span class="note">Almost every phone sold since about 2017. __SIZE_ARM64__.</span>
       </li>
-      <li>
+      <li class="lift">
         <a href="keepsake-arm32.apk" download>Keepsake for arm32</a>
         <span class="note">Older and smaller phones. __SIZE_ARM32__.</span>
       </li>
-      <li>
+      <li class="lift">
         <a href="keepsake-x86-64.apk" download>Keepsake for x86-64</a>
         <span class="note">Chromebooks and emulators, rarely a phone. __SIZE_X64__.</span>
       </li>
     </ul>
   </section>
 
-  <section class="dl-faq" aria-labelledby="faq-title">
+  <section class="faq dl-faq" aria-labelledby="faq-title" data-reveal>
     <h2 id="faq-title">Questions</h2>
-    <p><strong>Is there an iPhone version?</strong> Not yet. Keepsake works in Safari in the meantime, and the person you send a keepsake to never needs the app at all.</p>
-    <p><strong>Does the person I send it to need this?</strong> No. They open your link in whatever browser they already have.</p>
-    <p><strong>Will it update itself?</strong> Not on its own. Keepsake tells you when a newer one is out and brings you back to this page.</p>
-    <p><strong>Where does my writing go?</strong> See <a href="privacy.html">Privacy</a>.</p>
+    <div class="faq-list">
+      <details>
+        <summary>Is there an iPhone version?</summary>
+        <p>Not yet. Keepsake works in Safari in the meantime, and the person you send a keepsake to never needs the app at all.</p>
+      </details>
+      <details>
+        <summary>Does the person I send it to need this?</summary>
+        <p>No. They open your link in whatever browser they already have, on any phone or computer.</p>
+      </details>
+      <details>
+        <summary>Will it update itself?</summary>
+        <p>Not on its own. Keepsake tells you when a newer one is out and brings you back to this page, so you are never left on an old version without knowing.</p>
+      </details>
+      <details>
+        <summary>Why does my phone warn me about the file?</summary>
+        <p>Anything installed outside the Play Store shows that warning. It is your phone checking that you meant to, not a sign that something is wrong.</p>
+      </details>
+      <details>
+        <summary>Where does my writing go?</summary>
+        <p>Onto your phone first, and onto our server only when you share it. <a href="privacy.html">Privacy</a> says exactly what is kept and for how long.</p>
+      </details>
+    </div>
   </section>
 
   <p class="back"><a href="./">Back to the start</a></p>

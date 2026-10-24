@@ -168,9 +168,20 @@ a:hover { color: var(--accent-press); }
   background: var(--paper);
 }
 .btn-big { min-height: 56px; padding: 0 var(--s6); font-size: 1.1rem; }
-.dl-list { list-style: none; padding: 0; display: grid; gap: var(--s4); }
-.dl-list li { display: grid; gap: var(--s1); }
+.dl-list { list-style: none; padding: 0; display: grid; gap: var(--s3); }
+.dl-list li {
+  display: grid; gap: var(--s1);
+  padding: var(--s4);
+  border: 1px solid var(--paper-edge);
+  border-radius: 12px;
+  background: var(--paper);
+}
 .dl-list a { font-weight: 600; }
+.dl-list a::after {
+  content: "";
+  position: absolute; inset: 0;
+}
+.dl-list li { position: relative; }
 
 /* Download page ------------------------------------------------------- */
 .dl { padding-block: var(--s7) var(--s8); display: grid; gap: var(--s8); }
@@ -553,3 +564,69 @@ a:hover { color: var(--accent-press); }
 .lost { min-height: 80vh; display: grid; place-content: center; justify-items: center; text-align: center; gap: var(--s4); padding-block: var(--s7); }
 .lost img { width: 180px; }
 .lost p { color: var(--ink-soft); max-width: 40ch; }
+
+/* Life ------------------------------------------------------------------
+   The brief is paper, not glass: no gradients, no glow, nothing that spins.
+   So movement here is the way a hand sets something down. Things rise a
+   little as you reach them, a row arrives one after another, and what you
+   can pick up lifts slightly under the pointer.
+
+   All of it is turned off for anyone who asked for less motion, and it only
+   applies once script is running, so with script off the page is simply
+   there, in place, from the start.                                       */
+
+.js .reveal { opacity: 0; transform: translateY(18px); }
+.reveal {
+  transition:
+    opacity 640ms cubic-bezier(.22, .61, .36, 1),
+    transform 640ms cubic-bezier(.22, .61, .36, 1);
+}
+.reveal.is-in { opacity: 1; transform: none; }
+
+/* Something you can pick up says so when the pointer is over it. A real
+   shadow, the kind a card casts on a table, not a glow. */
+@media (hover: hover) and (pointer: fine) {
+  .lift {
+    transition:
+      transform 260ms cubic-bezier(.22, .61, .36, 1),
+      box-shadow 260ms cubic-bezier(.22, .61, .36, 1);
+  }
+  .lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px -16px rgba(25, 27, 22, 0.5);
+  }
+}
+
+/* The mascot breathes, barely. Slow enough that you notice it only if you
+   stop and look. */
+@keyframes keepsake-drift {
+  from { transform: translateY(0); }
+  to { transform: translateY(-9px); }
+}
+.drift { animation: keepsake-drift 5s ease-in-out infinite alternate; }
+
+/* Held by script while the page is scrolled, so the art behind the words
+   moves a touch slower than the page. Kept small on purpose. */
+.parallax { will-change: transform; }
+
+/* Download page at narrower widths: the sections were sitting too far
+   apart once the art dropped below the words. */
+@media (max-width: 820px) {
+  .dl { gap: var(--s7); padding-block: var(--s6) var(--s7); }
+  .dl-top { gap: var(--s5); }
+  .dl-art img { width: min(190px, 46vw); }
+}
+@media (max-width: 480px) {
+  .dl { gap: var(--s6); }
+  .dl-pick { padding: var(--s4); }
+  .btn-big { width: 100%; }
+  .dl-meta { gap: var(--s2) var(--s2); }
+  .store { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; }
+  .reveal, .lift { transition: none; }
+  .drift { animation: none; }
+  .parallax { transform: none !important; }
+}

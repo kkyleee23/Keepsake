@@ -2,6 +2,11 @@
 (function () {
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // Tell the stylesheet script is running, so the pieces that start hidden
+  // and are revealed on the way down only ever hide when something is there
+  // to reveal them. With script off the page is complete from the start.
+  document.documentElement.classList.add('js');
+
   // The opening clip: no autoplay for people who asked for less motion.
   var video = document.getElementById('opening');
   if (video && reduce) {
@@ -95,4 +100,69 @@
       next.focus();
     });
   });
+
+  // Things arrive as you reach them. One observer for the page, each piece
+  // let go once it has been seen, so nothing keeps watching after the fact.
+  var revealed = document.querySelectorAll('[data-reveal]');
+  if (revealed.length) {
+    if (reduce || !('IntersectionObserver' in window)) {
+      // No animation wanted, or no way to tell what is on screen: show it.
+      Array.prototype.forEach.call(revealed, function (el) {
+        el.classList.add('reveal', 'is-in');
+      });
+    } else {
+      Array.prototype.forEach.call(revealed, function (el) {
+        el.classList.add('reveal');
+      });
+      var seen = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var el = entry.target;
+          // A row of things comes in one after another rather than together.
+          var group = el.parentNode.querySelectorAll
+            ? el.parentNode.querySelectorAll(':scope > [data-reveal]')
+            : null;
+          var order = 0;
+          if (group && group.length > 1) {
+            order = Array.prototype.indexOf.call(group, el);
+          }
+          el.style.transitionDelay = Math.min(order, 6) * 70 + 'ms';
+          el.classList.add('is-in');
+          seen.unobserve(el);
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+      Array.prototype.forEach.call(revealed, function (el) {
+        seen.observe(el);
+      });
+    }
+  }
+
+  // The art behind the words drifts a little slower than the page, which
+  // gives the top of the page some depth without anything moving far.
+  var drifters = document.querySelectorAll('[data-parallax]');
+  if (drifters.length && !reduce) {
+    Array.prototype.forEach.call(drifters, function (el) {
+      el.classList.add('parallax');
+    });
+    var ticking = false;
+    var move = function () {
+      ticking = false;
+      var y = window.pageYOffset || document.documentElement.scrollTop;
+      Array.prototype.forEach.call(drifters, function (el) {
+        var rate = parseFloat(el.getAttribute('data-parallax')) || 0.06;
+        var shift = Math.max(-26, Math.min(26, -y * rate));
+        el.style.transform = 'translate3d(0,' + shift.toFixed(1) + 'px,0)';
+      });
+    };
+    window.addEventListener(
+      'scroll',
+      function () {
+        if (ticking) return;
+        ticking = true;
+        window.requestAnimationFrame(move);
+      },
+      { passive: true }
+    );
+    move();
+  }
 })();
