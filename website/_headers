@@ -1,4 +1,6 @@
 # Security headers for Netlify or Cloudflare Pages (both read this file).
+# Vercel ignores it and reads vercel.json instead, which carries the same
+# rules. If you change one, change the other.
 # tool/build_site.sh fills in __SUPABASE_HOST__ from dart_defines.json.
 #
 # The website's pages also carry their content policy in a <meta> tag, so it
