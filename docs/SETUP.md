@@ -21,7 +21,10 @@ in order. Each one says how to check it worked.
 
 ## What changed in each session
 
-- **Latest:** Handoff and polish (no new file; `0007` gained one small
+- **Latest:** Android fix (no setup): release builds were missing the
+  internet permission, so an installed APK couldn't publish or open
+  keepsakes. Added, and the app name on the home screen is now "Keepsake".
+- **Before that:** Handoff and polish (no new file; `0007` gained one small
   addition, so if you already ran it, run it again).
   - `docs/HANDOFF.md`: start here on a new machine. How to run it, what's
     left, the design rules, security and database in one place.
