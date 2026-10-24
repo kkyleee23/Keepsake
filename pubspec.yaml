@@ -1,7 +1,7 @@
 name: keepsake
 description: "Make something worth keeping, and give it to someone."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.10.0
@@ -40,6 +40,12 @@ dependencies:
   # Sharing a published keepsake
   qr_flutter: ^4.1.0
   share_plus: ^10.1.2
+
+  # Telling someone a newer build is out: the version this phone is running,
+  # a plain GET for the one on the site, and opening the download page.
+  package_info_plus: ^8.1.1
+  http: ^1.2.2
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:

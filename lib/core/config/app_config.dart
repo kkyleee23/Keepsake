@@ -32,5 +32,16 @@ abstract final class AppConfig {
   static bool get isSupabaseConfigured =>
       supabaseUrl.isNotEmpty && supabaseAnonKey.isNotEmpty;
 
+  /// The site everything lives on, with no path: share links sit under it,
+  /// and so do the download page and the file saying which build is out.
+  static String get siteOrigin {
+    final u = Uri.tryParse(shareLinkBase);
+    if (u == null || !u.hasScheme || u.host.isEmpty) return '';
+    return '${u.scheme}://${u.host}${u.hasPort ? ':${u.port}' : ''}';
+  }
+
+  /// Where someone goes to install the Android app or get a newer one.
+  static String get downloadUrl => '$siteOrigin/download';
+
   static String shareUrl(String token) => '$shareLinkBase/receive/$token';
 }

@@ -1,0 +1,7 @@
+{
+  "versionCode": __VERSION_CODE__,
+  "versionName": "__VERSION_NAME__",
+  "minVersionCode": 1,
+  "url": "https://keepsake-ph.vercel.app/download",
+  "note": "A newer Keepsake is ready."
+}

@@ -171,6 +171,60 @@ a:hover { color: var(--accent-press); }
 .dl-list { list-style: none; padding: 0; display: grid; gap: var(--s4); }
 .dl-list li { display: grid; gap: var(--s1); }
 .dl-list a { font-weight: 600; }
+
+/* Download page ------------------------------------------------------- */
+.dl { padding-block: var(--s7) var(--s8); display: grid; gap: var(--s8); }
+.dl-top { display: grid; gap: var(--s6); align-items: start; }
+@media (min-width: 820px) {
+  .dl-top { grid-template-columns: minmax(0, 1fr) auto; gap: var(--s7); }
+}
+.dl-words { min-width: 0; display: grid; gap: var(--s3); justify-items: start; }
+.dl-words h1 { margin: 0; }
+.dl-art { margin: 0; display: grid; justify-items: center; gap: var(--s2); }
+.dl-art img { width: min(260px, 60vw); height: auto; }
+
+.eyebrow {
+  margin: 0; color: var(--accent); font-weight: 700;
+  font-size: var(--t-small); letter-spacing: 0.08em; text-transform: uppercase;
+}
+.hand { font-family: "Caveat", cursive; font-size: 1.35rem; color: var(--ink-soft); }
+.back { margin-top: var(--s6); }
+.small { font-size: var(--t-small); }
+
+.dl-meta { display: flex; flex-wrap: wrap; gap: var(--s2); margin: 0; }
+.pill {
+  display: inline-flex; align-items: center;
+  padding: 4px var(--s3); border-radius: 999px;
+  border: 1px solid var(--paper-edge); background: var(--paper);
+  color: var(--ink-soft); font-size: var(--t-small); font-weight: 600;
+}
+
+/* The Play listing is not open yet, so the badge is shown resting rather
+   than hidden: people look for it, and its absence reads as missing. */
+.store-row { display: grid; gap: var(--s2); justify-items: start; }
+.store {
+  display: inline-flex; align-items: center; gap: var(--s3);
+  padding: var(--s3) var(--s4); border-radius: 12px;
+  border: 1px dashed var(--paper-edge); background: transparent;
+  color: var(--ink-soft);
+}
+.store-text { display: grid; line-height: 1.2; }
+.store-text small { font-size: 0.72rem; }
+.store-text strong { font-size: 1.02rem; color: var(--ink); }
+.store.is-soon { cursor: default; }
+.soon-tag {
+  margin-left: var(--s2); padding: 2px var(--s2); border-radius: 999px;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 0.7rem; font-weight: 700; letter-spacing: 0.04em;
+}
+
+.dl-steps-list { list-style: none; padding: 0; margin: var(--s4) 0 0; display: grid; gap: var(--s4); }
+.dl-steps-list li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--s3); align-items: start; }
+.step-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 999px;
+  background: var(--accent); color: var(--on-accent); font-weight: 700;
+}
 .note { color: var(--ink-soft); font-size: var(--t-small); }
 
 .hero-phone { position: relative; margin: 0; justify-self: center; display: grid; gap: var(--s3); justify-items: center; }

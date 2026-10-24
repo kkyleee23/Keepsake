@@ -5,6 +5,7 @@ import '../core/theme/app_colors.dart';
 import '../core/theme/app_theme.dart';
 import 'router.dart';
 import '../shared/widgets/gift_art.dart';
+import '../features/update/update_notice.dart';
 import '../shared/widgets/paper.dart';
 
 class KeepsakeApp extends ConsumerWidget {
@@ -20,7 +21,8 @@ class KeepsakeApp extends ConsumerWidget {
       routerConfig: router,
       // Keep the phone-first layout centered in a readable column on wide
       // screens (desktop, tablet), instead of stretching edge to edge.
-      builder: (context, child) => AppFrame(child: child),
+      builder: (context, child) =>
+          AppFrame(child: UpdateGate(child: child ?? const SizedBox.shrink())),
     );
   }
 }

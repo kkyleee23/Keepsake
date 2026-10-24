@@ -11,6 +11,7 @@ import '../../data/models/keepsake.dart';
 import '../../data/remote/auth_service.dart';
 import '../keepsakes/application/keepsakes_controller.dart';
 import '../keepsakes/widgets/keepsake_card.dart';
+import '../update/update_notice.dart';
 import '../../shared/widgets/brand.dart';
 import '../../shared/widgets/primary_button.dart';
 import '../../shared/widgets/section_header.dart';
@@ -49,6 +50,7 @@ class HomeScreen extends ConsumerWidget {
             child: Wordmark(height: 34),
           ),
           const SizedBox(height: AppSpacing.lg),
+          const UpdateNotice(),
           RiseIn(
             child: _Hero(
               name: ref.watch(authServiceProvider).displayName,
